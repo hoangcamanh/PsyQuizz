@@ -49,24 +49,26 @@ When seeking self-understanding online, young adults frequently encounter:
 
 | Module | Core Description | Implementation Status |
 |---|---|---|
-| **Module A: Landing Page** | Introduces brand identity, value proposition, how the system works, privacy commitment, and explicit non-diagnostic disclaimers. | ⏳ **Planned (Phase 1)** |
-| **Module B: Assessment Hub** | Central directory of validated psychological instruments displaying construct scope, item count, duration, and legal/scientific licensing data. | ⏳ **Planned (Phase 1)** |
+| **Module A: Landing Page** | Header với logo bên trái, các liên kết Take a Test & About Us căn giữa lệch phải, nút Login & Let's Start; Hero Section với quỹ đạo 3D (Orbital System), Card tương phản "Technology with purpose", và Showcase "Our technology". | ✅ **Implemented (Phase 1)** |
+| **Module B: Assessment Hub** | Central directory of validated psychological instruments displaying construct scope, item count, duration, and legal/scientific licensing data. | 🔄 **In Progress (Phase 2 Preview Modal Added)** |
 | **Module C: Assessment Experience** | Distraction-free, responsive questionnaire runner with real-time progress indicators, in-memory client-side state, and input validation. | ⏳ **Planned (Phase 2)** |
 | **Module D: Results Dashboard** | Interactive dimensional score visualizations (radar/bar charts), plain-language interpretation bands, and explicit assessment limitations. | ⏳ **Planned (Phase 2)** |
 | **Module E: AI Knowledge Assistant** | Server-side Gemini integration grounded in approved psychological literature, citing verified sources and refusing clinical diagnostic requests. | ⏳ **Planned (Phase 4 & 5)** |
-| **Module F: Optional Anonymous Access** | Firebase Anonymous Authentication enabling pseudonymous bookmarking and optional saving without revealing identity. | ⏳ **Planned (Phase 3)** |
+| **Module F: Optional Anonymous Access** | Firebase Anonymous Authentication enabling pseudonymous bookmarking and optional saving without revealing identity. | 🔄 **In Progress (UI Dialog Integrated)** |
 
 ---
 
 ## 3. Technology Stack: Planned vs. Existing
 
-Following a comprehensive repository audit, PsyQuizz is currently at the **Phase 0 (Architecture & Documentation)** stage. Below is the full technology stack distinguishing current repository status from planned implementation.
+Following Phase 1 development, the core modern frontend stack is fully initialized and operational.
 
 | Layer | Technology | Primary Purpose | Repository Status |
 |---|---|---|---|
-| **Frontend Framework** | [Next.js](https://nextjs.org/) (React 18+) | Server-side rendering, App Router, responsive client views | ⏳ *Planned (Phase 1)* |
-| **Language** | [TypeScript](https://www.typescriptlang.org/) | Strict type safety, psychometric data modeling, and robust API contracts | ⏳ *Planned (Phase 1)* |
-| **Styling & UI** | [Tailwind CSS](https://tailwindcss.com/) | Mobile-first styling utilizing PsyQuizz design tokens | ⏳ *Planned (Phase 1)* |
+| **Frontend Framework** | [Next.js 14](https://nextjs.org/) (React 18+) | Server-side rendering, App Router, responsive client views | ✅ **Implemented & Verified** |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) | Strict type safety, psychometric data modeling, and robust API contracts | ✅ **Implemented & Verified** |
+| **Styling & UI** | [Tailwind CSS](https://tailwindcss.com/) | Mobile-first styling with brand cosmic purple tokens (`#674BBE`, `#14AC94`) | ✅ **Implemented & Verified** |
+| **Motion & Animation** | [Framer Motion](https://www.framer.com/motion/) | Smooth 3D-angled orbital nodes, scroll reveal, and pulse glow effects | ✅ **Implemented & Verified** |
+| **Icons** | [Lucide React](https://lucide.dev/) | Clean, accessible SVG iconography | ✅ **Implemented & Verified** |
 | **Client Auth** | [Firebase Authentication](https://firebase.google.com/docs/auth) | Anonymous-First authentication & optional credential linking | ⏳ *Planned (Phase 3)* |
 | **Database** | [Cloud Firestore](https://firebase.google.com/docs/firestore) | Storing optional user-saved results and approved knowledge corpus | ⏳ *Planned (Phase 3)* |
 | **Application Backend** | Next.js Server Route Handlers | Secure API proxy, rate limiting, and server-side orchestration | ⏳ *Planned (Phase 4)* |
@@ -74,7 +76,7 @@ Following a comprehensive repository audit, PsyQuizz is currently at the **Phase
 | **Knowledge Grounding** | Verified RAG Architecture | Multi-stage literature retrieval, metadata tracking, and citation delivery | ⏳ *Planned (Phase 5)* |
 | **Secret Protection** | Google Cloud Secret Manager / Server Env | Isolating `GEMINI_API_KEY` and Firebase Admin credentials from client code | 🔒 **Defined (`.env.example`)** |
 | **Application Protection** | [Firebase App Check](https://firebase.google.com/docs/app-check) (reCAPTCHA v3) | Anti-abuse protection, quota shielding, and API endpoint verification | ⏳ *Planned (Phase 3)* |
-| **Version Control** | [Git](https://git-scm.com/) & [GitHub](https://github.com/hoangcamanh/PsyQuizz) | Baseline repository, version control, issue tracking, and roadmap | ✅ **Configured (Phase 0)** |
+| **Version Control** | [Git](https://git-scm.com/) & [GitHub](https://github.com/hoangcamanh/PsyQuizz) | Baseline repository, version control, issue tracking, and roadmap | ✅ **Configured & Synced** |
 
 ---
 
@@ -183,14 +185,34 @@ psy_quizz/
 ├── .env.example              # Configuration template for environment variables
 ├── .gitignore                # Git exclusions (credentials, build output, dependencies)
 ├── README.md                 # Primary project documentation
+├── package.json              # Project dependencies and npm scripts
+├── tsconfig.json             # TypeScript configuration
+├── tailwind.config.js        # Tailwind CSS configuration with PsyQuizz design tokens
+├── postcss.config.js         # PostCSS configuration
+├── next.config.js            # Next.js configuration
 ├── assets/                   # Brand assets and visual identity
 │   ├── README.md             # Asset specification and visual token guide
 │   └── logo.png              # Official PsyQuizz brand logo
+├── public/                   # Public static assets
+│   └── logo.png              # Web-optimized logo asset
 ├── docs/                     # Detailed architectural specifications
 │   ├── ARCHITECTURE.md       # Multi-tier architecture and ADRs
 │   ├── ROADMAP.md            # Phased implementation plan and decision gates
 │   └── SECURITY.md           # Privacy-by-design, Firestore rules & security model
-└── (Application source to be initialized in Phase 1)
+└── src/                      # Modern Next.js App Router source code
+    ├── app/
+    │   ├── globals.css       # Global styles, cosmic glows & custom scrollbar
+    │   ├── layout.tsx        # Root HTML layout and font configurations
+    │   └── page.tsx          # Interactive landing page orchestration
+    └── components/
+        ├── Header.tsx        # Responsive navigation header with action buttons
+        ├── HeroSection.tsx   # 3D-angled orbital neural animation & hero copy
+        ├── PurposeSection.tsx # Luminous contrast card with 4 core pillars
+        ├── TechnologySection.tsx # 3 glassmorphism technology showcase cards
+        ├── AssessmentModal.tsx # Interactive test overview & sample Likert slider
+        ├── AuthModal.tsx     # Anonymous guest & account onboarding dialog
+        ├── FloatingWidgets.tsx # Crisis support launcher & scroll-to-top button
+        └── Footer.tsx        # Footer with medical disclaimer and hotlines
 ```
 
 ---
@@ -198,7 +220,7 @@ psy_quizz/
 ## 8. Getting Started
 
 ### 8.1 Prerequisites
-- [Node.js](https://nodejs.org/) (v18.17+ or v20 LTS recommended)
+- [Node.js](https://nodejs.org/) (v18.17+ or v20+ LTS recommended)
 - `npm` (v9+) or `pnpm`
 - A [Google Cloud / Firebase](https://console.firebase.google.com/) project (for authentication and Firestore)
 - A [Google AI Studio](https://aistudio.google.com/) API key (for Gemini API)
@@ -215,16 +237,19 @@ psy_quizz/
    ```
 3. Populate `.env.local` with your development credentials (see [Environment Variables](#9-environment-variables)).
 
-### 8.3 Development Execution (Phase 1 onward)
+### 8.3 Development Execution
 ```bash
 # Install dependencies
 npm install
 
-# Run development server
+# Run development server (runs on http://localhost:3000)
 npm run dev
 
-# Run test suite
-npm run test
+# Build production bundle
+npm run build
+
+# Start production server
+npm run start
 ```
 
 ---
@@ -249,7 +274,7 @@ All environment variables must be declared in `.env.example` before use. **Never
 
 ## 10. Development Roadmap
 
-- [x] **Phase 0: Repository Audit & Architectural Planning** *(Current Milestone)*
+- [x] **Phase 0: Repository Audit & Architectural Planning** *(Completed)*
   - [x] Baseline filesystem audit, clean `.gitignore`, environment template.
   - [x] Architecture specification (`docs/ARCHITECTURE.md`).
   - [x] Privacy & Security specification (`docs/SECURITY.md`).
@@ -257,10 +282,15 @@ All environment variables must be declared in `.env.example` before use. **Never
   - [x] Official brand logo integration (`assets/logo.png`).
   - [x] Professional GitHub README.
   - [x] Initial documentation commit and remote synchronization.
-- [ ] **Phase 1: Frontend Foundation & Design System**
-  - [ ] Next.js + TypeScript scaffold with Tailwind CSS tokens.
-  - [ ] Module A: Landing Page with prominent disclaimers.
-  - [ ] Module B: Assessment Hub with instrument directory.
+- [x] **Phase 1: Frontend Foundation & Design System** *(Completed)*
+  - [x] Next.js 14 App Router + TypeScript + Tailwind CSS scaffold.
+  - [x] Module A: Responsive Landing Page (Header with biased center-right navigation, Login & Let's Start).
+  - [x] Hero Section with animated 3D-angled orbital neural nodes and glowing cosmic streaks.
+  - [x] Contrast Card: "Technology with purpose" with 4 core pillars and outline icons.
+  - [x] Showcase: "Our technology" with 3 dark glassmorphic cards and glowing borders.
+  - [x] Interactive Assessment preview modal with live Likert slider.
+  - [x] Privacy-First Auth modal (1-click Anonymous Guest & Email options).
+  - [x] Floating wellbeing crisis support launcher & scroll-to-top widget.
 - [ ] **Phase 2: Assessment Engine & Validated Scoring**
   - [ ] Validated IPIP Big Five client-side questionnaire runner.
   - [ ] Reverse-scored item calculation algorithms & unit tests.
