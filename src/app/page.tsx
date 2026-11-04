@@ -61,9 +61,7 @@ export default function HomePage() {
         />
 
         {/* Section 3: Technology Grid (Matching Screenshot 3) */}
-        <TechnologySection
-          onStartAssessment={handleOpenTest}
-        />
+        <TechnologySection />
 
       </main>
 

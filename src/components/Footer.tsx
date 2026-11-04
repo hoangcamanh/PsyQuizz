@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="md:col-span-5 space-y-4">
           <div className="relative h-10 w-44">
             <Image
-              src="/logo.png"
+              src="/logo-white.png"
               alt="PsyQuizz Logo"
               fill
               className="object-contain object-left"

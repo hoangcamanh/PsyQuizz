@@ -2,150 +2,129 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Brain, Shield, UserCheck, ArrowRight } from 'lucide-react';
+import { Sparkles, Brain, Radio, Fingerprint } from 'lucide-react';
 
-interface TechnologySectionProps {
-  onStartAssessment: () => void;
-}
-
-export default function TechnologySection({ onStartAssessment }: TechnologySectionProps) {
+export default function TechnologySection() {
   const cards = [
     {
       id: 'living-heritage',
-      name: 'IPIP Big Five',
-      badge: 'Thang đo Chuẩn hóa',
-      tagline: 'Mô hình 5 Yếu tố Nhân cách Quốc tế',
-      description:
-        'Hệ thống đánh giá tính cách dựa trên kho mục đề quốc tế IPIP (International Personality Item Pool). Đo lường khách quan 5 nét nhân cách: Cởi mở, Tận tâm, Hướng ngoại, Dễ chịu và Nhạy cảm cảm xúc.',
-      iconColor: 'from-purple-500 to-indigo-600',
-      borderColor: 'hover:border-purple-500/60',
-      glowColor: 'group-hover:shadow-[0_0_35px_rgba(168,85,247,0.35)]',
-      icon: UserCheck,
-      details: ['50 mục đề chuẩn', 'Xử lý in-memory', 'Đánh giá phi lâm sàng'],
+      name: 'Living Heritage',
+      description: 'Technology to preserve memories, stimulate memory and connect generations.',
+      borderColor: 'border-pink-500/40 hover:border-pink-500/80',
+      glowColor: 'hover:shadow-[0_0_40px_rgba(236,72,153,0.35)]',
+      renderIcon: () => (
+        <div className="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center">
+          {/* Custom Living Heritage Loop Icon with gradient */}
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+            <svg viewBox="0 0 100 100" className="w-full h-full stroke-[3.5] fill-none">
+              <defs>
+                <linearGradient id="lh-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#2dd4bf" />
+                  <stop offset="50%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#f43f5e" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M50 20 C65 20, 75 32, 75 48 C75 68, 50 82, 50 82 C50 82, 25 68, 25 48 C25 32, 35 20, 50 20 Z"
+                stroke="url(#lh-grad)"
+              />
+              <circle cx="50" cy="46" r="10" stroke="url(#lh-grad)" />
+            </svg>
+          </div>
+        </div>
+      ),
     },
     {
       id: 'adaia',
-      name: 'Verified RAG Assistant',
-      badge: 'Trí tuệ Nhân tạo Chuẩn y văn',
-      tagline: 'Trợ lý Giải thích Tâm lý Đối chiếu Nguồn',
-      description:
-        'Sử dụng mô hình Google Gemini được điều hướng qua quy trình RAG (Retrieval-Augmented Generation) nghiêm ngặt. Chỉ giải thích dựa trên y văn đã được kiểm duyệt, đính kèm số DOI/trích dẫn và từ chối tuyệt đối việc tự chẩn đoán bệnh lý.',
-      iconColor: 'from-pink-500 to-purple-600',
-      borderColor: 'hover:border-pink-500/60',
-      glowColor: 'group-hover:shadow-[0_0_35px_rgba(236,72,153,0.35)]',
-      icon: Brain,
-      details: ['Google Gemini 2.5', 'Trích dẫn y văn thật', 'Bộ lọc phòng ngừa khủng hoảng'],
+      name: 'ADAIA',
+      description: 'Emotional Artificial Intelligence for individual support and well-being based on science.',
+      borderColor: 'border-purple-500/40 hover:border-purple-500/80',
+      glowColor: 'hover:shadow-[0_0_40px_rgba(168,85,247,0.35)]',
+      renderIcon: () => (
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-tr from-cyan-400 via-purple-500 to-pink-500 p-[3px] shadow-lg">
+          <div className="w-full h-full rounded-[21px] bg-[#1a0a2f] flex items-center justify-center">
+            <Brain className="w-14 h-14 sm:w-16 sm:h-16 text-white stroke-[1.5]" />
+          </div>
+        </div>
+      ),
     },
     {
       id: 'neuroglint',
-      name: 'Anonymous Engine',
-      badge: 'Bảo mật Cấp cao',
-      tagline: 'Kiến trúc Tính toán Cục bộ Không Thu thập Danh tính',
-      description:
-        'Toàn bộ quá trình tính điểm thang đo diễn ra 100% trong trình duyệt máy khách (Client-Side Execution). Không yêu cầu email hay số điện thoại để làm bài, bảo vệ tuyệt đối sự an tâm của bạn theo Luật số 91/2025/QH15.',
-      iconColor: 'from-teal-400 to-emerald-600',
-      borderColor: 'hover:border-teal-500/60',
-      glowColor: 'group-hover:shadow-[0_0_35px_rgba(20,172,148,0.35)]',
-      icon: Shield,
-      details: ['Zero Cloud Leak', 'Tuân thủ Luật 91/2025', 'Tùy chọn xóa dữ liệu 1 chạm'],
+      name: 'NeuroGlint',
+      description: 'Applied neuroscience to convert stimuli and behavior into strategic data.',
+      borderColor: 'border-indigo-500/40 hover:border-indigo-500/80',
+      glowColor: 'hover:shadow-[0_0_40px_rgba(99,102,241,0.35)]',
+      renderIcon: () => (
+        <div className="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center relative">
+          <svg viewBox="0 0 100 100" className="w-20 h-20 sm:w-24 sm:h-24 stroke-[3.2] fill-none">
+            <defs>
+              <linearGradient id="ng-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#818cf8" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M30 65 C20 55, 20 40, 32 30 C45 18, 65 20, 75 32 C82 40, 80 52, 72 60 C65 68, 55 70, 52 78 C50 82, 45 84, 42 80 C40 76, 42 70, 48 66"
+              stroke="url(#ng-grad)"
+            />
+            {/* Concentric Signal Arcs */}
+            <path d="M42 48 A10 10 0 0 1 58 48" stroke="url(#ng-grad)" />
+            <path d="M36 42 A18 18 0 0 1 64 42" stroke="url(#ng-grad)" />
+            <path d="M30 36 A26 26 0 0 1 70 36" stroke="url(#ng-grad)" />
+          </svg>
+          {/* Sparkle star top-left of NeuroGlint */}
+          <Sparkles className="w-5 h-5 text-purple-300 absolute top-2 left-2 animate-pulse" />
+        </div>
+      ),
     },
   ];
 
   return (
-    <section id="technology" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20">
+    // Dark section matching Image 3
+    <section id="technology" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20 bg-[#060210]">
       
-      {/* Background Ambient Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-purple-900/15 rounded-full blur-[160px] pointer-events-none" />
+      {/* Subtle Purple Ambient Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-purple-950/30 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         
-        {/* Section Header (Matching Screenshot 3) */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16 sm:mb-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30 text-purple-300 text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
-            <span>Core Architecture</span>
-          </div>
-
+        {/* Title & Subtitle (Clean & minimal matching Image 3) */}
+        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16 sm:mb-20">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white glow-text">
             Our technology
           </h2>
-
-          <p className="text-gray-300 text-base sm:text-lg lg:text-xl font-normal leading-relaxed">
+          <p className="text-gray-300 text-sm sm:text-base font-normal leading-relaxed">
             We promote the future of health through disruptive solutions.
-          </p>
-          <p className="text-sm text-gray-400">
-            (Chúng tôi thúc đẩy tương lai của sức khỏe tinh thần bằng các giải pháp đột phá, an toàn và có cơ sở khoa học)
           </p>
         </div>
 
-        {/* 3 Large Glassmorphism Cards (Matching Screenshot 3) */}
+        {/* 3 Large Cards (Only element icon, title, and short text below - matching Image 3) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
-          {cards.map((card, idx) => {
-            const Icon = card.icon;
-            return (
-              <motion.div
-                key={card.id}
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.15 }}
-                className={`group relative rounded-[32px] p-8 sm:p-10 bg-[#100724]/75 backdrop-blur-2xl border border-purple-900/40 ${card.borderColor} transition-all duration-500 hover:-translate-y-2.5 ${card.glowColor} flex flex-col justify-between`}
-              >
-                {/* Glowing Corner Aura */}
-                <div className="absolute top-0 right-0 w-36 h-36 bg-purple-600/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-600/20 transition-colors" />
+          {cards.map((card, idx) => (
+            <motion.div
+              key={card.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: idx * 0.15 }}
+              className={`rounded-[32px] p-8 sm:p-12 bg-[#0c051a]/90 backdrop-blur-2xl border ${card.borderColor} transition-all duration-500 hover:-translate-y-2 ${card.glowColor} flex flex-col items-center text-center space-y-6 min-h-[380px] sm:min-h-[420px] justify-center`}
+            >
+              {/* Element Icon */}
+              <div className="flex items-center justify-center">
+                {card.renderIcon()}
+              </div>
 
-                <div>
-                  {/* Card Icon Header in Squircle Container */}
-                  <div className="flex items-center justify-between mb-8">
-                    <div className={`w-18 h-18 sm:w-20 sm:h-20 rounded-[24px] bg-gradient-to-br ${card.iconColor} p-[2px] shadow-lg transition-transform duration-300 group-hover:scale-105`}>
-                      <div className="w-full h-full rounded-[22px] bg-[#0c051d] flex items-center justify-center text-white">
-                        <Icon className="w-9 h-9 text-purple-200 group-hover:text-white transition-colors" />
-                      </div>
-                    </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/80 border border-purple-500/30 text-purple-300">
-                      {card.badge}
-                    </span>
-                  </div>
+              {/* Title */}
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                {card.name}
+              </h3>
 
-                  {/* Title & Tagline */}
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 transition-colors">
-                    {card.name}
-                  </h3>
-                  <h4 className="text-xs sm:text-sm font-semibold text-brand-teal mb-4">
-                    {card.tagline}
-                  </h4>
-
-                  {/* Description */}
-                  <p className="text-sm sm:text-[15px] text-gray-300 leading-relaxed font-normal mb-6">
-                    {card.description}
-                  </p>
-                </div>
-
-                {/* Feature Chips & Footer Action */}
-                <div className="pt-6 border-t border-purple-900/40 space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    {card.details.map((detail) => (
-                      <span
-                        key={detail}
-                        className="px-2.5 py-1 rounded-lg text-xs bg-purple-950/60 border border-purple-900/60 text-purple-300 font-medium"
-                      >
-                        ✓ {detail}
-                      </span>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={onStartAssessment}
-                    className="w-full pt-2 flex items-center justify-between text-xs sm:text-sm font-semibold text-purple-300 group-hover:text-brand-teal transition-colors"
-                  >
-                    <span>Khám phá tính năng</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-
-              </motion.div>
-            );
-          })}
+              {/* Short Description */}
+              <p className="text-xs sm:text-sm text-gray-300 font-normal leading-relaxed max-w-xs">
+                {card.description}
+              </p>
+            </motion.div>
+          ))}
         </div>
 
       </div>

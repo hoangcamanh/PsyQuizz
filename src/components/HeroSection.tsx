@@ -2,16 +2,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Brain, Sprout, ShieldCheck, HeartHandshake } from 'lucide-react';
+import { Brain, Sprout, ShieldCheck } from 'lucide-react';
 
 interface HeroSectionProps {
   onOpenTest: () => void;
   onExploreMore: () => void;
 }
 
-export default function HeroSection({ onOpenTest, onExploreMore }: HeroSectionProps) {
+export default function HeroSection({ onOpenTest }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-10 pb-20">
+    <section className="relative min-h-[88vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-8 pb-16">
       
       {/* Background Animated Wavy Streaks & Ambient Glows */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -61,74 +61,35 @@ export default function HeroSection({ onOpenTest, onExploreMore }: HeroSectionPr
 
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
         
-        {/* Left Column: Headlines & Call to Action */}
+        {/* Left Column: Headlines & Call to Action (Minimal, strictly English) */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="lg:col-span-7 text-left space-y-6 sm:space-y-8"
         >
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-medium backdrop-blur-md shadow-lg shadow-purple-950/50">
-            <Sparkles className="w-4 h-4 text-pink-400 animate-spin" style={{ animationDuration: '6s' }} />
-            <span>Khoa học Tâm lý & Trí tuệ Nhân tạo Chuẩn mực</span>
-          </div>
-
-          {/* Main Headline */}
+          {/* Main Headline (Clean & impactful matching Image 1) */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
-            Technology and science to{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-400 to-teal-300 glow-text">
-              understand your inner mind
-            </span>
+            Technology and science to transform the quality of life
           </h1>
 
-          {/* Subheadline */}
-          <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-2xl font-normal leading-relaxed">
-            Chúng tôi phát triển nền tảng tự khám phá tâm lý chuẩn hóa, kết hợp khoa học nhân cách, 
-            trợ lý AI đối chiếu y văn (Verified RAG) và triết lý bảo mật tuyệt đối dành cho người trẻ Việt Nam.
+          {/* Subheadline (Short, matching Image 1) */}
+          <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-xl font-normal leading-relaxed">
+            We develop solutions based on neuroscience, artificial intelligence and psychological science from our R&amp;D laboratory.
           </p>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            
-            {/* Primary Pill Button with glowing border */}
+          {/* Primary Action Button (Matching Image 1: 'Our laboratory') */}
+          <div className="pt-2">
             <button
               onClick={onOpenTest}
-              className="relative inline-flex items-center justify-center p-[2px] rounded-full overflow-hidden group bg-gradient-to-r from-brand-purple via-pink-500 to-brand-teal hover:from-purple-500 hover:to-teal-400 transition-all duration-300 shadow-glow-purple hover:shadow-[0_0_45px_rgba(168,85,247,0.7)] active:scale-95"
+              className="px-8 py-3.5 rounded-2xl border-2 border-purple-500/70 hover:border-purple-400 text-white font-semibold text-base bg-[#0f0724]/80 hover:bg-[#1a0c3b] shadow-[0_0_30px_rgba(168,85,247,0.35)] hover:shadow-[0_0_45px_rgba(168,85,247,0.6)] transition-all duration-300 active:scale-95"
             >
-              <span className="px-7 py-3.5 rounded-full bg-[#0d0622] group-hover:bg-[#150a36] text-white font-semibold text-sm sm:text-base flex items-center gap-3 transition-colors duration-200">
-                <span>Our assessments</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </span>
+              Our laboratory
             </button>
-
-            {/* Secondary Button */}
-            <button
-              onClick={onExploreMore}
-              className="px-6 py-3.5 rounded-full border border-purple-800/60 hover:border-purple-500 text-gray-300 hover:text-white font-medium text-sm sm:text-base bg-purple-950/20 hover:bg-purple-950/40 backdrop-blur-md transition-all duration-200"
-            >
-              Tìm hiểu quy trình
-            </button>
-          </div>
-
-          {/* Quick Trust Badges */}
-          <div className="pt-4 flex flex-wrap items-center gap-6 text-xs sm:text-sm text-gray-400">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-brand-teal" />
-              <span>100% Ẩn danh & Xử lý cục bộ</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Brain className="w-4 h-4 text-pink-400" />
-              <span>Thang đo IPIP Big Five chuẩn hóa</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <HeartHandshake className="w-4 h-4 text-purple-400" />
-              <span>Phi chẩn đoán & Hướng đến giáo dục</span>
-            </div>
           </div>
         </motion.div>
 
-        {/* Right Column: Spectacular 3D Interactive Orbital System (Image 1 Style) */}
+        {/* Right Column: 3D Orbital Neural System (Matching Image 1) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -162,7 +123,7 @@ export default function HeroSection({ onOpenTest, onExploreMore }: HeroSectionPr
             <span className="absolute bottom-16 left-12 w-2 h-2 rounded-full bg-pink-300 shadow-[0_0_10px_#f472b6] animate-pulse" style={{ animationDelay: '1s' }} />
             <span className="absolute top-1/2 left-4 w-1.5 h-1.5 rounded-full bg-teal-200 shadow-[0_0_8px_#99f6e4] animate-pulse" style={{ animationDelay: '2s' }} />
 
-            {/* Node 1: Top Purple Bubble (Self-Discovery / Human Profile) */}
+            {/* Node 1: Top Purple Bubble */}
             <motion.div
               animate={{ y: [-6, 6, -6] }}
               transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
@@ -173,15 +134,11 @@ export default function HeroSection({ onOpenTest, onExploreMore }: HeroSectionPr
                 <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#180b38] flex items-center justify-center text-purple-300 group-hover:text-white transition-colors">
                   <Sprout className="w-7 h-7 sm:w-8 sm:h-8 text-brand-teal animate-pulse" />
                 </div>
-                {/* Glowing Outer Halo */}
                 <div className="absolute inset-0 rounded-full border border-purple-400/60 animate-ping pointer-events-none opacity-40" style={{ animationDuration: '3s' }} />
               </div>
-              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-200 opacity-90 group-hover:opacity-100">
-                Self-Discovery
-              </span>
             </motion.div>
 
-            {/* Node 2: Right Neon Pink Bubble (Verified AI / Brain) */}
+            {/* Node 2: Right Neon Pink Bubble */}
             <motion.div
               animate={{ y: [6, -6, 6] }}
               transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut', delay: 0.5 }}
@@ -193,12 +150,9 @@ export default function HeroSection({ onOpenTest, onExploreMore }: HeroSectionPr
                 </div>
                 <div className="absolute inset-0 rounded-full border border-pink-400/60 animate-ping pointer-events-none opacity-30" style={{ animationDuration: '4s' }} />
               </div>
-              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-pink-950/80 border border-pink-500/40 text-pink-200 opacity-90 group-hover:opacity-100">
-                Verified RAG AI
-              </span>
             </motion.div>
 
-            {/* Node 3: Bottom Left Teal Bubble (Anonymous Engine / Privacy) */}
+            {/* Node 3: Bottom Left Teal Bubble */}
             <motion.div
               animate={{ y: [-5, 5, -5] }}
               transition={{ repeat: Infinity, duration: 4.8, ease: 'easeInOut', delay: 1 }}
@@ -210,9 +164,6 @@ export default function HeroSection({ onOpenTest, onExploreMore }: HeroSectionPr
                 </div>
                 <div className="absolute inset-0 rounded-full border border-teal-400/60 animate-ping pointer-events-none opacity-30" style={{ animationDuration: '3.5s' }} />
               </div>
-              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-950/80 border border-teal-500/40 text-teal-200 opacity-90 group-hover:opacity-100">
-                Privacy Engine
-              </span>
             </motion.div>
 
           </div>
