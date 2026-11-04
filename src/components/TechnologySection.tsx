@@ -2,19 +2,19 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Brain, Radio, Fingerprint } from 'lucide-react';
+import { Sparkles, Brain } from 'lucide-react';
 
 export default function TechnologySection() {
   const cards = [
     {
-      id: 'living-heritage',
-      name: 'Living Heritage',
-      description: 'Technology to preserve memories, stimulate memory and connect generations.',
+      id: 'ipip-big-five',
+      name: 'IPIP Big Five',
+      description:
+        'Standardized psychometric framework measuring Openness, Conscientiousness, Extraversion, Agreeableness, and Emotional Stability.',
       borderColor: 'border-pink-500/40 hover:border-pink-500/80',
       glowColor: 'hover:shadow-[0_0_40px_rgba(236,72,153,0.35)]',
       renderIcon: () => (
         <div className="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center">
-          {/* Custom Living Heritage Loop Icon with gradient */}
           <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
             <svg viewBox="0 0 100 100" className="w-full h-full stroke-[3.5] fill-none">
               <defs>
@@ -35,9 +35,10 @@ export default function TechnologySection() {
       ),
     },
     {
-      id: 'adaia',
-      name: 'ADAIA',
-      description: 'Emotional Artificial Intelligence for individual support and well-being based on science.',
+      id: 'verified-rag-ai',
+      name: 'Verified RAG AI',
+      description:
+        'Evidence-grounded explanations powered by Google Gemini, strictly referencing reviewed psychological literature with verifiable source citations.',
       borderColor: 'border-purple-500/40 hover:border-purple-500/80',
       glowColor: 'hover:shadow-[0_0_40px_rgba(168,85,247,0.35)]',
       renderIcon: () => (
@@ -49,9 +50,10 @@ export default function TechnologySection() {
       ),
     },
     {
-      id: 'neuroglint',
-      name: 'NeuroGlint',
-      description: 'Applied neuroscience to convert stimuli and behavior into strategic data.',
+      id: 'anonymous-engine',
+      name: 'Anonymous Engine',
+      description:
+        'Zero-knowledge client-side computation ensuring your assessment responses remain completely private on your device without cloud tracking.',
       borderColor: 'border-indigo-500/40 hover:border-indigo-500/80',
       glowColor: 'hover:shadow-[0_0_40px_rgba(99,102,241,0.35)]',
       renderIcon: () => (
@@ -72,7 +74,6 @@ export default function TechnologySection() {
             <path d="M36 42 A18 18 0 0 1 64 42" stroke="url(#ng-grad)" />
             <path d="M30 36 A26 26 0 0 1 70 36" stroke="url(#ng-grad)" />
           </svg>
-          {/* Sparkle star top-left of NeuroGlint */}
           <Sparkles className="w-5 h-5 text-purple-300 absolute top-2 left-2 animate-pulse" />
         </div>
       ),
@@ -80,8 +81,8 @@ export default function TechnologySection() {
   ];
 
   return (
-    // Dark section matching Image 3
-    <section id="technology" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20 bg-[#060210]">
+    // Dark section matching Image 3 with accurate PsyQuizz technology content
+    <section id="technology" className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 relative z-20 bg-[#060210]">
       
       {/* Subtle Purple Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-purple-950/30 rounded-full blur-[140px] pointer-events-none" />
@@ -94,7 +95,7 @@ export default function TechnologySection() {
             Our technology
           </h2>
           <p className="text-gray-300 text-sm sm:text-base font-normal leading-relaxed">
-            We promote the future of health through disruptive solutions.
+            We promote the future of mental well-being through evidence-grounded, disruptive solutions.
           </p>
         </div>
 
