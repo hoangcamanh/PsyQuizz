@@ -66,7 +66,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onOpenTest={handleOpenTest} />
 
       {/* Interactive Modals */}
       <AssessmentModal

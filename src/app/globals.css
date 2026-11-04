@@ -19,6 +19,15 @@ body {
   overflow-x: hidden;
 }
 
+/* Cho toàn bộ màn hình nhỏ đi 10% so với tỉ lệ máy tính (90% zoom on desktop) */
+@media (min-width: 1024px) {
+  body {
+    zoom: 0.9;
+    -moz-transform: scale(0.9);
+    -moz-transform-origin: top center;
+  }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -78,4 +87,207 @@ body {
   background: radial-gradient(circle at 20% 30%, rgba(103, 75, 190, 0.15) 0%, transparent 60%),
               radial-gradient(circle at 80% 60%, rgba(20, 172, 148, 0.12) 0%, transparent 50%),
               radial-gradient(circle at 50% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 60%);
+}
+
+/* Sparklingtech Hero Orbit & Bubbles System */
+.hero-orbit {
+  --design-w: 440px;
+  --stage-w: clamp(320px, 37vw, 540px);
+  aspect-ratio: 440 / 280;
+  margin: 0 auto;
+  max-width: 100%;
+  position: relative;
+  width: var(--stage-w);
+}
+
+@media (max-width: 768px) {
+  .hero-orbit {
+    --stage-w: clamp(300px, 85vw, 440px);
+  }
+}
+
+.hero-orbit-scaler {
+  height: 280px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(calc(var(--stage-w) / var(--design-w)));
+  transform-origin: center;
+  width: 440px;
+}
+
+.hero-orbit-svg {
+  inset: 0;
+  overflow: visible;
+  position: absolute;
+}
+
+.hero-ellipse-path {
+  fill: none;
+  stroke: url(#hero-ellipse-gradient);
+  stroke-width: 1.6;
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.7));
+  opacity: 0.9;
+}
+
+.hero-track-star {
+  animation-iteration-count: infinite;
+  animation-name: trackStarTwinkle;
+  animation-timing-function: ease-in-out;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+.hero-track-star--blue path {
+  fill: #a5b4fc;
+  filter: drop-shadow(0 0 4px #a5b4fc) drop-shadow(0 0 12px #6366f1);
+}
+
+.hero-track-star--purple path {
+  fill: #e9d5ff;
+  filter: drop-shadow(0 0 4px #e9d5ff) drop-shadow(0 0 12px #c084fc);
+}
+
+.hero-track-star--pink path {
+  fill: #fbcfe8;
+  filter: drop-shadow(0 0 4px #fbcfe8) drop-shadow(0 0 12px #ec4899);
+}
+
+.hero-bubble-wrap {
+  align-items: center;
+  animation: orbitTravel 42s linear infinite;
+  display: flex;
+  flex-direction: column;
+  font-family: Inter, sans-serif;
+  gap: 8px;
+  left: 0;
+  offset-anchor: 50% 56px;
+  offset-distance: 0;
+  offset-path: path("M 417.34 68.18 A 210 95 -20 1 1 417.05 67.41 Z");
+  offset-rotate: 0deg;
+  position: absolute;
+  text-decoration: none;
+  top: 0;
+  width: 148px;
+  z-index: 5;
+}
+
+.hero-bubble {
+  display: block;
+  height: 112px;
+  position: relative;
+  width: 112px;
+}
+
+.hero-bubble-glow {
+  animation: bubbleGlowPulse 3.2s ease-in-out infinite;
+  background: radial-gradient(circle, var(--bubble-color) 0%, rgba(0, 0, 0, 0) 68%);
+  border-radius: 50%;
+  filter: blur(20px);
+  inset: -45%;
+  opacity: 0.65;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.hero-bubble-glass {
+  align-items: center;
+  backdrop-filter: blur(3px) saturate(1.4);
+  -webkit-backdrop-filter: blur(3px) saturate(1.4);
+  background: radial-gradient(circle at 26% 15%, #fff 0%, rgba(255, 255, 255, 0.95) 3%, rgba(255, 255, 255, 0) 8%),
+              radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.3) 12%, rgba(255, 255, 255, 0.08) 22%, rgba(255, 255, 255, 0) 36%),
+              radial-gradient(circle at 78% 82%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 32%),
+              radial-gradient(circle at 60% 62%, var(--bubble-color) 0%, rgba(5, 5, 18, 0.85) 80%);
+  border: 1.5px solid color-mix(in srgb, var(--bubble-color) 65%, #fff 35%);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--bubble-color) 50%, transparent),
+              inset -8px -10px 18px rgba(0, 0, 0, 0.4),
+              inset 6px 8px 16px rgba(255, 255, 255, 0.18),
+              0 12px 30px rgba(0, 0, 0, 0.45),
+              0 0 18px var(--bubble-color);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  width: 100%;
+  z-index: 1;
+}
+
+.hero-bubble-rim {
+  background: radial-gradient(circle, transparent 87%, color-mix(in srgb, var(--bubble-color) 75%, #fff 25%) 95%, transparent 100%);
+  border-radius: 50%;
+  inset: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  position: absolute;
+  z-index: 3;
+}
+
+.hero-bubble-glass img {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+  height: 54%;
+  object-fit: contain;
+  position: relative;
+  width: 54%;
+  z-index: 2;
+}
+
+.hero-bubble-wrap:hover .hero-bubble-glass,
+.hero-bubble-wrap:focus-visible .hero-bubble-glass {
+  border-color: color-mix(in srgb, var(--bubble-color) 80%, #fff 20%);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--bubble-color) 70%, transparent),
+              inset -8px -10px 18px rgba(0, 0, 0, 0.3),
+              inset 6px 8px 16px rgba(255, 255, 255, 0.25),
+              0 16px 40px rgba(0, 0, 0, 0.5),
+              0 0 30px var(--bubble-color);
+  transform: scale(1.16);
+}
+
+.hero-bubble-wrap:hover .hero-bubble-glow,
+.hero-bubble-wrap:focus-visible .hero-bubble-glow {
+  filter: blur(28px);
+  opacity: 0.85;
+}
+
+.hero-bubble-wrap:hover,
+.hero-bubble-wrap:focus-visible {
+  animation-play-state: paused;
+}
+
+.hero-orbit:hover .hero-bubble-wrap {
+  animation-play-state: paused;
+}
+
+@keyframes trackStarTwinkle {
+  0%, 100% {
+    filter: brightness(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    filter: brightness(1.7);
+    opacity: 1;
+  }
+}
+
+@keyframes orbitTravel {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes bubbleGlowPulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15);
+  }
 }

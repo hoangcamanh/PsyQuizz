@@ -30,24 +30,24 @@ export default function Header({ onOpenAuth, onOpenTest }: HeaderProps) {
           </div>
         </Link>
 
-        {/* Center-Right Biased Navigation Links (Only 'Take a Test' and 'About Us') */}
+        {/* Center-Right Biased Navigation Links (Order: About Us, Take a Test) */}
         <nav className="hidden md:flex items-center gap-8 lg:gap-10 ml-auto mr-8">
-          <button
-            onClick={onOpenTest}
-            className="text-gray-300 hover:text-white font-medium text-sm lg:text-[15px] transition-colors relative py-1 group flex items-center gap-1.5"
-          >
-            <span>Take a test</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
-            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-brand-purple to-brand-teal transition-all duration-300 group-hover:w-full" />
-          </button>
-
           <Link
             href="#about"
             className="text-gray-300 hover:text-white font-medium text-sm lg:text-[15px] transition-colors relative py-1 group"
           >
-            <span>About us</span>
+            <span>About Us</span>
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-brand-purple to-brand-teal transition-all duration-300 group-hover:w-full" />
           </Link>
+
+          <button
+            onClick={onOpenTest}
+            className="text-gray-300 hover:text-white font-medium text-sm lg:text-[15px] transition-colors relative py-1 group flex items-center gap-1.5"
+          >
+            <span>Take a Test</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-brand-purple to-brand-teal transition-all duration-300 group-hover:w-full" />
+          </button>
         </nav>
 
         {/* Right Action Buttons */}
@@ -92,6 +92,13 @@ export default function Header({ onOpenAuth, onOpenTest }: HeaderProps) {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#0c061d]/98 backdrop-blur-2xl border-b border-purple-900/40 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <Link
+            href="#about"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-base font-medium text-gray-200 hover:text-brand-teal py-2"
+          >
+            About Us
+          </Link>
           <button
             onClick={() => {
               setMobileMenuOpen(false);
@@ -99,15 +106,8 @@ export default function Header({ onOpenAuth, onOpenTest }: HeaderProps) {
             }}
             className="block w-full text-left text-base font-medium text-gray-200 hover:text-brand-teal py-2"
           >
-            Take a test
+            Take a Test
           </button>
-          <Link
-            href="#about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-base font-medium text-gray-200 hover:text-brand-teal py-2"
-          >
-            About us
-          </Link>
           <div className="pt-4 border-t border-purple-900/40 flex flex-col gap-3">
             <button
               onClick={() => {
