@@ -17,59 +17,23 @@ uniform float iTime;
 uniform vec3  iResolution;
 uniform float animationSpeed;
 
-uniform bool enableTop;
-uniform bool enableMiddle;
-uniform bool enableBottom;
-
-uniform int topLineCount;
-uniform int middleLineCount;
-uniform int bottomLineCount;
-
-uniform float topLineDistance;
-uniform float middleLineDistance;
-uniform float bottomLineDistance;
-
-uniform vec3 topWavePosition;
-uniform vec3 middleWavePosition;
-uniform vec3 bottomWavePosition;
-
 uniform vec2 iMouse;
 uniform bool interactive;
 uniform float bendRadius;
 uniform float bendStrength;
 uniform float bendInfluence;
-
-uniform bool parallax;
-uniform float parallaxStrength;
 uniform vec2 parallaxOffset;
-
-const vec3 BLACK = vec3(0.0);
-const vec3 PINK  = vec3(233.0, 71.0, 245.0) / 255.0;
-const vec3 BLUE  = vec3(47.0,  75.0, 162.0) / 255.0;
 
 mat2 rotate(float r) {
   return mat2(cos(r), sin(r), -sin(r), cos(r));
 }
 
-vec3 background_color(vec2 uv) {
-  vec3 col = vec3(0.0);
-  float y = sin(uv.x - 0.2) * 0.3 - 0.1;
-  float m = uv.y - y;
-  col += mix(BLUE, BLACK, smoothstep(0.0, 1.0, abs(m)));
-  col += mix(PINK, BLACK, smoothstep(0.0, 1.0, abs(m - 0.8)));
-  return col * 0.5;
-}
-
-vec3 getLineColor(float t, vec3 baseColor) {
-  return baseColor;
-}
-
-float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
+// Wave calculation
+float calcWave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
   float time = iTime * animationSpeed;
-  float x_offset   = offset;
-  float x_movement = time * 0.1;
-  float amp        = sin(offset + time * 0.2) * 0.3;
-  float y          = sin(uv.x + x_offset + x_movement) * amp;
+  float x_movement = time * 0.12;
+  float amp = sin(offset + time * 0.22) * 0.28 + 0.04;
+  float y = sin(uv.x + offset + x_movement) * amp;
 
   if (shouldBend) {
     vec2 d = screenUv - mouseUv;
@@ -79,76 +43,76 @@ float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) 
   }
 
   float m = uv.y - y;
-  return 0.0175 / max(abs(m) + 0.01, 1e-3) + 0.01;
+  // Silky ribbon line intensity
+  return 0.016 / (max(abs(m), 0.003) + 0.006);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 baseUv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
   baseUv.y *= -1.0;
-  
-  if (parallax) {
-    baseUv += parallaxOffset;
-  }
-
-  vec3 col = vec3(0.0);
-  vec3 b = background_color(baseUv);
+  baseUv += parallaxOffset;
 
   vec2 mouseUv = vec2(0.0);
   if (interactive) {
     mouseUv = (2.0 * iMouse - iResolution.xy) / iResolution.y;
     mouseUv.y *= -1.0;
   }
-  
-  if (enableBottom) {
-    for (int i = 0; i < 7; ++i) {
-      float fi = float(i);
-      vec3 lineCol = getLineColor(fi / 6.0, b);
-      
-      float angle = bottomWavePosition.z * log(length(baseUv) + 1.0);
-      vec2 ruv = baseUv * rotate(angle);
-      col += lineCol * wave(
-        ruv + vec2(bottomLineDistance * fi + bottomWavePosition.x, bottomWavePosition.y),
-        1.5 + 0.2 * fi,
-        baseUv,
-        mouseUv,
-        interactive
-      ) * 0.2;
-    }
+
+  vec3 col = vec3(0.0);
+
+  // 1. Bottom Wave Stream (Vibrant Violet to Pink)
+  for (int i = 0; i < 7; ++i) {
+    float fi = float(i);
+    float t = fi / 6.0;
+    vec3 lineCol = mix(vec3(0.45, 0.22, 0.95), vec3(0.92, 0.25, 0.72), t);
+    
+    float angle = -0.85 * log(length(baseUv) + 1.0);
+    vec2 ruv = baseUv * rotate(angle);
+    float w = calcWave(
+      ruv + vec2(0.05 * fi + 2.0, -0.65),
+      1.5 + 0.18 * fi,
+      baseUv,
+      mouseUv,
+      interactive
+    );
+    col += lineCol * w * 0.38;
   }
 
-  if (enableMiddle) {
-    for (int i = 0; i < 7; ++i) {
-      float fi = float(i);
-      vec3 lineCol = getLineColor(fi / 6.0, b);
-      
-      float angle = middleWavePosition.z * log(length(baseUv) + 1.0);
-      vec2 ruv = baseUv * rotate(angle);
-      col += lineCol * wave(
-        ruv + vec2(middleLineDistance * fi + middleWavePosition.x, middleWavePosition.y),
-        2.0 + 0.15 * fi,
-        baseUv,
-        mouseUv,
-        interactive
-      );
-    }
+  // 2. Middle Wave Stream (Hot Pink to Cyan/Blue)
+  for (int i = 0; i < 7; ++i) {
+    float fi = float(i);
+    float t = fi / 6.0;
+    vec3 lineCol = mix(vec3(0.95, 0.18, 0.65), vec3(0.20, 0.55, 0.98), t);
+    
+    float angle = 0.25 * log(length(baseUv) + 1.0);
+    vec2 ruv = baseUv * rotate(angle);
+    float w = calcWave(
+      ruv + vec2(0.045 * fi + 5.0, 0.05),
+      2.0 + 0.14 * fi,
+      baseUv,
+      mouseUv,
+      interactive
+    );
+    col += lineCol * w * 0.45;
   }
 
-  if (enableTop) {
-    for (int i = 0; i < 7; ++i) {
-      float fi = float(i);
-      vec3 lineCol = getLineColor(fi / 6.0, b);
-      
-      float angle = topWavePosition.z * log(length(baseUv) + 1.0);
-      vec2 ruv = baseUv * rotate(angle);
-      ruv.x *= -1.0;
-      col += lineCol * wave(
-        ruv + vec2(topLineDistance * fi + topWavePosition.x, topWavePosition.y),
-        1.0 + 0.2 * fi,
-        baseUv,
-        mouseUv,
-        interactive
-      ) * 0.1;
-    }
+  // 3. Top Wave Stream (Electric Blue to Soft Purple)
+  for (int i = 0; i < 7; ++i) {
+    float fi = float(i);
+    float t = fi / 6.0;
+    vec3 lineCol = mix(vec3(0.15, 0.72, 0.95), vec3(0.72, 0.35, 0.95), t);
+    
+    float angle = -0.35 * log(length(baseUv) + 1.0);
+    vec2 ruv = baseUv * rotate(angle);
+    ruv.x *= -1.0;
+    float w = calcWave(
+      ruv + vec2(0.04 * fi + 8.0, 0.55),
+      1.0 + 0.16 * fi,
+      baseUv,
+      mouseUv,
+      interactive
+    );
+    col += lineCol * w * 0.32;
   }
 
   fragColor = vec4(col, 1.0);
@@ -169,15 +133,11 @@ export default function WaveBackground() {
     if (!canvas) return;
 
     const gl =
-      canvas.getContext('webgl', { antialias: true, alpha: false }) ||
+      canvas.getContext('webgl', { antialias: true, alpha: true }) ||
       (canvas.getContext('experimental-webgl') as WebGLRenderingContext | null);
 
-    if (!gl) {
-      console.warn('WebGL not supported, falling back to CSS background');
-      return;
-    }
+    if (!gl) return;
 
-    // Compile helper
     const createShader = (type: number, src: string) => {
       const s = gl.createShader(type);
       if (!s) return null;
@@ -208,7 +168,7 @@ export default function WaveBackground() {
 
     gl.useProgram(prog);
 
-    // Quad geometry: 2 triangles covering [-1, 1]
+    // Full screen quad geometry
     const posBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
     const verts = new Float32Array([
@@ -229,51 +189,21 @@ export default function WaveBackground() {
     const u_iTime = gl.getUniformLocation(prog, 'iTime');
     const u_iResolution = gl.getUniformLocation(prog, 'iResolution');
     const u_animationSpeed = gl.getUniformLocation(prog, 'animationSpeed');
-    const u_enableTop = gl.getUniformLocation(prog, 'enableTop');
-    const u_enableMiddle = gl.getUniformLocation(prog, 'enableMiddle');
-    const u_enableBottom = gl.getUniformLocation(prog, 'enableBottom');
-    const u_topLineCount = gl.getUniformLocation(prog, 'topLineCount');
-    const u_middleLineCount = gl.getUniformLocation(prog, 'middleLineCount');
-    const u_bottomLineCount = gl.getUniformLocation(prog, 'bottomLineCount');
-    const u_topLineDistance = gl.getUniformLocation(prog, 'topLineDistance');
-    const u_middleLineDistance = gl.getUniformLocation(prog, 'middleLineDistance');
-    const u_bottomLineDistance = gl.getUniformLocation(prog, 'bottomLineDistance');
-    const u_topWavePosition = gl.getUniformLocation(prog, 'topWavePosition');
-    const u_middleWavePosition = gl.getUniformLocation(prog, 'middleWavePosition');
-    const u_bottomWavePosition = gl.getUniformLocation(prog, 'bottomWavePosition');
     const u_iMouse = gl.getUniformLocation(prog, 'iMouse');
     const u_interactive = gl.getUniformLocation(prog, 'interactive');
     const u_bendRadius = gl.getUniformLocation(prog, 'bendRadius');
     const u_bendStrength = gl.getUniformLocation(prog, 'bendStrength');
     const u_bendInfluence = gl.getUniformLocation(prog, 'bendInfluence');
-    const u_parallax = gl.getUniformLocation(prog, 'parallax');
-    const u_parallaxStrength = gl.getUniformLocation(prog, 'parallaxStrength');
     const u_parallaxOffset = gl.getUniformLocation(prog, 'parallaxOffset');
 
-    // Static uniform values
     gl.uniform1f(u_animationSpeed, 1.0);
-    gl.uniform1i(u_enableTop, 1);
-    gl.uniform1i(u_enableMiddle, 1);
-    gl.uniform1i(u_enableBottom, 1);
-    gl.uniform1i(u_topLineCount, 7);
-    gl.uniform1i(u_middleLineCount, 7);
-    gl.uniform1i(u_bottomLineCount, 7);
-    gl.uniform1f(u_topLineDistance, 0.04);
-    gl.uniform1f(u_middleLineDistance, 0.05);
-    gl.uniform1f(u_bottomLineDistance, 0.06);
-    gl.uniform3f(u_topWavePosition, 10.0, 0.5, -0.4);
-    gl.uniform3f(u_middleWavePosition, 5.0, 0.0, 0.2);
-    gl.uniform3f(u_bottomWavePosition, 2.0, -0.7, -1.0);
     gl.uniform1i(u_interactive, 1);
-    gl.uniform1f(u_bendRadius, 5.0);
-    gl.uniform1f(u_bendStrength, -0.5);
-    gl.uniform1i(u_parallax, 1);
-    gl.uniform1f(u_parallaxStrength, 0.2);
+    gl.uniform1f(u_bendRadius, 4.5);
+    gl.uniform1f(u_bendStrength, -0.45);
 
     let animationFrameId: number;
     const startTime = performance.now();
 
-    // Mouse tracking & damping
     let targetMouseX = -1000;
     let targetMouseY = -1000;
     let currentMouseX = -1000;
@@ -283,8 +213,8 @@ export default function WaveBackground() {
     const handleMouseMove = (e: MouseEvent) => {
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
-      targetMouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-      targetMouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+      targetMouseX = (e.clientX - rect.left) * (canvas.width / (rect.width || 1));
+      targetMouseY = (e.clientY - rect.top) * (canvas.height / (rect.height || 1));
       bendInfluence = 1.0;
     };
 
@@ -292,9 +222,10 @@ export default function WaveBackground() {
 
     const resize = () => {
       if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = canvas.clientWidth || window.innerWidth;
-      const height = canvas.clientHeight || window.innerHeight;
+      const width = Math.max(rect.width || window.innerWidth, 320);
+      const height = Math.max(rect.height || window.innerHeight, 320);
       const displayWidth = Math.floor(width * dpr);
       const displayHeight = Math.floor(height * dpr);
 
@@ -302,7 +233,6 @@ export default function WaveBackground() {
         canvas.width = displayWidth;
         canvas.height = displayHeight;
         gl.viewport(0, 0, displayWidth, displayHeight);
-        gl.uniform3f(u_iResolution, displayWidth, displayHeight, 1.0);
       }
     };
 
@@ -316,12 +246,13 @@ export default function WaveBackground() {
       // Mouse damping
       currentMouseX += (targetMouseX - currentMouseX) * 0.06;
       currentMouseY += (targetMouseY - currentMouseY) * 0.06;
-      bendInfluence *= 0.98; // gentle fade when mouse stops
+      bendInfluence *= 0.985;
 
-      // Parallax offset
-      const normX = (currentMouseX / (canvas.width || 1) - 0.5) * 0.15;
-      const normY = (currentMouseY / (canvas.height || 1) - 0.5) * 0.15;
+      const normX = (currentMouseX / (canvas.width || 1) - 0.5) * 0.12;
+      const normY = (currentMouseY / (canvas.height || 1) - 0.5) * 0.12;
 
+      gl.useProgram(prog);
+      gl.uniform3f(u_iResolution, canvas.width, canvas.height, 1.0);
       gl.uniform1f(u_iTime, elapsed);
       gl.uniform2f(u_iMouse, currentMouseX, currentMouseY);
       gl.uniform1f(u_bendInfluence, bendInfluence);
@@ -350,9 +281,8 @@ export default function WaveBackground() {
       <canvas
         ref={canvasRef}
         className="w-full h-full block"
-        style={{ mixBlendMode: 'screen' }}
+        style={{ mixBlendMode: 'screen', opacity: 0.95 }}
       />
     </div>
   );
 }
-

@@ -20,6 +20,8 @@
 
 ## 2. Multi-Tier Logical Architecture
 
+> **Visual Interface Reference:** For the full-page landing page design and visual showcase, see [LANDING_PAGE.md](./LANDING_PAGE.md) and the captured full-screen rendering at [landing-page-full.png](./landing-page-full.png).
+
 The PsyQuizz architecture separates presentation, application logic, and cloud services into three distinct tiers.
 
 ```mermaid

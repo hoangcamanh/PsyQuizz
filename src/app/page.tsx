@@ -9,26 +9,33 @@ import AssessmentModal from '@/components/AssessmentModal';
 import AuthModal from '@/components/AuthModal';
 import FloatingWidgets from '@/components/FloatingWidgets';
 import Footer from '@/components/Footer';
+import { ASSESSMENTS, AssessmentData } from '@/config/assessments';
 
 export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
-  const [testModalOpen, setTestModalOpen] = useState(false);
+  const [selectedAssessment, setSelectedAssessment] = useState<AssessmentData | null>(null);
+  const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
 
   const handleOpenAuth = (mode: 'login' | 'signup') => {
     setAuthMode(mode);
     setAuthModalOpen(true);
   };
 
-  const handleOpenTest = () => {
-    setTestModalOpen(true);
+  const handleSelectAssessment = (assessment: AssessmentData) => {
+    setSelectedAssessment(assessment);
+    setAssessmentModalOpen(true);
   };
 
-  const handleStartFullTest = () => {
-    // In Phase 2 this will route to /assessment/ipip-big-five
-    // For now it confirms the session and starts
-    setTestModalOpen(false);
-    alert('Phiên làm bài IPIP Big Five đã được khởi tạo thành công trên thiết bị của bạn!');
+  const handleOpenTest = () => {
+    // When clicking "Take a Test" from Header or Footer, smooth scroll to assessments section
+    const el = document.getElementById('assessments');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      setSelectedAssessment(ASSESSMENTS[0]);
+      setAssessmentModalOpen(true);
+    }
   };
 
   return (
@@ -41,26 +48,23 @@ export default function HomePage() {
       />
 
       {/* Main Content Sections */}
-      <main className="flex-1">
+      <main className="flex-1 -mt-20">
         
-        {/* Section 1: Hero (Matching Screenshot 1) */}
+        {/* Section 1: Hero */}
         <HeroSection
           onOpenTest={handleOpenTest}
           onExploreMore={() => {
-            const el = document.getElementById('about');
+            const el = document.getElementById('assessments');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
           }}
         />
 
-        {/* Section 2: Purpose Contrast Card (Matching Screenshot 2) */}
+        {/* Section 2: Core Psychological Assessments */}
         <PurposeSection
-          onLearnMore={() => {
-            const el = document.getElementById('technology');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
+          onSelectAssessment={handleSelectAssessment}
         />
 
-        {/* Section 3: Technology Grid (Matching Screenshot 3) */}
+        {/* Section 3: Technology Grid */}
         <TechnologySection />
 
       </main>
@@ -68,13 +72,14 @@ export default function HomePage() {
       {/* Footer */}
       <Footer onOpenTest={handleOpenTest} />
 
-      {/* Interactive Modals */}
+      {/* Reusable Pre-Test Modal */}
       <AssessmentModal
-        isOpen={testModalOpen}
-        onClose={() => setTestModalOpen(false)}
-        onStartFullTest={handleStartFullTest}
+        isOpen={assessmentModalOpen}
+        assessment={selectedAssessment}
+        onClose={() => setAssessmentModalOpen(false)}
       />
 
+      {/* Auth Modal (preserved for authentication workflows) */}
       <AuthModal
         isOpen={authModalOpen}
         initialMode={authMode}

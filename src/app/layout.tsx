@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'PsyQuizz — Understand Yourself, One Insight at a Time',
+  title: 'PsyQuizz — Know Your Mind, Discover Yourself',
   description:
     'A privacy-first psychological self-assessment and science-grounded AI explanation platform for young adults.',
   icons: {

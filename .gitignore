@@ -48,6 +48,9 @@ ui-debug.log*
 .DS_Store
 Thumbs.db
 
+# Scratch & Temporary Tools
+scratch/
+
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts

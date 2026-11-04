@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck, ExternalLink, PhoneCall, AlertCircle, Heart } from 'lucide-react';
+import { ShieldCheck, ExternalLink, PhoneCall, AlertCircle } from 'lucide-react';
 
 interface FooterProps {
   onOpenTest?: () => void;
@@ -13,7 +13,7 @@ export default function Footer({ onOpenTest }: FooterProps) {
   return (
     <footer className="w-full relative z-20">
       
-      {/* Upward Parabolic Arc Transition (Cong lên hình cung parabol cao và thanh thoát) */}
+      {/* Upward Parabolic Arc Transition */}
       <div className="relative w-full overflow-hidden leading-none z-30 -mb-[1px]">
         <svg
           viewBox="0 0 1440 200"
@@ -48,15 +48,15 @@ export default function Footer({ onOpenTest }: FooterProps) {
         </svg>
       </div>
 
-      {/* Main Footer Body (Pure English, Highly Professional) */}
+      {/* Main Footer Body — Centered, cohesive layout */}
       <div className="w-full bg-[#04010a] text-gray-400 pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-t border-purple-950/40">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           
-          {/* Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-14 pb-14 border-b border-purple-900/30">
+          {/* Grid Layout: Columns brought closer together and centered */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 md:gap-8 lg:gap-10 pb-12 border-b border-purple-900/30">
             
             {/* Col 1: Brand & Mission */}
-            <div className="md:col-span-4 space-y-4">
+            <div className="md:col-span-5 space-y-4">
               <div className="relative h-11 w-44">
                 <Image
                   src="/logo-white.png"
@@ -67,7 +67,7 @@ export default function Footer({ onOpenTest }: FooterProps) {
               </div>
               
               <p className="text-sm text-purple-300 font-medium italic">
-                Understand Yourself, One Insight at a Time.
+                Know Your Mind. Discover Yourself.
               </p>
               
               <p className="text-xs text-gray-400 leading-relaxed max-w-sm font-normal">
@@ -114,7 +114,7 @@ export default function Footer({ onOpenTest }: FooterProps) {
             </div>
 
             {/* Col 3: Resources */}
-            <div className="md:col-span-3 space-y-3">
+            <div className="md:col-span-2 space-y-3">
               <h4 className="text-xs font-bold text-white uppercase tracking-wider">
                 Resources
               </h4>
@@ -125,11 +125,11 @@ export default function Footer({ onOpenTest }: FooterProps) {
                       onClick={onOpenTest}
                       className="hover:text-white transition-colors text-left"
                     >
-                      Psychological Assessments
+                      Assessments
                     </button>
                   ) : (
                     <span className="hover:text-white transition-colors cursor-pointer">
-                      Psychological Assessments
+                      Assessments
                     </span>
                   )}
                 </li>
@@ -140,13 +140,13 @@ export default function Footer({ onOpenTest }: FooterProps) {
                     rel="noreferrer"
                     className="hover:text-white transition-colors flex items-center gap-1.5"
                   >
-                    <span>Scientific References</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-brand-teal" />
+                    <span>References</span>
+                    <ExternalLink className="w-3 h-3 text-brand-teal" />
                   </a>
                 </li>
                 <li>
                   <Link href="#helplines" className="hover:text-white transition-colors">
-                    Mental Health Support
+                    Mental Health
                   </Link>
                 </li>
               </ul>
@@ -200,7 +200,7 @@ export default function Footer({ onOpenTest }: FooterProps) {
             </div>
           </div>
 
-          {/* Bottom Copyright & Legal / Privacy */}
+          {/* Bottom Copyright & Legal / Privacy (Removed "Built to support self-understanding" and heart icon) */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
             <p>
               © 2026 PsyQuizz. University Entrepreneurship Project — Group 10.
@@ -209,11 +209,6 @@ export default function Footer({ onOpenTest }: FooterProps) {
               <span className="hover:text-gray-300 cursor-pointer transition-colors">Privacy Policy</span>
               <span>•</span>
               <span className="hover:text-gray-300 cursor-pointer transition-colors">Terms of Use</span>
-              <span>•</span>
-              <div className="flex items-center gap-1 text-purple-400 italic">
-                <span>Built to support self-understanding.</span>
-                <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500 ml-0.5" />
-              </div>
             </div>
           </div>
 

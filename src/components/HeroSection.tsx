@@ -22,40 +22,43 @@ const ORBIT_STARS = [
 
 const ORBIT_BUBBLES = [
   {
-    id: 'patrimonio-vivo',
-    name: 'Patrimonio Vivo',
-    logo: '/orbit/logopv.png',
-    color: '#c084fc',
-    delay: 0,
+    id: 'tech-ai-hands',
+    name: 'Evidence-Grounded AI',
+    logo: '/orbit/tech-ai-hands-white.png',
+    color: '#a855f7',
+    staticOffset: '28%', // Top-left position
   },
   {
-    id: 'adaia',
-    name: 'ADAIA',
-    logo: '/orbit/ADAIA_logo_1.png',
+    id: 'tech-atom',
+    name: 'Big Five (BFI-44)',
+    logo: '/orbit/tech-atom-white.png',
     color: '#ec4899',
-    delay: -14,
+    staticOffset: '68%', // Bottom position
   },
   {
-    id: 'neuroglint',
-    name: 'NeuroGlint',
-    logo: '/orbit/NeuroglintBlanco_corto.png',
+    id: 'tech-network-node',
+    name: 'Privacy-Focused Assessments',
+    logo: '/orbit/tech-network-node-white.png',
     color: '#6366f1',
-    delay: -28,
+    staticOffset: '0%', // Right position
   },
 ];
 
-export default function HeroSection({ onOpenTest }: HeroSectionProps) {
+export default function HeroSection({ onOpenTest, onExploreMore }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-[#080314]">
+    <section className="relative min-h-[96vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-20 bg-[#080314]">
       
       {/* 1:1 Silky Wave WebGL Background (matching sparklingtech.es) */}
       <WaveBackground />
 
-      {/* Ambient background glows for deep cosmic atmosphere */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1]">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-40 w-[550px] h-[550px] bg-pink-600/10 rounded-full blur-[130px]" />
-        <div className="absolute -bottom-20 left-1/3 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[140px]" />
+      {/* Dark gradient overlay layer (reduced to ~25% tint so waves remain clearly visible) */}
+      <div className="absolute inset-0 pointer-events-none z-[1] bg-gradient-to-b from-black/40 via-black/20 to-black/45" />
+
+      {/* Ambient background glows for deep cosmic colorful atmosphere */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
+        <div className="absolute -top-40 -left-40 w-[650px] h-[650px] bg-purple-600/30 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute top-1/4 -right-40 w-[600px] h-[600px] bg-pink-500/25 rounded-full blur-[130px] animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="absolute -bottom-20 left-1/4 w-[550px] h-[550px] bg-blue-600/25 rounded-full blur-[140px]" />
       </div>
 
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
@@ -68,8 +71,10 @@ export default function HeroSection({ onOpenTest }: HeroSectionProps) {
           className="lg:col-span-7 text-left space-y-5 sm:space-y-6"
         >
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
-            Understand Yourself, One Insight at a Time.
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15]">
+            Know Your Mind.
+            <br />
+            Discover Yourself.
           </h1>
 
           {/* Subheadline */}
@@ -82,13 +87,19 @@ export default function HeroSection({ onOpenTest }: HeroSectionProps) {
             PsyQuizz brings psychological self-assessments and research-informed explanations together in one accessible platform. Explore your personality and emotional well-being through a thoughtful, privacy-conscious experience.
           </p>
 
-          {/* Primary Action Button (Primary CTA: Take a Test) */}
+          {/* Primary Action Button (Primary CTA: Explore the Tests) */}
           <div className="pt-3">
             <button
-              onClick={onOpenTest}
+              onClick={() => {
+                if (onExploreMore) {
+                  onExploreMore();
+                } else {
+                  document.getElementById('assessments')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="px-8 py-3.5 rounded-2xl border-2 border-purple-500/70 hover:border-purple-400 text-white font-semibold text-base bg-[#0f0724]/80 hover:bg-[#1a0c3b] shadow-[0_0_30px_rgba(168,85,247,0.35)] hover:shadow-[0_0_45px_rgba(168,85,247,0.6)] transition-all duration-300 active:scale-95"
             >
-              Take a Test
+              Explore the Tests
             </button>
           </div>
         </motion.div>
@@ -155,33 +166,29 @@ export default function HeroSection({ onOpenTest }: HeroSectionProps) {
                 ))}
               </svg>
 
-              {/* 3 Floating Glass Glowing Bubbles traveling continuously on the Orbit */}
-              {ORBIT_BUBBLES.map((bubble) => {
-                const restOffset = `${((-bubble.delay % 42) / 42) * 100}%`;
-                return (
-                  <div
-                    key={bubble.id}
-                    onClick={onOpenTest}
-                    className="hero-bubble-wrap cursor-pointer"
-                    style={
-                      {
-                        '--bubble-color': bubble.color,
-                        '--rest-offset': restOffset,
-                        animationDelay: `${bubble.delay}s`,
-                      } as React.CSSProperties
-                    }
-                    title={bubble.name}
-                  >
-                    <span className="hero-bubble">
-                      <span className="hero-bubble-glow" aria-hidden="true" />
-                      <span className="hero-bubble-glass">
-                        <span className="hero-bubble-rim" aria-hidden="true" />
-                        <img src={bubble.logo} alt={bubble.name} />
-                      </span>
+              {/* 3 Static Glass Glowing Bubbles resting along the Orbit (Tĩnh, không click được) */}
+              {ORBIT_BUBBLES.map((bubble) => (
+                <div
+                  key={bubble.id}
+                  className="hero-bubble-wrap pointer-events-none select-none"
+                  style={
+                    {
+                      '--bubble-color': bubble.color,
+                      offsetDistance: bubble.staticOffset,
+                      animation: 'none',
+                    } as React.CSSProperties
+                  }
+                  title={bubble.name}
+                >
+                  <span className="hero-bubble">
+                    <span className="hero-bubble-glow" aria-hidden="true" />
+                    <span className="hero-bubble-glass">
+                      <span className="hero-bubble-rim" aria-hidden="true" />
+                      <img src={bubble.logo} alt={bubble.name} />
                     </span>
-                  </div>
-                );
-              })}
+                  </span>
+                </div>
+              ))}
 
             </div>
           </div>
