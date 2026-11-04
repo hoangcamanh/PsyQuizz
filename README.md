@@ -1,6 +1,8 @@
 <div align="center">
 
-# PsyQuizz
+<img src="assets/logo.png" alt="PsyQuizz Logo" width="500" />
+
+<br/>
 
 **Understand Yourself, One Insight at a Time.**
 
@@ -8,10 +10,10 @@
 
 ---
 
-[![Project Phase](https://img.shields.io/badge/Project_Phase-Phase_0:_Audit_%26_Planning-orange?style=flat-square)](#development-roadmap)
-[![Target Market](https://img.shields.io/badge/Target_Audience-Young_Adults_in_Vietnam_(18--30)-blue?style=flat-square)](#project-overview)
-[![License](https://img.shields.io/badge/License-Academic_/_Pending-lightgrey?style=flat-square)](#contributors--license)
-[![Privacy First](https://img.shields.io/badge/Privacy-Anonymous--First_(Law_91%2F2025%2FQH15)-success?style=flat-square)](#privacy--security)
+[![Project Phase](https://img.shields.io/badge/Project_Phase-Phase_0:_Audit_%26_Planning-orange?style=flat-square)](#10-development-roadmap)
+[![Target Market](https://img.shields.io/badge/Target_Audience-Young_Adults_in_Vietnam_(18--30)-blue?style=flat-square)](#1-project-overview)
+[![License](https://img.shields.io/badge/License-Academic_/_Pending-lightgrey?style=flat-square)](#12-contributors--license)
+[![Privacy First](https://img.shields.io/badge/Privacy-Anonymous--First_(Law_91%2F2025%2FQH15)-success?style=flat-square)](#5-privacy--security-by-design)
 
 </div>
 
@@ -174,43 +176,16 @@ flowchart LR
 
 ---
 
-## 7. Brand Identity & Design System
-
-The visual identity of PsyQuizz communicates **calmness, scientific rigor, trustworthiness, and constructive self-discovery**.
-
-### Color Palette Tokens
-
-| Token Name | HEX | Color Preview | Purpose |
-|---|---|---|---|
-| **Primary Purple** | `#674BBE` | `■` | Primary buttons, active states, brand anchors |
-| **Accent Teal** | `#14AC94` | `■` | Highlights, badges, growth icons, interactive accents |
-| **Charcoal** | `#242730` | `■` | High-contrast typography, wordmark, dark borders |
-| **Soft Lavender** | `#F4F0FC` | `■` | Card backgrounds, subtle divider panels, calm surfaces |
-| **Pure White** | `#FFFFFF` | `■` | Canvas background, input fields, clean spacing |
-
-### Typography
-- **Headings & Display:** `Nunito Sans` (SemiBold / Bold)
-- **Body & Controls:** `Inter` (Regular / Medium)
-
-### Brand Logo Concept
-The PsyQuizz logo concept represents mental awareness and organic growth:
-- **Purple Side-Profile Silhouette (`#674BBE`):** Symbolizes the human mind, contemplation, and inner exploration.
-- **Teal Sprout (`#14AC94`):** Symbolizes personal development, learning, and psychological resilience.
-- **Charcoal Wordmark (`#242730`):** Modern, balanced typography conveying scientific groundedness.
-
-*(Note: Per Phase 0 audit, official vector/raster assets are to be added to [`assets/`](assets/) once exported from design sources).*
-
----
-
-## 8. Project Structure
+## 7. Project Structure
 
 ```text
 psy_quizz/
 ├── .env.example              # Configuration template for environment variables
 ├── .gitignore                # Git exclusions (credentials, build output, dependencies)
 ├── README.md                 # Primary project documentation
-├── assets/                   # Brand assets and design specifications
-│   └── README.md             # Asset specification and visual token guide
+├── assets/                   # Brand assets and visual identity
+│   ├── README.md             # Asset specification and visual token guide
+│   └── logo.png              # Official PsyQuizz brand logo
 ├── docs/                     # Detailed architectural specifications
 │   ├── ARCHITECTURE.md       # Multi-tier architecture and ADRs
 │   ├── ROADMAP.md            # Phased implementation plan and decision gates
@@ -220,15 +195,15 @@ psy_quizz/
 
 ---
 
-## 9. Getting Started
+## 8. Getting Started
 
-### 9.1 Prerequisites
+### 8.1 Prerequisites
 - [Node.js](https://nodejs.org/) (v18.17+ or v20 LTS recommended)
 - `npm` (v9+) or `pnpm`
 - A [Google Cloud / Firebase](https://console.firebase.google.com/) project (for authentication and Firestore)
 - A [Google AI Studio](https://aistudio.google.com/) API key (for Gemini API)
 
-### 9.2 Configuration Setup
+### 8.2 Configuration Setup
 1. Clone the repository:
    ```bash
    git clone https://github.com/hoangcamanh/PsyQuizz.git
@@ -238,9 +213,9 @@ psy_quizz/
    ```bash
    cp .env.example .env.local
    ```
-3. Populate `.env.local` with your development credentials (see [Environment Variables](#10-environment-variables)).
+3. Populate `.env.local` with your development credentials (see [Environment Variables](#9-environment-variables)).
 
-### 9.3 Development Execution (Phase 1 onward)
+### 8.3 Development Execution (Phase 1 onward)
 ```bash
 # Install dependencies
 npm install
@@ -254,7 +229,7 @@ npm run test
 
 ---
 
-## 10. Environment Variables
+## 9. Environment Variables
 
 All environment variables must be declared in `.env.example` before use. **Never commit real credentials to Git.**
 
@@ -272,13 +247,14 @@ All environment variables must be declared in `.env.example` before use. **Never
 
 ---
 
-## 11. Development Roadmap
+## 10. Development Roadmap
 
 - [x] **Phase 0: Repository Audit & Architectural Planning** *(Current Milestone)*
   - [x] Baseline filesystem audit, clean `.gitignore`, environment template.
   - [x] Architecture specification (`docs/ARCHITECTURE.md`).
   - [x] Privacy & Security specification (`docs/SECURITY.md`).
   - [x] Development roadmap (`docs/ROADMAP.md`).
+  - [x] Official brand logo integration (`assets/logo.png`).
   - [x] Professional GitHub README.
   - [x] Initial documentation commit and remote synchronization.
 - [ ] **Phase 1: Frontend Foundation & Design System**
@@ -307,13 +283,13 @@ For detailed phase milestones and decision gates, see [`docs/ROADMAP.md`](docs/R
 
 ---
 
-## 12. Documentation & References
+## 11. Documentation & References
 
 ### Project Specifications
 - [System Architecture Specification](docs/ARCHITECTURE.md)
 - [Security & Privacy Specification](docs/SECURITY.md)
 - [Development Roadmap & Decision Gates](docs/ROADMAP.md)
-- [Brand Identity & Visual Tokens](assets/README.md)
+- [Brand Asset Specification](assets/README.md)
 
 ### Academic & Scientific Grounding
 - **International Personality Item Pool (IPIP):** [ipip.ori.org](https://ipip.ori.org/) — *Public-domain Big Five instrument scales and scoring guidelines.*
@@ -330,7 +306,7 @@ For detailed phase milestones and decision gates, see [`docs/ROADMAP.md`](docs/R
 
 ---
 
-## 13. Contributors & License
+## 12. Contributors & License
 
 - **Project Group:** Group 10 — University Entrepreneurship Project
 - **Repository Maintainer:** [@hoangcamanh](https://github.com/hoangcamanh)

@@ -177,3 +177,4 @@ In compliance with Law No. 91/2025/QH15 (effective 1 January 2026):
 2. **No Third-Party Ad Profiling:** Assessment answers and scores are strictly prohibited from being sold, leased, or transmitted to third-party ad networks or tracking scripts.
 3. **Data Erasure:** A visible "Xóa toàn bộ dữ liệu của tôi" (Delete all my data) control allows users to instantly remove all stored pseudonymous records from Firestore.
 4. **Data Minimization:** No demographic or identity attributes are requested unless strictly required for psychometric norming (and even then, only with opt-in anonymized consent).
+

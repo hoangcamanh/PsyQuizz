@@ -6,9 +6,9 @@ This directory houses the visual assets and brand identity files for **PsyQuizz*
 
 ## 1. Brand Visual Identity Concept
 
-The official brand concept comprises:
+The official brand identity comprises:
 1. **Purple Mind Silhouette**: A profile silhouette representing human cognition, introspection, and mental well-being (`#674BBE`).
-2. **Teal Sprout**: A delicate sprout emerging from the mind, symbolizing psychological growth, self-discovery, and resilient potential (`#14AC94`).
+2. **Teal Sprout**: A sprout emerging from the mind, symbolizing personal development, self-discovery, and psychological resilience (`#14AC94`).
 3. **Wordmark**: Clean, modern typography spelling **PsyQuizz** in deep charcoal (`#242730`).
 
 ---
@@ -32,12 +32,10 @@ The official brand concept comprises:
 
 ---
 
-## 4. Asset File Specifications
+## 4. Asset Files
 
-| Target Filename | Dimensions | Format | Usage | Status |
-|---|---|---|---|---|
-| `logo.png` | 512x512 / 1024x1024 | PNG (Transparent) | Raster fallback, social sharing previews (OpenGraph) | *Pending addition from design source* |
-| `logo.svg` | Scalable Vector | SVG | Primary header, crisp display across high-DPI screens | *Pending addition from design source* |
-| `favicon.ico` | 32x32, 16x16 | ICO | Browser tab icon | *Pending generation* |
-
-> **Audit Note**: As of repository audit (Phase 0), no pre-existing raster or vector logo files were found in the local repository or workspace. Once exported from the team's official design files (Figma/Illustrator), copy the verified assets into this folder.
+| Filename | Format | Description | Status |
+|---|---|---|---|
+| `logo.png` | PNG (1024x341, RGBA) | Official PsyQuizz brand logo with mark and wordmark | ✅ **Present & Verified** |
+| `logo.svg` | SVG | Scalable vector logo for high-DPI responsive headers | *Optional / Future addition* |
+| `favicon.ico` | ICO (32x32, 16x16) | Browser tab icon | *Pending generation* |

@@ -223,3 +223,4 @@ sequenceDiagram
 ### Module F — Optional Anonymous Access
 * Firebase Anonymous Authentication integration.
 * Allows users to bookmark their result or access it during the same session without disclosing email, phone number, or social media identity.
+

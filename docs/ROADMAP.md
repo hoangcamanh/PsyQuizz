@@ -180,3 +180,4 @@ flowchart LR
 | **Instrument Gate: DASS-21** | Written license or confirmed compliance with UNSW DASS policy regarding public web administration. | **HOLD / STOP:** Do not deploy publicly until licensing terms and automated interpretation constraints are formally resolved. |
 | **Safety Gate: Crisis Protocol** | Automated crisis deflection tested against red-team prompts. | **MANDATORY:** System must never attempt AI counseling during an acute crisis; must return hotline info immediately. |
 | **Data Gate: Law 91/2025/QH15** | Consent flows, zero ad targeting, and one-click data deletion verified. | **MANDATORY:** Launch blocked if user deletion or anonymous processing is compromised. |
+
