@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Brain, Gamepad2, Dna, FileText } from 'lucide-react';
 
 interface PurposeSectionProps {
   onLearnMore: () => void;
@@ -13,85 +13,100 @@ export default function PurposeSection({ onLearnMore }: PurposeSectionProps) {
     {
       title: 'Health & Wellness',
       description: 'Immersive technologies, neuroscience and artificial intelligence to improve quality of life.',
-      icon: Brain,
+      iconSrc: '/elements/health-wellness.png',
+      alt: 'Health & Wellness icon',
     },
     {
       title: 'Video game',
       description: 'Gamified experiences based on the study of user behavior, oriented towards research.',
-      icon: Gamepad2,
+      iconSrc: '/elements/video-game.png',
+      alt: 'Video game icon',
     },
     {
       title: 'Omic technologies',
       description: 'Omic approaches to optimize crops and processes, analyzing their impact on well-being.',
-      icon: Dna,
+      iconSrc: '/elements/omic-technologies.png',
+      alt: 'Omic technologies icon',
     },
     {
       title: 'Applied research',
       description: 'Rigorous science converted into useful knowledge and practical solutions with real impact.',
-      icon: FileText,
+      iconSrc: '/elements/applied-research.png',
+      alt: 'Applied research icon',
     },
   ];
 
   return (
-    // Outer section with vibrant pink-purple background (matching Image 4)
+    // Outer section with luminous, light pastel gradient matching Image 1:
+    // Left: Soft periwinkle/lavender (#c4beff), Middle: Bright white (#ffffff), Right: Soft pastel pink (#f8b5db)
     <section
       id="about"
-      className="py-24 px-4 sm:px-6 lg:px-8 relative z-20 bg-gradient-to-b from-[#080314] via-[#521748] to-[#12051f]"
+      className="py-24 sm:py-28 px-4 sm:px-6 lg:px-8 relative z-20 overflow-hidden"
+      style={{
+        background: 'linear-gradient(135deg, #c7c0ff 0%, #e2dfff 20%, #ffffff 50%, #fcd6ed 80%, #f6aada 100%)',
+      }}
     >
-      {/* Ambient soft glow spots */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-pink-500/20 blur-[150px] pointer-events-none" />
+      {/* Subtle ambient light glows matching Image 1 */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-300/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-300/35 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Giant Luminous White/Faded Card (Matching Image 4) */}
+      {/* Giant Luminous White / Faded Card (Matching Image 1 & 4) */}
       <motion.div
         initial={{ opacity: 0, y: 35 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.8 }}
-        className="max-w-6xl mx-auto rounded-[36px] sm:rounded-[48px] bg-white/95 sm:bg-white/90 backdrop-blur-2xl text-[#242730] p-8 sm:p-14 lg:p-20 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.4)] relative overflow-hidden"
+        className="max-w-6xl mx-auto rounded-[36px] sm:rounded-[44px] md:rounded-[52px] bg-white/95 sm:bg-white/90 backdrop-blur-2xl text-[#242730] p-8 sm:p-14 lg:p-20 shadow-[0_25px_70px_-15px_rgba(103,75,190,0.15)] border border-white/80 relative z-10"
       >
-        {/* Title & Subtitle (Clean & minimal, Image 4) */}
+        {/* Title & Subtitle */}
         <div className="text-center max-w-2xl mx-auto space-y-4 mb-16 sm:mb-20">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#674BBE]">
+          
+          {/* Ombre Title: Light violet to Dark purple (Left to Right) */}
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ba85f8] via-[#7532cc] to-[#3a0d78]">
             Technology with purpose
           </h2>
+
           <p className="text-gray-600 text-sm sm:text-base font-normal leading-relaxed">
             We develop innovative solutions that combine science, technology and social commitment to transform lives.
           </p>
         </div>
 
-        {/* 4 Minimal Elements Grid (Matching Image 4) */}
+        {/* 4 Elements Grid with Directly Embedded Images (Image 2, 3, 4, 5) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
-          {pillars.map((pillar, idx) => {
-            const Icon = pillar.icon;
-            return (
-              <motion.div
-                key={pillar.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="flex flex-col items-center text-center space-y-4 group"
-              >
-                {/* Minimalist Outline Icon */}
-                <div className="w-16 h-16 flex items-center justify-center text-[#242730] group-hover:text-[#674BBE] transition-colors duration-300">
-                  <Icon className="w-12 h-12 stroke-[1.6]" />
-                </div>
+          {pillars.map((pillar, idx) => (
+            <motion.div
+              key={pillar.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="flex flex-col items-center text-center space-y-4 group cursor-default"
+            >
+              {/* Direct Image Element (Matching Image 2, 3, 4, 5) */}
+              <div className="w-20 h-20 sm:w-22 sm:h-22 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                <Image
+                  src={pillar.iconSrc}
+                  alt={pillar.alt}
+                  width={84}
+                  height={84}
+                  className="object-contain w-auto h-auto max-w-[80px] max-h-[80px]"
+                />
+              </div>
 
-                {/* Title */}
-                <h3 className="text-lg font-bold text-[#242730] tracking-tight">
-                  {pillar.title}
-                </h3>
+              {/* Title */}
+              <h3 className="text-lg font-bold text-[#242730] tracking-tight group-hover:text-[#674BBE] transition-colors">
+                {pillar.title}
+              </h3>
 
-                {/* Minimalist Description */}
-                <p className="text-xs sm:text-sm text-gray-500 font-normal leading-relaxed">
-                  {pillar.description}
-                </p>
-              </motion.div>
-            );
-          })}
+              {/* Minimal Text Description */}
+              <p className="text-xs sm:text-sm text-gray-500 font-normal leading-relaxed max-w-[220px]">
+                {pillar.description}
+              </p>
+            </motion.div>
+          ))}
         </div>
 
-        {/* Centered Button (Matching Image 4: 'Learn more about us') */}
+        {/* Centered Button (Matching Image 1 & 4: 'Learn more about us') */}
         <div className="text-center pt-16 sm:pt-20">
           <button
             onClick={onLearnMore}
