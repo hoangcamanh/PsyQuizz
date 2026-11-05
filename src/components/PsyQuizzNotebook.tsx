@@ -14,9 +14,7 @@ import {
   RotateCcw, 
   ShieldCheck, 
   HelpCircle, 
-  Lightbulb, 
   Bookmark, 
-  ChevronRight, 
   User, 
   Bot 
 } from 'lucide-react';
@@ -37,6 +35,115 @@ interface PsyQuizzNotebookProps {
   resultsSummary?: string;
 }
 
+// Inline Markdown parser for clean bold, italics, and code formatting
+function renderInlineText(str: string): React.ReactNode[] {
+  const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
+  const parts = str.split(regex);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={i} className="font-bold text-white">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return (
+        <em key={i} className="italic text-purple-200">
+          {part.slice(1, -1)}
+        </em>
+      );
+    }
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return (
+        <code key={i} className="px-1.5 py-0.5 rounded bg-black/40 text-purple-300 font-mono text-xs">
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    return part;
+  });
+}
+
+// Comprehensive message formatter with proper paragraph & bullet list line breaking
+function FormattedMessageText({ content }: { content: string }) {
+  const normalized = content.replace(/\r\n/g, '\n');
+
+  // Fix clumping if multiple bullet items (* **Item:**) were returned on a single line
+  const fixedContent = normalized.replace(/([^\n])\s*\*\s+\*\*/g, '$1\n\n* **');
+
+  // Split into blocks by double newlines
+  const blocks = fixedContent.split(/\n\n+/);
+
+  return (
+    <div className="space-y-3 font-sans text-sm leading-relaxed">
+      {blocks.map((block, bIdx) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+
+        // Headings
+        if (trimmed.startsWith('### ')) {
+          return (
+            <h4 key={bIdx} className="font-bold text-base text-purple-200 pt-1">
+              {renderInlineText(trimmed.replace(/^###\s+/, ''))}
+            </h4>
+          );
+        }
+        if (trimmed.startsWith('## ')) {
+          return (
+            <h3 key={bIdx} className="font-bold text-lg text-white pt-1">
+              {renderInlineText(trimmed.replace(/^##\s+/, ''))}
+            </h3>
+          );
+        }
+
+        // Bullet lists
+        const lines = trimmed.split('\n');
+        const hasListItems = lines.some((l) => /^(\s*[-*•]|\s*\d+\.)\s+/.test(l.trim()));
+
+        if (hasListItems) {
+          return (
+            <div key={bIdx} className="space-y-2 pt-1">
+              {lines.map((line, lIdx) => {
+                const tLine = line.trim();
+                const isItem = /^(\s*[-*•]|\s*\d+\.)\s+/.test(tLine);
+                if (isItem) {
+                  const cleanText = tLine.replace(/^(\s*[-*•]|\s*\d+\.)\s+/, '');
+                  return (
+                    <div key={lIdx} className="flex items-start gap-2.5 pl-1">
+                      <span className="text-brand-teal mt-1 shrink-0 text-xs">•</span>
+                      <div className="flex-1 leading-relaxed">
+                        {renderInlineText(cleanText)}
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <p key={lIdx} className="leading-relaxed">
+                    {renderInlineText(tLine)}
+                  </p>
+                );
+              })}
+            </div>
+          );
+        }
+
+        // Regular paragraph with single newline support
+        return (
+          <p key={bIdx} className="leading-relaxed">
+            {lines.map((line, lIdx) => (
+              <React.Fragment key={lIdx}>
+                {lIdx > 0 && <br />}
+                {renderInlineText(line)}
+              </React.Fragment>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNotebookProps) {
   const [activeTab, setActiveTab] = useState<'chat' | 'digest' | 'journal'>('chat');
   
@@ -48,7 +155,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
     {
       id: 'welcome',
       sender: 'assistant',
-      text: `Hello! I am your **PsyQuizz Research Companion** for the **${assessment.name}**.\n\nI am connected with verified scientific literature (${kb.canonicalSource}). Ask me anything about your score profile, psychological mechanisms, career alignment, or evidence-based lifestyle adaptations.\n\n*Click one of the suggested starter prompts below or ask any question in the input box!*`,
+      text: `Hello! I am your **PsyQuizz Research Companion** for the **${assessment.name}**.\n\nI am connected with verified scientific literature (${kb.canonicalSource}). Ask me anything about your score profile, psychological mechanisms, career alignment, or evidence-based lifestyle adaptations.\n\nType your question in the input box below to begin!`,
       source: kb.canonicalSource,
       citation: kb.academicCitation,
       timestamp: 'Just now'
@@ -177,9 +284,9 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
   };
 
   return (
-    <div className="w-full h-[760px] sm:h-[820px] flex flex-col rounded-3xl bg-gradient-to-b from-[#130b29] to-[#0a0517] border border-purple-500/30 overflow-hidden shadow-2xl transition-all">
+    <div className="w-full h-[800px] sm:h-[860px] flex flex-col rounded-3xl bg-gradient-to-b from-[#130b29] to-[#0a0517] border border-purple-500/30 overflow-hidden shadow-2xl transition-all">
       {/* 1. PERMANENT TOP HEADER (Always fixed at the top of the box) */}
-      <div className="shrink-0 p-5 sm:p-7 border-b border-white/10 space-y-3 bg-[#130b29]/95 backdrop-blur-md z-10">
+      <div className="shrink-0 p-6 sm:p-8 border-b border-white/10 space-y-4 bg-[#130b29]/95 backdrop-blur-md z-10">
         {/* Eyebrow */}
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-purple-400">
@@ -220,43 +327,43 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
           )}
         </div>
 
-        {/* 3-Tab Bar (All 3 visible at once without scrolling) */}
-        <div className="pt-1">
-          <div className="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-black/40 border border-white/10 max-w-lg">
+        {/* 3-Tab Bar (Spacious, full text, never truncated) */}
+        <div className="pt-2">
+          <div className="inline-flex flex-wrap items-center gap-3 p-1.5 rounded-2xl bg-black/40 border border-white/10">
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2.5 py-2.5 px-5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                 activeTab === 'chat'
-                  ? 'bg-purple-900/50 text-white border border-purple-400/40 shadow-sm'
+                  ? 'bg-purple-900/60 text-white border border-purple-400/40 shadow-sm'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              <MessageSquare className="w-4 h-4 shrink-0" />
-              <span className="truncate">Ask Assistant</span>
+              <MessageSquare className="w-4 h-4 shrink-0 text-purple-300" />
+              <span>Ask Assistant</span>
             </button>
 
             <button
               onClick={() => setActiveTab('digest')}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2.5 py-2.5 px-5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                 activeTab === 'digest'
-                  ? 'bg-purple-900/50 text-white border border-purple-400/40 shadow-sm'
+                  ? 'bg-purple-900/60 text-white border border-purple-400/40 shadow-sm'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              <FileText className="w-4 h-4 shrink-0" />
-              <span className="truncate">Academic Digest</span>
+              <FileText className="w-4 h-4 shrink-0 text-brand-teal" />
+              <span>Academic Digest</span>
             </button>
 
             <button
               onClick={() => setActiveTab('journal')}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2.5 py-2.5 px-5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                 activeTab === 'journal'
-                  ? 'bg-purple-900/50 text-white border border-purple-400/40 shadow-sm'
+                  ? 'bg-purple-900/60 text-white border border-purple-400/40 shadow-sm'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              <Edit3 className="w-4 h-4 shrink-0" />
-              <span className="truncate">My Journal</span>
+              <Edit3 className="w-4 h-4 shrink-0 text-pink-400" />
+              <span>My Journal</span>
             </button>
           </div>
         </div>
@@ -270,9 +377,9 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
             {/* Scrollable Conversation Stream (Scrolls ONLY inside this div) */}
             <div 
               ref={chatScrollContainerRef}
-              className="flex-1 min-h-0 p-5 sm:p-7 space-y-5 overflow-y-auto"
+              className="flex-1 min-h-0 p-6 sm:p-9 space-y-6 overflow-y-auto"
             >
-              {messages.map((msg, index) => (
+              {messages.map((msg) => (
                 <div key={msg.id} className="space-y-4">
                   <div className={`flex gap-3 sm:gap-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {msg.sender === 'assistant' && (
@@ -289,29 +396,15 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                             : 'bg-[#180e33] border border-purple-500/30 text-gray-100 rounded-tl-none'
                         }`}
                       >
-                        <div className="space-y-2.5 font-sans break-words [overflow-wrap:anywhere]">
-                          {msg.text.split('\n\n').map((paragraph, idx) => {
-                            if (paragraph.startsWith('### ')) {
-                              return (
-                                <h4 key={idx} className="font-bold text-base text-purple-200 pt-1">
-                                  {paragraph.replace('### ', '')}
-                                </h4>
-                              );
-                            }
-                            return (
-                              <p key={idx} className="leading-relaxed">
-                                {paragraph}
-                              </p>
-                            );
-                          })}
-                        </div>
+                        {/* Properly formatted Markdown with line breaks & bullet lists */}
+                        <FormattedMessageText content={msg.text} />
 
-                        {/* Citation footer */}
+                        {/* Italic and subtle/muted citation footer */}
                         {msg.citation && (
-                          <div className="pt-3 mt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-purple-300/80 min-w-0">
+                          <div className="pt-2.5 mt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
                             <div className="flex items-start gap-1.5 min-w-0 flex-1">
-                              <ShieldCheck className="w-4 h-4 text-brand-teal shrink-0 mt-0.5" />
-                              <span className="font-mono text-[11px] leading-snug break-words [overflow-wrap:anywhere]">
+                              <ShieldCheck className="w-3.5 h-3.5 text-gray-500 shrink-0 mt-0.5" />
+                              <span className="font-mono text-[11px] leading-snug break-words [overflow-wrap:anywhere] italic text-gray-400">
                                 Source: {msg.citation}
                               </span>
                             </div>
@@ -347,29 +440,6 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                       </div>
                     )}
                   </div>
-
-                  {/* Starter Prompts embedded directly under Welcome message */}
-                  {index === 0 && assessment.notebookLmPrompts && assessment.notebookLmPrompts.length > 0 && (
-                    <div className="pl-11 pr-2 pt-1 pb-2 space-y-2.5">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-300 uppercase tracking-wider">
-                        <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Suggested questions to explore:</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {assessment.notebookLmPrompts.map((prompt, i) => (
-                          <button
-                            key={i}
-                            onClick={() => handleSendMessage(prompt)}
-                            disabled={isLoading}
-                            className="p-3 rounded-xl bg-[#180e33]/90 hover:bg-purple-950/80 border border-purple-500/20 hover:border-purple-400/50 text-xs text-left text-gray-300 hover:text-white transition-all flex items-center justify-between gap-2.5 group disabled:opacity-50 shadow-sm"
-                          >
-                            <span className="line-clamp-2 leading-relaxed">&ldquo;{prompt}&rdquo;</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-purple-300 shrink-0 transition-transform group-hover:translate-x-0.5" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
 
@@ -385,25 +455,6 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                 </div>
               )}
             </div>
-
-            {/* Quick Prompt Pills bar right above the input (Convenient, compact, zero jump) */}
-            {assessment.notebookLmPrompts && assessment.notebookLmPrompts.length > 0 && (
-              <div className="shrink-0 px-5 sm:px-7 py-2 bg-black/20 border-t border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-none">
-                <span className="text-[11px] font-bold text-purple-400 shrink-0 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-400" /> Prompts:
-                </span>
-                {assessment.notebookLmPrompts.map((prompt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSendMessage(prompt)}
-                    disabled={isLoading}
-                    className="shrink-0 text-[11px] px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 text-gray-300 hover:text-white transition-all whitespace-nowrap disabled:opacity-40"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            )}
 
             {/* PERMANENT BOTTOM INPUT BAR (Always visible and pinned at the bottom) */}
             <div className="shrink-0 p-4 sm:p-5 bg-[#0f0822] border-t border-purple-500/20">

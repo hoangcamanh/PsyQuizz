@@ -192,10 +192,10 @@ export const BFI44_ASSESSMENT: AssessmentDefinition = {
       scores,
       actionGuide: {
         levelTitle: 'In-Depth Research with NotebookLM',
-        levelBadge: '🧠 Big Five Scientific Insights',
+        levelBadge: '',
         levelColor: '#8B5CF6',
         recommendations: [
-          'Click "Open NotebookLM" below to delve deeper into your Big Five dimensions using curated academic literature.',
+          'Click "Google NotebookLM" below to delve deeper into your Big Five dimensions using curated academic literature.',
           'Ask the AI research assistant tailored questions on optimal career environments, interpersonal synergy, and personal growth.'
         ]
       }

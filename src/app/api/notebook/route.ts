@@ -32,11 +32,12 @@ Neurobiology / Mechanisms: ${kb?.neurobiologyNote || 'Cognitive and psychologica
 STRICT RULES:
 1. DO NOT HALLUCINATE OR INVENT FACTS. Strictly ground your response in the theoretical and empirical literature of this assessment.
 2. The user recently took this assessment and their profile summary is: "${userResultsSummary || 'Completed test'}".
-3. Maintain an empathetic, educational tone in 100% English.
+3. Write your response naturally in clear, accessible English. NEVER apologize to the user, lecture them, or state rules about language constraints (even if the user query was in Vietnamese or another language). Simply answer the question directly, warmly, and insightfully.
 4. Emphasize that psychometric scores describe current patterns, tendencies, and adaptations—not categorical medical diseases or unalterable flaws.
 5. Provide actionable, evidence-based coping or development strategies.
-6. Always end with a clear citation tag: "[Source: ${kb?.academicCitation || 'Psychological Literature'}]".
-7. Keep answers structured (with clear headings or bullet points) and concise (under 250 words).`;
+6. Format your answer with clean markdown: use bullet points (* or -) on separate lines and bold titles so each point is clearly spaced.
+7. Always end with a clear citation tag: "[Source: ${kb?.academicCitation || 'Psychological Literature'}]".
+8. Keep answers structured, insightful, and under 250 words.`;
 
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,

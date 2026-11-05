@@ -192,8 +192,10 @@ export default function AssessmentRunnerPage() {
         />
       </div>
 
-      {/* Dedicated Questionnaire Runner Container with expansive max-w-4xl width */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10 flex flex-col justify-center">
+      {/* Dedicated Questionnaire Runner Container with responsive width: max-w-4xl during quiz, 95% viewport width on results */}
+      <main className={`flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10 flex flex-col justify-center transition-all duration-300 ${
+        isCompleted ? 'max-w-[95vw] min-w-[320px]' : 'max-w-4xl'
+      }`}>
         {!isCompleted ? (
           /* ================= QUESTIONNAIRE CARD ================= */
           <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col">
@@ -352,49 +354,41 @@ export default function AssessmentRunnerPage() {
 
           </div>
         ) : (
-          /* ================= RESULTS DASHBOARD (100% ENGLISH) ================= */
+          /* ================= RESULTS DASHBOARD (100% ENGLISH, 95% PANORAMIC VIEW) ================= */
           results && (
-            <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col space-y-8 p-6 sm:p-10 animate-in fade-in duration-300">
+            <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col space-y-10 p-8 sm:p-12 lg:p-14 animate-in fade-in duration-300">
               
-              {/* Header: Stacked layout so description doesn't wrap unnecessarily and badge has its own line */}
+              {/* Header: Stacked layout with generous spacing */}
               <div className="border-b border-white/10 pb-6 space-y-3">
                 <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
                   Assessment Report: {assessment.code}
                 </span>
 
                 <div className="space-y-1.5">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
                     {results.title}
                   </h1>
-                  <p className="text-sm text-gray-300 leading-relaxed w-full">
+                  <p className="text-sm sm:text-base text-gray-300 leading-relaxed w-full">
                     {results.summary}
                   </p>
                 </div>
-
-                {results.actionGuide?.levelBadge && (
-                  <div className="pt-1.5">
-                    <span className="inline-flex items-center px-4 py-2 rounded-xl bg-purple-950/60 border border-purple-500/30 text-xs sm:text-sm font-semibold text-white shadow-sm">
-                      {results.actionGuide.levelBadge}
-                    </span>
-                  </div>
-                )}
               </div>
 
-              {/* Dimension Score Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Dimension Score Cards: Generous 3-column grid (Chia 3-2 for 5 KPI cards without squeezing) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.values(results.scores).map((dim) => {
                   const percent = Math.min(100, Math.round((dim.score / dim.maxScore) * 100));
                   return (
                     <div
                       key={dim.id}
-                      className="p-5 rounded-2xl bg-[#140b26]/80 border border-white/10 space-y-3 flex flex-col justify-between"
+                      className="p-6 sm:p-7 rounded-2xl bg-[#140b26]/80 border border-white/10 space-y-4 flex flex-col justify-between hover:border-purple-500/30 transition-all shadow-sm"
                     >
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h3 className="text-xs font-bold text-white">{dim.name}</h3>
+                      <div className="space-y-2.5">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="text-sm sm:text-base font-bold text-white leading-snug">{dim.name}</h3>
                           {dim.levelLabel && (
                             <span 
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
+                              className="px-2.5 py-0.5 rounded-full text-[11px] font-bold border shrink-0"
                               style={{
                                 color: dim.levelColor || '#a855f7',
                                 borderColor: `${dim.levelColor || '#a855f7'}40`,
@@ -407,17 +401,17 @@ export default function AssessmentRunnerPage() {
                         </div>
 
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-extrabold text-white">{dim.score}</span>
-                          <span className="text-[11px] text-gray-400">/ {dim.maxScore}</span>
+                          <span className="text-2xl sm:text-3xl font-extrabold text-white">{dim.score}</span>
+                          <span className="text-xs text-gray-400">/ {dim.maxScore}</span>
                           {dim.averageScore !== undefined && (
-                            <span className="text-[11px] text-brand-teal ml-auto font-mono">
+                            <span className="text-xs text-brand-teal ml-auto font-mono">
                               Avg: {dim.averageScore}/5.0
                             </span>
                           )}
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{
@@ -428,7 +422,7 @@ export default function AssessmentRunnerPage() {
                         </div>
                       </div>
 
-                      <p className="text-xs text-gray-300 leading-relaxed pt-2 border-t border-white/5">
+                      <p className="text-xs sm:text-sm text-gray-300 leading-relaxed pt-3 border-t border-white/5">
                         {dim.description}
                       </p>
                     </div>
@@ -436,28 +430,28 @@ export default function AssessmentRunnerPage() {
                 })}
               </div>
 
-              {/* PsyQuizz In-App Research Notebook & Academic Companion */}
-              <PsyQuizzNotebook 
-                assessment={assessment} 
-                resultsSummary={`${results.title}: ${results.summary}`} 
-              />
-
               {/* Action Guidance Card */}
               {results.actionGuide && (
-                <div className="p-6 rounded-2xl bg-[#140b26]/90 border border-purple-900/40 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-pink-400" />
-                    <h3 className="text-sm font-bold text-white">
+                <div className="p-7 sm:p-8 rounded-3xl bg-[#140b26]/90 border border-purple-900/40 space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <Heart className="w-5 h-5 text-pink-400 shrink-0" />
+                    <h3 className="text-base font-bold text-white tracking-wide">
                       {results.actionGuide.levelTitle}
                     </h3>
                   </div>
-                  <ul className="space-y-2 text-xs sm:text-sm text-gray-300 list-disc list-inside leading-relaxed">
+                  <ul className="space-y-2 text-xs sm:text-sm text-gray-300 list-disc list-inside leading-relaxed pt-1">
                     {results.actionGuide.recommendations.map((rec, i) => (
                       <li key={i}>{rec}</li>
                     ))}
                   </ul>
                 </div>
               )}
+
+              {/* PsyQuizz In-App Research Notebook & Academic Companion */}
+              <PsyQuizzNotebook 
+                assessment={assessment} 
+                resultsSummary={`${results.title}: ${results.summary}`} 
+              />
 
               {/* Bottom Buttons */}
               <div className="flex justify-between items-center pt-2">
