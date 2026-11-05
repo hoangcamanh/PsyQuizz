@@ -31,6 +31,33 @@ export default function AssessmentRunnerPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
+  const [showExitModal, setShowExitModal] = useState(false);
+
+  // Warn before browser unload/refresh if test is in progress
+  React.useEffect(() => {
+    if (isCompleted || Object.keys(answers).length === 0) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isCompleted, answers]);
+
+  const handleAttemptExit = () => {
+    if (!isCompleted && Object.keys(answers).length > 0) {
+      setShowExitModal(true);
+    } else {
+      router.push('/');
+    }
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitModal(false);
+    router.push('/');
+  };
 
   if (!assessment) {
     return (
@@ -141,7 +168,12 @@ export default function AssessmentRunnerPage() {
 
       {/* Navigation Header */}
       <div className="relative z-20">
-        <Header onOpenAuth={() => {}} onOpenTest={() => router.push('/')} />
+        <Header 
+          onOpenAuth={() => {}} 
+          onOpenTest={handleAttemptExit} 
+          onLogoClick={handleAttemptExit}
+          logoHref="/"
+        />
       </div>
 
       {/* Dedicated Questionnaire Runner Container with expansive max-w-4xl width */}
@@ -153,12 +185,13 @@ export default function AssessmentRunnerPage() {
             {/* Header */}
             <div className="px-6 sm:px-10 py-5 border-b border-white/10 bg-[#090512]/90 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Link
-                  href="/"
-                  className="text-gray-400 hover:text-white text-xs flex items-center gap-1.5 transition-colors"
+                <button
+                  type="button"
+                  onClick={handleAttemptExit}
+                  className="text-gray-400 hover:text-white text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
-                </Link>
+                </button>
                 <span className="text-white/20">|</span>
                 <div>
                   <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
@@ -486,6 +519,47 @@ export default function AssessmentRunnerPage() {
       <div className="relative z-20">
         <Footer onOpenTest={() => router.push('/')} />
       </div>
+
+      {/* Exit Confirmation Dialog when user tries to leave mid-test */}
+      {showExitModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div className="w-full max-w-md rounded-2xl bg-[#0e071e] border border-white/20 p-6 sm:p-7 shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-bold text-white">
+                Leave Assessment?
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                You haven&apos;t finished your test yet. If you leave now, your current answers will be lost and won&apos;t be saved.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowExitModal(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-bold transition-all shadow"
+              >
+                Continue Test
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmExit}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 text-xs font-semibold transition-all"
+              >
+                Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -10,13 +10,6 @@ export const DASS21_ASSESSMENT: AssessmentDefinition = {
   itemCount: 21,
   license: 'Public Domain (Lovibond & Lovibond, 1995)',
   disclaimer: 'DASS-21 is an educational screening instrument designed for self-reflection and personal awareness. It is not a clinical diagnostic tool.',
-  notebookLmUrl: 'https://notebook.google.com/notebook/a3405fea-e381-4b2d-b50d-b30cff62b7bb',
-  notebookLmPrompts: [
-    'What evidence-based breathing techniques effectively soothe acute nervous tension?',
-    'How can I identify early indicators of burnout and restore emotional energy?',
-    'What practical boundaries help protect mental health and peace of mind at work or school?',
-    'What gentle mindfulness practices help quiet repetitive worries and racing thoughts?'
-  ],
   options: [
     { value: 0, label: '0', description: 'Did not apply to me at all' },
     { value: 1, label: '1', description: 'Applied to me to some degree, or some of the time' },

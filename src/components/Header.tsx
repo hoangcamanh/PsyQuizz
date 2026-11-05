@@ -8,9 +8,11 @@ import { Menu, X } from 'lucide-react';
 interface HeaderProps {
   onOpenAuth?: (mode: 'login' | 'signup') => void;
   onOpenTest: () => void;
+  onLogoClick?: () => void;
+  logoHref?: string;
 }
 
-export default function Header({ onOpenTest }: HeaderProps) {
+export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -23,6 +25,13 @@ export default function Header({ onOpenTest }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (onLogoClick) {
+      e.preventDefault();
+      onLogoClick();
+    }
+  };
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
@@ -34,7 +43,11 @@ export default function Header({ onOpenTest }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Left: Brand Logo */}
-        <Link href="#top" className="flex items-center gap-2 group transition-transform duration-300 hover:scale-[1.02]">
+        <Link 
+          href={logoHref} 
+          onClick={handleLogoClick}
+          className="flex items-center gap-2 group transition-transform duration-300 hover:scale-[1.02]"
+        >
           <div className="relative h-11 w-44 sm:w-48">
             <Image
               src="/logo-white.png"
