@@ -15,11 +15,12 @@ import {
   Sparkles, 
   ExternalLink,
   BookOpen, 
-  Copy,
-  Check,
-  Heart
+  Copy, 
+  Check, 
+  Heart 
 } from 'lucide-react';
 import { getAssessmentById } from '@/data/assessments';
+import { PsyQuizzNotebook } from '@/components/PsyQuizzNotebook';
 
 export default function AssessmentRunnerPage() {
   const params = useParams();
@@ -98,27 +99,42 @@ export default function AssessmentRunnerPage() {
 
     const isAllComplete = Object.keys(updatedAnswers).length >= totalQuestions;
 
-    if (currentIndex >= totalQuestions - 1) {
-      if (isAllComplete) {
-        setTimeout(() => {
-          setIsCompleted(true);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 240);
-      } else {
-        const firstUnanswered = questions.findIndex(q => updatedAnswers[q.id] === undefined);
-        if (firstUnanswered !== -1) {
-          setTimeout(() => setCurrentIndex(firstUnanswered), 180);
-        } else {
-          setTimeout(() => {
-            setIsCompleted(true);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }, 240);
+    if (isAllComplete) {
+      setTimeout(() => {
+        setIsCompleted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 240);
+      return;
+    }
+
+    // Find the NEXT unanswered question forward from currentIndex + 1
+    let nextUnansweredIndex = -1;
+    for (let i = currentIndex + 1; i < totalQuestions; i++) {
+      if (updatedAnswers[questions[i].id] === undefined) {
+        nextUnansweredIndex = i;
+        break;
+      }
+    }
+
+    // If none found ahead, wrap around from 0 up to currentIndex - 1
+    if (nextUnansweredIndex === -1) {
+      for (let i = 0; i < currentIndex; i++) {
+        if (updatedAnswers[questions[i].id] === undefined) {
+          nextUnansweredIndex = i;
+          break;
         }
       }
+    }
+
+    if (nextUnansweredIndex !== -1) {
+      setTimeout(() => {
+        setCurrentIndex(nextUnansweredIndex);
+      }, 180);
     } else {
       setTimeout(() => {
-        setCurrentIndex(prev => Math.min(totalQuestions - 1, prev + 1));
-      }, 180);
+        setIsCompleted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 240);
     }
   };
 
@@ -340,23 +356,26 @@ export default function AssessmentRunnerPage() {
           results && (
             <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col space-y-8 p-6 sm:p-10 animate-in fade-in duration-300">
               
-              {/* Header */}
-              <div className="border-b border-white/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
-                    Assessment Report: {assessment.code}
-                  </span>
+              {/* Header: Stacked layout so description doesn't wrap unnecessarily and badge has its own line */}
+              <div className="border-b border-white/10 pb-6 space-y-3">
+                <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
+                  Assessment Report: {assessment.code}
+                </span>
+
+                <div className="space-y-1.5">
                   <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                     {results.title}
                   </h1>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-2xl leading-relaxed">
+                  <p className="text-sm text-gray-300 leading-relaxed w-full">
                     {results.summary}
                   </p>
                 </div>
 
                 {results.actionGuide?.levelBadge && (
-                  <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white self-start sm:self-auto shadow">
-                    {results.actionGuide.levelBadge}
+                  <div className="pt-1.5">
+                    <span className="inline-flex items-center px-4 py-2 rounded-xl bg-purple-950/60 border border-purple-500/30 text-xs sm:text-sm font-semibold text-white shadow-sm">
+                      {results.actionGuide.levelBadge}
+                    </span>
                   </div>
                 )}
               </div>
@@ -417,63 +436,11 @@ export default function AssessmentRunnerPage() {
                 })}
               </div>
 
-              {/* NotebookLM Section (Available for both DASS-21 and BFI-44!) */}
-              {assessment.notebookLmUrl && (
-                <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-950/60 to-brand-purple/20 border border-purple-500/40 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-xl bg-purple-900/50 text-brand-purple-light border border-purple-700/50">
-                        <BookOpen className="w-5 h-5 text-teal-300" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                          NotebookLM Research Companion (Google)
-                        </h3>
-                        <p className="text-xs text-gray-300">
-                          Ask in-depth questions grounded in curated scientific literature about {assessment.code}.
-                        </p>
-                      </div>
-                    </div>
-
-                    <a
-                      href={assessment.notebookLmUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-bold transition-all whitespace-nowrap shadow"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                      <span>Open NotebookLM</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-
-                  {assessment.notebookLmPrompts && (
-                    <div className="space-y-2 pt-2 border-t border-white/10">
-                      <span className="text-[10px] font-semibold text-purple-300 uppercase tracking-wider block">
-                        Suggested questions to explore (Click to copy):
-                      </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {assessment.notebookLmPrompts.map((prompt, i) => (
-                          <div
-                            key={i}
-                            onClick={() => handleCopyPrompt(prompt)}
-                            className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-purple-400 cursor-pointer transition-all flex items-center justify-between gap-2 text-xs text-gray-200 hover:text-white"
-                          >
-                            <span className="leading-relaxed">&ldquo;{prompt}&rdquo;</span>
-                            <span className="shrink-0 text-gray-400">
-                              {copiedPrompt === prompt ? (
-                                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                              ) : (
-                                <Copy className="w-3.5 h-3.5" />
-                              )}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* PsyQuizz In-App Research Notebook & Academic Companion */}
+              <PsyQuizzNotebook 
+                assessment={assessment} 
+                resultsSummary={`${results.title}: ${results.summary}`} 
+              />
 
               {/* Action Guidance Card */}
               {results.actionGuide && (

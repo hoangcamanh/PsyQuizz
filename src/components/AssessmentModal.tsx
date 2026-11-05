@@ -109,31 +109,40 @@ export default function AssessmentModal({
       const total = definition.questions.length;
       const isComplete = Object.keys(updatedAnswers).length >= total;
 
-      // If answering the final question or all questions are now complete
-      if (currentIndex >= total - 1) {
-        if (isComplete) {
-          // All done! Smoothly transition to results without freezing
-          setTimeout(() => {
-            setViewMode('result');
-          }, 240);
-        } else {
-          // If some questions were skipped, jump to first unanswered question
-          const firstUnanswered = definition.questions.findIndex(q => updatedAnswers[q.id] === undefined);
-          if (firstUnanswered !== -1) {
-            setTimeout(() => {
-              setCurrentIndex(firstUnanswered);
-            }, 200);
-          } else {
-            setTimeout(() => {
-              setViewMode('result');
-            }, 240);
+      if (isComplete) {
+        setTimeout(() => {
+          setViewMode('result');
+        }, 240);
+        return;
+      }
+
+      // Find NEXT unanswered question forward from currentIndex + 1
+      let nextUnansweredIndex = -1;
+      for (let i = currentIndex + 1; i < total; i++) {
+        if (updatedAnswers[definition.questions[i].id] === undefined) {
+          nextUnansweredIndex = i;
+          break;
+        }
+      }
+
+      // If none found ahead, wrap around from 0 to currentIndex - 1
+      if (nextUnansweredIndex === -1) {
+        for (let i = 0; i < currentIndex; i++) {
+          if (updatedAnswers[definition.questions[i].id] === undefined) {
+            nextUnansweredIndex = i;
+            break;
           }
         }
-      } else {
-        // Auto-advance smoothly to next question
+      }
+
+      if (nextUnansweredIndex !== -1) {
         setTimeout(() => {
-          setCurrentIndex(prev => Math.min(total - 1, prev + 1));
+          setCurrentIndex(nextUnansweredIndex);
         }, 180);
+      } else {
+        setTimeout(() => {
+          setViewMode('result');
+        }, 240);
       }
     }
   };
