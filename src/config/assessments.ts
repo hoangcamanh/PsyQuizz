@@ -23,7 +23,7 @@ export const ASSESSMENTS: AssessmentData[] = [
     subtitle: 'Depression, Anxiety & Stress',
     description: 'Measure depression, anxiety, and stress levels.',
     ctaText: 'Take the Test',
-    destinationUrl: '/assessment/dass-21',
+    destinationUrl: process.env.NEXT_PUBLIC_DASS21_URL || 'https://tally.so/r/WOXWqk',
     isExternal: false,
     destinationType: 'internal',
     modalContent: {
@@ -50,7 +50,7 @@ export const ASSESSMENTS: AssessmentData[] = [
     subtitle: 'Personality Traits',
     description: 'Discover your profile across five key personality traits.',
     ctaText: 'Take the Test',
-    destinationUrl: '/assessment/bfi-44',
+    destinationUrl: process.env.NEXT_PUBLIC_BFI44_URL || 'https://tally.so/r/A7NVEk',
     isExternal: false,
     destinationType: 'internal',
     modalContent: {
