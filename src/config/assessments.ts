@@ -23,9 +23,9 @@ export const ASSESSMENTS: AssessmentData[] = [
     subtitle: 'Depression, Anxiety & Stress',
     description: 'Measure depression, anxiety, and stress levels.',
     ctaText: 'Take the Test',
-    destinationUrl: process.env.NEXT_PUBLIC_DASS21_URL,
-    isExternal: true,
-    destinationType: 'tally',
+    destinationUrl: '/assessment/dass-21',
+    isExternal: false,
+    destinationType: 'internal',
     modalContent: {
       title: 'Before You Begin: DASS-21',
       about:
@@ -50,7 +50,7 @@ export const ASSESSMENTS: AssessmentData[] = [
     subtitle: 'Personality Traits',
     description: 'Discover your profile across five key personality traits.',
     ctaText: 'Take the Test',
-    destinationUrl: process.env.NEXT_PUBLIC_BFI44_URL,
+    destinationUrl: '/assessment/bfi-44',
     isExternal: false,
     destinationType: 'internal',
     modalContent: {
@@ -77,7 +77,9 @@ export const ASSESSMENTS: AssessmentData[] = [
     subtitle: 'Personality & Temperament',
     description: 'Explore core temperament and personality dimensions.',
     ctaText: 'Take the Test',
-    destinationUrl: process.env.NEXT_PUBLIC_EYSENCK_URL,
+    destinationUrl:
+      process.env.NEXT_PUBLIC_EYSENCK_URL ||
+      'https://psy-edu.net/test/eysencks-personality-inventory-epi-extroversionintroversion/',
     isExternal: true,
     destinationType: 'external',
     modalContent: {
@@ -104,7 +106,9 @@ export const ASSESSMENTS: AssessmentData[] = [
     subtitle: 'Attention & Focus',
     description: 'Screen attention, focus, and concentration patterns.',
     ctaText: 'Take the Test',
-    destinationUrl: process.env.NEXT_PUBLIC_ADHD_URL,
+    destinationUrl:
+      process.env.NEXT_PUBLIC_ADHD_URL ||
+      'https://www.careadhd.co.uk/free-online-adhd-screening-test',
     isExternal: true,
     destinationType: 'external',
     modalContent: {

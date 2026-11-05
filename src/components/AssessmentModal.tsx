@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AssessmentData } from '@/config/assessments';
 
 interface AssessmentModalProps {
@@ -14,6 +15,16 @@ export default function AssessmentModal({
   assessment,
   onClose,
 }: AssessmentModalProps) {
+  const router = useRouter();
+  const [isAcknowledged, setIsAcknowledged] = useState(false);
+
+  // Reset acknowledgment checkbox whenever modal opens/closes or assessment changes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsAcknowledged(false);
+    }
+  }, [isOpen, assessment]);
+
   // Lock body scroll and listen for Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -39,10 +50,21 @@ export default function AssessmentModal({
   const content = assessment.modalContent;
 
   const handleContinue = () => {
-    if (assessment.destinationUrl) {
-      window.open(assessment.destinationUrl, '_blank', 'noopener,noreferrer');
-    }
+    if (!isAcknowledged) return;
+
     onClose();
+
+    // DASS-21 and BFI-44 run natively on PsyQuizz
+    if (assessment.id === 'dass-21' || assessment.id === 'bfi-44') {
+      router.push(`/assessment/${assessment.id}`);
+      return;
+    }
+
+    // External assessments open in new tab
+    const targetUrl = assessment.destinationUrl;
+    if (targetUrl) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -128,6 +150,22 @@ export default function AssessmentModal({
 
         </div>
 
+        {/* Mandatory Acknowledgment Checkbox */}
+        <div className="px-6 sm:px-8 py-3.5 bg-[#090512] border-t border-white/10">
+          <label className="flex items-start gap-3 cursor-pointer group select-none">
+            <input
+              type="checkbox"
+              id="acknowledge-checkbox"
+              checked={isAcknowledged}
+              onChange={(e) => setIsAcknowledged(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-white/30 bg-white/10 text-purple-600 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer accent-purple-600"
+            />
+            <span className="text-xs sm:text-sm text-gray-300 group-hover:text-white transition-colors leading-relaxed">
+              I understand that this assessment cannot determine whether I have a mental health disorder or predict my future mental health.
+            </span>
+          </label>
+        </div>
+
         {/* Dignified Action Buttons: Back | I Understand */}
         <div className="px-6 sm:px-8 py-4 border-t border-white/10 bg-[#090512] flex items-center justify-end gap-3">
           <button
@@ -140,7 +178,12 @@ export default function AssessmentModal({
           <button
             type="button"
             onClick={handleContinue}
-            className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-sm font-semibold transition-colors focus:outline-none"
+            disabled={!isAcknowledged}
+            className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all focus:outline-none ${
+              isAcknowledged
+                ? 'bg-white text-black hover:bg-gray-200 cursor-pointer shadow-md active:scale-95'
+                : 'bg-white/15 text-gray-500 cursor-not-allowed pointer-events-none'
+            }`}
           >
             I Understand
           </button>
