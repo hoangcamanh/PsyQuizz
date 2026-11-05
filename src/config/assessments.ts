@@ -64,7 +64,7 @@ export const ASSESSMENTS: AssessmentData[] = [
       ],
       instructions: [
         'Please respond based on how you generally see yourself in daily life, rather than how you wish or aspire to be.',
-        'Answer each statement honestly based on your typical habits and natural reactions.',
+        'Answer each statement honestly based on your typical habits and natural reactions (from 1: Disagree strongly to 5: Agree strongly).',
         'There are no right or wrong answers. Proceed through the statements at a steady pace.',
       ],
       notice:

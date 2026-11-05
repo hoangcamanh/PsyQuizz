@@ -3,72 +3,72 @@ import { AssessmentDefinition, DimensionResult } from './types';
 export const BFI44_ASSESSMENT: AssessmentDefinition = {
   id: 'bfi-44',
   code: 'BFI-44',
-  name: 'Mô Hình Nhân Cách BIG FIVE (BFI-44)',
+  name: 'Big Five Inventory (BFI-44)',
   subtitle: 'The Big Five Inventory (44 items)',
-  description: 'Thang đo chuẩn hóa quốc tế gồm 44 câu hỏi nhằm đánh giá 5 chiều kích nhân cách cốt lõi: Hướng ngoại, Dễ chịu, Tận tâm, Nhiễu tâm và Cởi mở.',
-  duration: '5 - 7 phút',
+  description: 'A globally validated 44-item psychometric instrument evaluating personality across five core dimensions: Extraversion, Agreeableness, Conscientiousness, Neuroticism, and Openness.',
+  duration: '5 - 7 mins',
   itemCount: 44,
   license: 'Public Domain (John, Donahue, & Kentle, 1991)',
-  disclaimer: 'Bài trắc nghiệm này đo lường các đặc điểm tính cách tương đối ổn định của bạn, có thể phát triển và điều chỉnh theo thời gian. Đây không phải là bài kiểm tra bệnh lý tâm thần.',
+  disclaimer: 'This inventory describes general personality tendencies and traits. It is an educational tool for self-reflection and not a clinical diagnosis.',
   notebookLmUrl: 'https://notebook.google.com/notebook/3c90b86a-da2a-4861-b906-af66b42f05dd',
   notebookLmPrompts: [
-    'Với hồ sơ tính cách Big Five này, tôi phù hợp với những môi trường làm việc và nghề nghiệp nào?',
-    'Điểm mạnh và điểm mù (điểm yếu) của người có tính Dễ chịu (Agreeableness) cao là gì?',
-    'Làm sao để tôi quản lý cảm xúc tốt hơn khi có chỉ số Nhiễu tâm (Neuroticism) ở mức cao?',
-    'Làm thế nào để người Hướng nội (Extraversion thấp) phát huy tối đa thế mạnh lãnh đạo?'
+    'Based on this Big Five profile, which work environments and career paths allow me to excel?',
+    'What are the core strengths and potential blind spots of high Agreeableness?',
+    'How can I channel emotional sensitivity (Neuroticism) into empathy and creative focus?',
+    'How can an introverted personality leverage quiet strengths in leadership and team collaboration?'
   ],
   options: [
-    { value: 1, label: '1', description: 'Rất không đồng ý' },
-    { value: 2, label: '2', description: 'Không đồng ý một chút' },
-    { value: 3, label: '3', description: 'Trung lập' },
-    { value: 4, label: '4', description: 'Đồng ý một chút' },
-    { value: 5, label: '5', description: 'Rất đồng ý' }
+    { value: 1, label: '1', description: 'Disagree strongly' },
+    { value: 2, label: '2', description: 'Disagree a little' },
+    { value: 3, label: '3', description: 'Neither agree nor disagree' },
+    { value: 4, label: '4', description: 'Agree a little' },
+    { value: 5, label: '5', description: 'Agree strongly' }
   ],
   questions: [
-    { id: 1, text: 'Tôi là người hay nói', dimension: 'extraversion' },
-    { id: 2, text: 'Tôi là người hay bắt bẻ người khác', dimension: 'agreeableness', isReverse: true },
-    { id: 3, text: 'Tôi là người làm việc cẩn thận, chu đáo', dimension: 'conscientiousness' },
-    { id: 4, text: 'Tôi là người hay chán nản, buồn bã', dimension: 'neuroticism' },
-    { id: 5, text: 'Tôi là người sáng tạo, có ý tưởng mới', dimension: 'openness' },
-    { id: 6, text: 'Tôi là người kín đáo', dimension: 'extraversion', isReverse: true },
-    { id: 7, text: 'Tôi là người sẵn lòng giúp đỡ và vị tha', dimension: 'agreeableness' },
-    { id: 8, text: 'Tôi là người có phần bất cẩn', dimension: 'conscientiousness', isReverse: true },
-    { id: 9, text: 'Tôi là người thư thái, chịu được áp lực tốt', dimension: 'neuroticism', isReverse: true },
-    { id: 10, text: 'Tôi là người tò mò về nhiều điều mới lạ', dimension: 'openness' },
-    { id: 11, text: 'Tôi là người tràn đầy năng lượng', dimension: 'extraversion' },
-    { id: 12, text: 'Tôi là người hay gây gổ với người khác', dimension: 'agreeableness', isReverse: true },
-    { id: 13, text: 'Tôi là người làm việc đáng tin cậy', dimension: 'conscientiousness' },
-    { id: 14, text: 'Tôi là người hay căng thẳng', dimension: 'neuroticism' },
-    { id: 15, text: 'Tôi là người thông minh, hay suy nghĩ sâu xa', dimension: 'openness' },
-    { id: 16, text: 'Tôi là người tạo ra nhiều sự nhiệt tình', dimension: 'extraversion' },
-    { id: 17, text: 'Tôi là người có bản tính khoan dung', dimension: 'agreeableness' },
-    { id: 18, text: 'Tôi là người có xu hướng vô tổ chức', dimension: 'conscientiousness', isReverse: true },
-    { id: 19, text: 'Tôi là người hay lo lắng', dimension: 'neuroticism' },
-    { id: 20, text: 'Tôi là người có trí tưởng tượng phong phú', dimension: 'openness' },
-    { id: 21, text: 'Tôi là người thường im lặng', dimension: 'extraversion', isReverse: true },
-    { id: 22, text: 'Tôi là người thường tin tưởng người khác', dimension: 'agreeableness' },
-    { id: 23, text: 'Tôi là người có xu hướng lười biếng', dimension: 'conscientiousness', isReverse: true },
-    { id: 24, text: 'Tôi là người cảm xúc ổn định, không dễ bị kích động', dimension: 'neuroticism', isReverse: true },
-    { id: 25, text: 'Tôi là người có tính phát minh', dimension: 'openness' },
-    { id: 26, text: 'Tôi là người có cá tính quyết đoán', dimension: 'extraversion' },
-    { id: 27, text: 'Tôi là người có thể lạnh lùng và xa cách', dimension: 'agreeableness', isReverse: true },
-    { id: 28, text: 'Tôi là người kiên trì cho đến khi hoàn thành công việc', dimension: 'conscientiousness' },
-    { id: 29, text: 'Tôi là người hay thay đổi tâm trạng', dimension: 'neuroticism' },
-    { id: 30, text: 'Tôi là người đánh giá cao nghệ thuật, trải nghiệm thẩm mỹ', dimension: 'openness' },
-    { id: 31, text: 'Tôi là người đôi khi nhút nhát, e dè', dimension: 'extraversion', isReverse: true },
-    { id: 32, text: 'Tôi là người chu đáo và tử tế với hầu hết mọi người', dimension: 'agreeableness' },
-    { id: 33, text: 'Tôi là người làm mọi việc một cách hiệu quả', dimension: 'conscientiousness' },
-    { id: 34, text: 'Tôi là người giữ bình tĩnh trong tình huống căng thẳng', dimension: 'neuroticism', isReverse: true },
-    { id: 35, text: 'Tôi là người thích công việc mang tính lặp lại', dimension: 'openness', isReverse: true },
-    { id: 36, text: 'Tôi là người hướng ngoại, hòa đồng', dimension: 'extraversion' },
-    { id: 37, text: 'Tôi là người đôi khi thô lỗ với người khác', dimension: 'agreeableness', isReverse: true },
-    { id: 38, text: 'Tôi là người biết lập kế hoạch và thực hiện đến cùng', dimension: 'conscientiousness' },
-    { id: 39, text: 'Tôi là người dễ bị lo âu', dimension: 'neuroticism' },
-    { id: 40, text: 'Tôi là người thích suy ngẫm, chơi đùa với các ý tưởng', dimension: 'openness' },
-    { id: 41, text: 'Tôi là người ít quan tâm đến nghệ thuật', dimension: 'openness', isReverse: true },
-    { id: 42, text: 'Tôi là người thích hợp tác với người khác', dimension: 'agreeableness' },
-    { id: 43, text: 'Tôi là người dễ bị phân tâm', dimension: 'conscientiousness', isReverse: true },
-    { id: 44, text: 'Tôi là người sành sỏi về nghệ thuật, âm nhạc hoặc văn học', dimension: 'openness' }
+    { id: 1, text: 'I see myself as someone who is talkative', dimension: 'extraversion' },
+    { id: 2, text: 'I see myself as someone who tends to find fault with others', dimension: 'agreeableness', isReverse: true },
+    { id: 3, text: 'I see myself as someone who does a thorough job', dimension: 'conscientiousness' },
+    { id: 4, text: 'I see myself as someone who is depressed, blue', dimension: 'neuroticism' },
+    { id: 5, text: 'I see myself as someone who is original, comes up with new ideas', dimension: 'openness' },
+    { id: 6, text: 'I see myself as someone who is reserved', dimension: 'extraversion', isReverse: true },
+    { id: 7, text: 'I see myself as someone who is helpful and unselfish with others', dimension: 'agreeableness' },
+    { id: 8, text: 'I see myself as someone who can be somewhat careless', dimension: 'conscientiousness', isReverse: true },
+    { id: 9, text: 'I see myself as someone who is relaxed, handles stress well', dimension: 'neuroticism', isReverse: true },
+    { id: 10, text: 'I see myself as someone who is curious about many different things', dimension: 'openness' },
+    { id: 11, text: 'I see myself as someone who is full of energy', dimension: 'extraversion' },
+    { id: 12, text: 'I see myself as someone who starts quarrels with others', dimension: 'agreeableness', isReverse: true },
+    { id: 13, text: 'I see myself as someone who is a reliable worker', dimension: 'conscientiousness' },
+    { id: 14, text: 'I see myself as someone who can be tense', dimension: 'neuroticism' },
+    { id: 15, text: 'I see myself as someone who is ingenious, a deep thinker', dimension: 'openness' },
+    { id: 16, text: 'I see myself as someone who generates a lot of enthusiasm', dimension: 'extraversion' },
+    { id: 17, text: 'I see myself as someone who has a forgiving nature', dimension: 'agreeableness' },
+    { id: 18, text: 'I see myself as someone who tends to be disorganized', dimension: 'conscientiousness', isReverse: true },
+    { id: 19, text: 'I see myself as someone who worries a lot', dimension: 'neuroticism' },
+    { id: 20, text: 'I see myself as someone who has an active imagination', dimension: 'openness' },
+    { id: 21, text: 'I see myself as someone who tends to be quiet', dimension: 'extraversion', isReverse: true },
+    { id: 22, text: 'I see myself as someone who is generally trusting', dimension: 'agreeableness' },
+    { id: 23, text: 'I see myself as someone who tends to be lazy', dimension: 'conscientiousness', isReverse: true },
+    { id: 24, text: 'I see myself as someone who is emotionally stable, not easily upset', dimension: 'neuroticism', isReverse: true },
+    { id: 25, text: 'I see myself as someone who is inventive', dimension: 'openness' },
+    { id: 26, text: 'I see myself as someone who has an assertive personality', dimension: 'extraversion' },
+    { id: 27, text: 'I see myself as someone who can be cold and aloof', dimension: 'agreeableness', isReverse: true },
+    { id: 28, text: 'I see myself as someone who perseveres until the task is finished', dimension: 'conscientiousness' },
+    { id: 29, text: 'I see myself as someone who can be moody', dimension: 'neuroticism' },
+    { id: 30, text: 'I see myself as someone who values artistic, aesthetic experiences', dimension: 'openness' },
+    { id: 31, text: 'I see myself as someone who is sometimes shy, inhibited', dimension: 'extraversion', isReverse: true },
+    { id: 32, text: 'I see myself as someone who is considerate and kind to almost everyone', dimension: 'agreeableness' },
+    { id: 33, text: 'I see myself as someone who does things efficiently', dimension: 'conscientiousness' },
+    { id: 34, text: 'I see myself as someone who remains calm in tense situations', dimension: 'neuroticism', isReverse: true },
+    { id: 35, text: 'I see myself as someone who prefers work that is routine', dimension: 'openness', isReverse: true },
+    { id: 36, text: 'I see myself as someone who is outgoing, sociable', dimension: 'extraversion' },
+    { id: 37, text: 'I see myself as someone who is sometimes rude to others', dimension: 'agreeableness', isReverse: true },
+    { id: 38, text: 'I see myself as someone who makes plans and follows through with them', dimension: 'conscientiousness' },
+    { id: 39, text: 'I see myself as someone who gets nervous easily', dimension: 'neuroticism' },
+    { id: 40, text: 'I see myself as someone who likes to reflect, play with ideas', dimension: 'openness' },
+    { id: 41, text: 'I see myself as someone who has few artistic interests', dimension: 'openness', isReverse: true },
+    { id: 42, text: 'I see myself as someone who likes to cooperate with others', dimension: 'agreeableness' },
+    { id: 43, text: 'I see myself as someone who is easily distracted', dimension: 'conscientiousness', isReverse: true },
+    { id: 44, text: 'I see myself as someone who is sophisticated in art, music, or literature', dimension: 'openness' }
   ],
   calculateResults: (answers: Record<number, number>) => {
     const getVal = (id: number, isReverse?: boolean) => {
@@ -112,9 +112,9 @@ export const BFI44_ASSESSMENT: AssessmentDefinition = {
     opeRev.forEach(i => opeScore += getVal(i, true));
 
     const getLevelText = (avg: number) => {
-      if (avg >= 3.8) return { label: 'Mức Cao', color: '#10B981' };
-      if (avg >= 2.6) return { label: 'Mức Trung bình', color: '#3B82F6' };
-      return { label: 'Mức Thấp', color: '#F59E0B' };
+      if (avg >= 3.8) return { label: 'High', color: '#10B981' };
+      if (avg >= 2.6) return { label: 'Moderate', color: '#3B82F6' };
+      return { label: 'Low', color: '#F59E0B' };
     };
 
     const extAvg = +(extScore / 8).toFixed(1);
@@ -126,67 +126,77 @@ export const BFI44_ASSESSMENT: AssessmentDefinition = {
     const scores: Record<string, DimensionResult> = {
       extraversion: {
         id: 'extraversion',
-        name: 'Hướng ngoại (Extraversion)',
+        name: 'Extraversion',
         score: extScore,
         maxScore: 40,
         averageScore: extAvg,
         levelLabel: getLevelText(extAvg).label,
         levelColor: getLevelText(extAvg).color,
-        description: extAvg >= 3.5 ? 'Bạn là người hoạt bát, thích giao tiếp, tràn đầy năng lượng khi ở trong đám đông và có xu hướng quyết đoán.' : 'Bạn là người điềm tĩnh, thích không gian yên tĩnh để tái tạo năng lượng, độc lập và suy nghĩ thấu đáo.'
+        description: extAvg >= 3.5 
+          ? 'You are outgoing, talkative, assertive, energetic in social environments, and comfortable taking the lead.' 
+          : 'You are calm, reflective, comfortable with independence, and recharge your energy through quiet time.'
       },
       agreeableness: {
         id: 'agreeableness',
-        name: 'Dễ chịu / Vị tha (Agreeableness)',
+        name: 'Agreeableness',
         score: agrScore,
         maxScore: 45,
         averageScore: agrAvg,
         levelLabel: getLevelText(agrAvg).label,
         levelColor: getLevelText(agrAvg).color,
-        description: agrAvg >= 3.5 ? 'Bạn có tính cách hòa nhã, đáng tin cậy, sẵn lòng giúp đỡ người khác và coi trọng sự hòa thuận trong các mối quan hệ.' : 'Bạn thẳng thắn, độc lập trong quan điểm, thích sự cạnh tranh và sẵn sàng đặt câu hỏi nghi vấn.'
+        description: agrAvg >= 3.5 
+          ? 'You are empathetic, trustworthy, generous, and place high importance on harmony in interpersonal relationships.' 
+          : 'You are independent-minded, direct in communication, comfortable with competition, and naturally challenge assumptions.'
       },
       conscientiousness: {
         id: 'conscientiousness',
-        name: 'Tận tâm / Chu đáo (Conscientiousness)',
+        name: 'Conscientiousness',
         score: conScore,
         maxScore: 45,
         averageScore: conAvg,
         levelLabel: getLevelText(conAvg).label,
         levelColor: getLevelText(conAvg).color,
-        description: conAvg >= 3.5 ? 'Bạn có tính kỷ luật cao, làm việc có kế hoạch, đáng tin cậy và kiên trì theo đuổi mục tiêu đến cùng.' : 'Bạn linh hoạt, thích ứng tốt với sự thay đổi bất ngờ, hành động tự phát và không thích bị ràng buộc bởi quy tắc cứng nhắc.'
+        description: conAvg >= 3.5 
+          ? 'You are disciplined, organized, dependable, and systematically persevere until goals are accomplished.' 
+          : 'You are flexible, adaptable to spontaneous changes, comfortable with informal workflows, and open to pivoting.'
       },
       neuroticism: {
         id: 'neuroticism',
-        name: 'Nhiễu tâm / Nhạy cảm cảm xúc (Neuroticism)',
+        name: 'Neuroticism (Emotional Sensitivity)',
         score: neuScore,
         maxScore: 40,
         averageScore: neuAvg,
         levelLabel: getLevelText(neuAvg).label,
         levelColor: getLevelText(neuAvg).color,
-        description: neuAvg >= 3.5 ? 'Bạn có hệ thần kinh nhạy cảm, dễ cảm nhận sâu sắc các biến động cảm xúc, thỉnh thoảng dễ lo âu trước áp lực.' : 'Bạn có cảm xúc ổn định, điềm tĩnh trước khó khăn, ít khi bị dao động và chịu áp lực tâm lý tốt.'
+        description: neuAvg >= 3.5 
+          ? 'You experience emotions vividly, with heightened sensitivity to stressful shifts and changing circumstances.' 
+          : 'You are emotionally steady, resilient under pressure, and maintain a composed, calm perspective through challenges.'
       },
       openness: {
         id: 'openness',
-        name: 'Cởi mở với trải nghiệm (Openness)',
+        name: 'Openness to Experience',
         score: opeScore,
         maxScore: 50,
         averageScore: opeAvg,
         levelLabel: getLevelText(opeAvg).label,
         levelColor: getLevelText(opeAvg).color,
-        description: opeAvg >= 3.5 ? 'Bạn giàu trí tưởng tượng, tò mò về thế giới, yêu thích cái đẹp nghệ thuật và cởi mở với những tư tưởng mới lạ.' : 'Bạn thực tế, thích những giải pháp cụ thể đã được kiểm chứng, coi trọng truyền thống và sự ổn định.'
+        description: opeAvg >= 3.5 
+          ? 'You are imaginative, intellectually curious, appreciate diverse art and aesthetics, and embrace novel perspectives.' 
+          : 'You are practical, grounded, prefer tested methods, value concrete facts, and appreciate structured routines.'
       }
     };
 
     return {
-      title: 'Hồ Sơ Nhân Cách Big Five (BFI-44)',
-      summary: 'Biểu đồ phân bố 5 đặc tính tính cách cốt lõi của bạn theo thang đo Big Five.',
+      title: 'Big Five Personality Profile (BFI-44)',
+      summary: 'Distribution across the five foundational dimensions of human personality.',
       scores,
       actionGuide: {
-        levelTitle: 'Tra cứu chuyên sâu với Sổ tay NotebookLM',
-        levelBadge: '🧠 Tri Thức Big Five',
+        levelTitle: 'In-Depth Research with NotebookLM',
+        levelBadge: '🧠 Big Five Scientific Insights',
         levelColor: '#8B5CF6',
         recommendations: [
-          'Bạn có thể bấm vào nút "Mở Sổ tay NotebookLM" bên dưới để tìm hiểu chi tiết về từng thành phần trong bài test.',
-          'Sổ tay tập hợp các tài liệu nghiên cứu khoa học được tuyển chọn, cho phép bạn hỏi bất kỳ câu hỏi nào về định hướng nghề nghiệp, cách giao tiếp và phát triển bản thân.'
+          'Click "Open NotebookLM" below to delve deeper into your Big Five dimensions using curated academic literature.',
+          'Ask the AI research assistant tailored questions on optimal career environments, interpersonal synergy, and personal growth.'
         ]
       }
     };

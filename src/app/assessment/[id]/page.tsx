@@ -12,15 +12,12 @@ import {
   CheckCircle2, 
   RotateCcw, 
   ShieldAlert, 
-  PhoneCall, 
   Sparkles, 
   ExternalLink,
   BookOpen, 
-  Clock, 
-  FileCheck,
-  ChevronLeft,
   Copy,
-  Check
+  Check,
+  Heart
 } from 'lucide-react';
 import { getAssessmentById } from '@/data/assessments';
 
@@ -42,15 +39,15 @@ export default function AssessmentRunnerPage() {
         <main className="flex-1 flex items-center justify-center p-6 text-center z-10">
           <div className="p-8 rounded-2xl bg-[#0d0818] border border-white/15 max-w-md space-y-4 shadow-2xl">
             <ShieldAlert className="w-12 h-12 text-amber-400 mx-auto" />
-            <h2 className="text-xl font-bold text-white">Chưa tìm thấy bài đánh giá</h2>
+            <h2 className="text-xl font-bold text-white">Assessment Not Found</h2>
             <p className="text-gray-400 text-sm">
-              Bài trắc nghiệm với mã &ldquo;{assessmentId}&rdquo; hiện đang được chuẩn bị dữ liệu.
+              The requested assessment with code &ldquo;{assessmentId}&rdquo; is not available in our registry.
             </p>
             <Link
               href="/"
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 font-semibold text-sm transition-all"
             >
-              <ArrowLeft className="w-4 h-4" /> Về trang chủ
+              <ArrowLeft className="w-4 h-4" /> Back to Homepage
             </Link>
           </div>
         </main>
@@ -66,14 +63,34 @@ export default function AssessmentRunnerPage() {
   const progressPercent = Math.round((answeredCount / totalQuestions) * 100);
 
   const handleSelectOption = (value: number) => {
-    setAnswers(prev => ({
-      ...prev,
+    const updatedAnswers = {
+      ...answers,
       [currentQuestion.id]: value
-    }));
+    };
+    setAnswers(updatedAnswers);
 
-    if (currentIndex < totalQuestions - 1) {
+    const isAllComplete = Object.keys(updatedAnswers).length >= totalQuestions;
+
+    if (currentIndex >= totalQuestions - 1) {
+      if (isAllComplete) {
+        setTimeout(() => {
+          setIsCompleted(true);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 240);
+      } else {
+        const firstUnanswered = questions.findIndex(q => updatedAnswers[q.id] === undefined);
+        if (firstUnanswered !== -1) {
+          setTimeout(() => setCurrentIndex(firstUnanswered), 180);
+        } else {
+          setTimeout(() => {
+            setIsCompleted(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 240);
+        }
+      }
+    } else {
       setTimeout(() => {
-        setCurrentIndex(prev => prev + 1);
+        setCurrentIndex(prev => Math.min(totalQuestions - 1, prev + 1));
       }, 180);
     }
   };
@@ -112,46 +129,55 @@ export default function AssessmentRunnerPage() {
   return (
     <div className="min-h-screen bg-[#080314] text-white flex flex-col justify-between selection:bg-brand-purple selection:text-white relative overflow-hidden">
       
-      {/* 1:1 Silky Wave WebGL Background matching homepage */}
+      {/* 1:1 Silky Wave WebGL Background */}
       <WaveBackground />
 
-      {/* Dark overlay & cosmic ambient glows */}
-      <div className="absolute inset-0 pointer-events-none z-[1] bg-gradient-to-b from-black/40 via-black/20 to-black/45" />
+      {/* Dark overlay & ambient cosmic glows */}
+      <div className="absolute inset-0 pointer-events-none z-[1] bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
-        <div className="absolute -top-40 -left-40 w-[650px] h-[650px] bg-purple-600/30 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute top-1/4 -right-40 w-[600px] h-[600px] bg-pink-500/25 rounded-full blur-[130px] animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="absolute -top-40 -left-40 w-[650px] h-[650px] bg-purple-600/25 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute top-1/4 -right-40 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[130px] animate-pulse" style={{ animationDuration: '6s' }} />
       </div>
 
-      {/* Main Header */}
+      {/* Navigation Header */}
       <div className="relative z-20">
         <Header onOpenAuth={() => {}} onOpenTest={() => router.push('/')} />
       </div>
 
-      {/* Main Questionnaire Runner Container */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-12 relative z-10 flex flex-col justify-center">
+      {/* Dedicated Questionnaire Runner Container with expansive max-w-4xl width */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10 flex flex-col justify-center">
         {!isCompleted ? (
           /* ================= QUESTIONNAIRE CARD ================= */
-          <div className="w-full rounded-2xl bg-[#0d0818] border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col">
+          <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col">
             
             {/* Header */}
-            <div className="px-6 sm:px-8 py-5 border-b border-white/10 bg-[#090512] flex items-center justify-between">
-              <div>
-                <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
-                  {assessment.code} • Đánh giá khoa học
-                </span>
-                <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                  {assessment.name}
-                </h1>
+            <div className="px-6 sm:px-10 py-5 border-b border-white/10 bg-[#090512]/90 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/"
+                  className="text-gray-400 hover:text-white text-xs flex items-center gap-1.5 transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back
+                </Link>
+                <span className="text-white/20">|</span>
+                <div>
+                  <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
+                    {assessment.code} • Scientific Psychometrics
+                  </span>
+                  <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                    {assessment.name}
+                  </h1>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-purple-300 bg-purple-950/60 border border-purple-800/40 px-2.5 py-1 rounded-full font-mono font-bold">
-                  {currentIndex + 1} / {totalQuestions}
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-purple-300 bg-purple-950/70 border border-purple-800/40 px-3 py-1 rounded-full font-mono font-bold">
+                  {currentIndex + 1} of {totalQuestions}
                 </span>
                 <button
                   onClick={handleReset}
-                  title="Làm lại từ đầu"
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+                  title="Reset quiz"
+                  className="p-2 rounded-xl text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -166,19 +192,27 @@ export default function AssessmentRunnerPage() {
               />
             </div>
 
-            {/* Body */}
-            <div className="p-6 sm:p-8 space-y-6">
-              <div className="space-y-2">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                  Câu hỏi #{currentQuestion.id}
-                </span>
-                <h2 className="text-xl sm:text-2xl font-bold text-white min-h-[56px] flex items-center leading-relaxed">
-                  &ldquo;{currentQuestion.text}&rdquo;
-                </h2>
+            {/* Body with ample breathing room */}
+            <div className="p-6 sm:p-10 space-y-8">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Statement #{currentQuestion.id}
+                  </span>
+                  <span className="text-xs text-brand-teal font-medium font-mono">
+                    {progressPercent}% Completed
+                  </span>
+                </div>
+
+                <div className="min-h-[90px] p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-center">
+                  <h2 className="text-xl sm:text-2xl font-medium text-white leading-relaxed max-w-2xl">
+                    &ldquo;{currentQuestion.text}&rdquo;
+                  </h2>
+                </div>
               </div>
 
               {/* Options */}
-              <div className={`grid gap-3 pt-2 ${
+              <div className={`grid gap-3.5 pt-1 ${
                 assessment.options.length <= 4 
                   ? 'grid-cols-1 sm:grid-cols-2' 
                   : 'grid-cols-1 sm:grid-cols-5'
@@ -189,7 +223,7 @@ export default function AssessmentRunnerPage() {
                     <button
                       key={opt.value}
                       onClick={() => handleSelectOption(opt.value)}
-                      className={`text-left p-4 rounded-xl border transition-all flex sm:flex-col sm:items-center sm:text-center items-start gap-2.5 ${
+                      className={`text-left p-4 sm:p-5 rounded-2xl border transition-all flex sm:flex-col sm:items-center sm:text-center items-start gap-3 min-h-[72px] sm:min-h-[88px] justify-center ${
                         isSelected
                           ? 'bg-white text-black border-white shadow-xl scale-[1.02]'
                           : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 text-gray-200'
@@ -204,7 +238,7 @@ export default function AssessmentRunnerPage() {
                       >
                         {opt.label}
                       </div>
-                      <span className={`text-xs ${isSelected ? 'font-bold text-black' : 'text-gray-300'}`}>
+                      <span className={`text-xs sm:text-sm ${isSelected ? 'font-bold text-black' : 'text-gray-300'} leading-tight`}>
                         {opt.description}
                       </span>
                     </button>
@@ -213,7 +247,7 @@ export default function AssessmentRunnerPage() {
               </div>
 
               {/* Quick Jump Dots */}
-              <div className="pt-4 flex flex-wrap gap-1 justify-center max-h-24 overflow-y-auto border-t border-white/5">
+              <div className="pt-4 flex flex-wrap gap-1.5 justify-center max-h-24 overflow-y-auto border-t border-white/5">
                 {questions.map((q, idx) => {
                   const isAnswered = answers[q.id] !== undefined;
                   const isCurrent = idx === currentIndex;
@@ -221,9 +255,9 @@ export default function AssessmentRunnerPage() {
                     <button
                       key={q.id}
                       onClick={() => setCurrentIndex(idx)}
-                      className={`w-6 h-6 rounded text-[11px] font-semibold transition-all ${
+                      className={`w-7 h-7 rounded-lg text-xs font-semibold transition-all ${
                         isCurrent
-                          ? 'bg-white text-black'
+                          ? 'bg-white text-black font-bold ring-1 ring-white'
                           : isAnswered
                           ? 'bg-purple-900/60 border border-purple-500/50 text-purple-200'
                           : 'bg-white/5 text-gray-500 hover:text-gray-300'
@@ -237,7 +271,7 @@ export default function AssessmentRunnerPage() {
             </div>
 
             {/* Footer Controls */}
-            <div className="px-6 sm:px-8 py-4 border-t border-white/10 bg-[#090512] flex items-center justify-between">
+            <div className="px-6 sm:px-10 py-5 border-t border-white/10 bg-[#090512]/90 flex items-center justify-between">
               <button
                 type="button"
                 onClick={handlePrevious}
@@ -251,9 +285,9 @@ export default function AssessmentRunnerPage() {
                 <button
                   type="button"
                   onClick={handleFinish}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 animate-bounce"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 animate-pulse"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> Xem Kết Quả Phân Tích
+                  <CheckCircle2 className="w-4 h-4" /> View Analysis Results
                 </button>
               ) : (
                 <button
@@ -269,46 +303,46 @@ export default function AssessmentRunnerPage() {
 
           </div>
         ) : (
-          /* ================= RESULTS CARD ================= */
+          /* ================= RESULTS DASHBOARD (100% ENGLISH) ================= */
           results && (
-            <div className="w-full rounded-2xl bg-[#0d0818] border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col space-y-6 p-6 sm:p-8 animate-in fade-in duration-300">
+            <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col space-y-8 p-6 sm:p-10 animate-in fade-in duration-300">
               
               {/* Header */}
-              <div className="border-b border-white/10 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="border-b border-white/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
-                    Báo cáo kết quả {assessment.code}
+                    Assessment Report: {assessment.code}
                   </span>
-                  <h1 className="text-2xl font-bold text-white">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                     {results.title}
                   </h1>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-2xl leading-relaxed">
                     {results.summary}
                   </p>
                 </div>
 
                 {results.actionGuide?.levelBadge && (
-                  <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white self-start sm:self-auto">
+                  <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white self-start sm:self-auto shadow">
                     {results.actionGuide.levelBadge}
                   </div>
                 )}
               </div>
 
               {/* Dimension Score Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.values(results.scores).map((dim) => {
                   const percent = Math.min(100, Math.round((dim.score / dim.maxScore) * 100));
                   return (
                     <div
                       key={dim.id}
-                      className="p-4 rounded-xl bg-[#140b26] border border-white/10 space-y-2.5 flex flex-col justify-between"
+                      className="p-5 rounded-2xl bg-[#140b26]/80 border border-white/10 space-y-3 flex flex-col justify-between"
                     >
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         <div className="flex justify-between items-start">
                           <h3 className="text-xs font-bold text-white">{dim.name}</h3>
                           {dim.levelLabel && (
                             <span 
-                              className="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
                               style={{
                                 color: dim.levelColor || '#a855f7',
                                 borderColor: `${dim.levelColor || '#a855f7'}40`,
@@ -325,7 +359,7 @@ export default function AssessmentRunnerPage() {
                           <span className="text-[11px] text-gray-400">/ {dim.maxScore}</span>
                           {dim.averageScore !== undefined && (
                             <span className="text-[11px] text-brand-teal ml-auto font-mono">
-                              ĐTB: {dim.averageScore}/5.0
+                              Avg: {dim.averageScore}/5.0
                             </span>
                           )}
                         </div>
@@ -342,7 +376,7 @@ export default function AssessmentRunnerPage() {
                         </div>
                       </div>
 
-                      <p className="text-[11px] text-gray-300 leading-relaxed pt-2 border-t border-white/5">
+                      <p className="text-xs text-gray-300 leading-relaxed pt-2 border-t border-white/5">
                         {dim.description}
                       </p>
                     </div>
@@ -350,20 +384,20 @@ export default function AssessmentRunnerPage() {
                 })}
               </div>
 
-              {/* NotebookLM Section (For BFI-44) */}
+              {/* NotebookLM Section (Available for both DASS-21 and BFI-44!) */}
               {assessment.notebookLmUrl && (
-                <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/60 to-brand-purple/20 border border-purple-500/40 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-2.5 rounded-xl bg-purple-900/50 text-brand-purple-light border border-purple-700/50">
+                <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-950/60 to-brand-purple/20 border border-purple-500/40 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-xl bg-purple-900/50 text-brand-purple-light border border-purple-700/50">
                         <BookOpen className="w-5 h-5 text-teal-300" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-white">
-                          Tra cứu Sổ tay NotebookLM (Google)
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          NotebookLM Research Companion (Google)
                         </h3>
-                        <p className="text-[11px] text-gray-300">
-                          Hỏi đáp chuyên sâu dựa trên các tài liệu khoa học về {assessment.code}.
+                        <p className="text-xs text-gray-300">
+                          Ask in-depth questions grounded in curated scientific literature about {assessment.code}.
                         </p>
                       </div>
                     </div>
@@ -375,7 +409,7 @@ export default function AssessmentRunnerPage() {
                       className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-bold transition-all whitespace-nowrap shadow"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                      <span>Mở Sổ Tay NotebookLM</span>
+                      <span>Open NotebookLM</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -383,16 +417,16 @@ export default function AssessmentRunnerPage() {
                   {assessment.notebookLmPrompts && (
                     <div className="space-y-2 pt-2 border-t border-white/10">
                       <span className="text-[10px] font-semibold text-purple-300 uppercase tracking-wider block">
-                        Gợi ý câu hỏi mẫu (Bấm để copy):
+                        Suggested questions to explore (Click to copy):
                       </span>
-                      <div className="space-y-1.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {assessment.notebookLmPrompts.map((prompt, i) => (
                           <div
                             key={i}
                             onClick={() => handleCopyPrompt(prompt)}
-                            className="p-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-purple-400 cursor-pointer transition-all flex items-center justify-between gap-2 text-xs text-gray-200 hover:text-white"
+                            className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-purple-400 cursor-pointer transition-all flex items-center justify-between gap-2 text-xs text-gray-200 hover:text-white"
                           >
-                            <span>&ldquo;{prompt}&rdquo;</span>
+                            <span className="leading-relaxed">&ldquo;{prompt}&rdquo;</span>
                             <span className="shrink-0 text-gray-400">
                               {copiedPrompt === prompt ? (
                                 <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -408,26 +442,20 @@ export default function AssessmentRunnerPage() {
                 </div>
               )}
 
-              {/* Action plan guidance (For DASS-21) */}
-              {results.actionGuide && !assessment.notebookLmUrl && (
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-                  <h3 className="text-xs font-bold text-white">
-                    {results.actionGuide.levelTitle}
-                  </h3>
-                  <ul className="space-y-1.5 text-xs text-gray-300 list-disc list-inside">
+              {/* Action Guidance Card */}
+              {results.actionGuide && (
+                <div className="p-6 rounded-2xl bg-[#140b26]/90 border border-purple-900/40 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-pink-400" />
+                    <h3 className="text-sm font-bold text-white">
+                      {results.actionGuide.levelTitle}
+                    </h3>
+                  </div>
+                  <ul className="space-y-2 text-xs sm:text-sm text-gray-300 list-disc list-inside leading-relaxed">
                     {results.actionGuide.recommendations.map((rec, i) => (
                       <li key={i}>{rec}</li>
                     ))}
                   </ul>
-
-                  {results.actionGuide.emergencyNote && (
-                    <div className="p-3 rounded-lg bg-red-950/40 border border-red-800/50 text-red-200 text-xs flex items-start gap-2">
-                      <PhoneCall className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                      <div>
-                        <strong>Kênh hỗ trợ khẩn cấp:</strong> {results.actionGuide.emergencyNote}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -438,14 +466,14 @@ export default function AssessmentRunnerPage() {
                   onClick={handleReset}
                   className="px-5 py-2.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-medium transition-colors flex items-center gap-1.5"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Làm lại bài test
+                  <RotateCcw className="w-3.5 h-3.5" /> Retake Assessment
                 </button>
 
                 <Link
                   href="/"
                   className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-semibold transition-colors"
                 >
-                  Về trang chủ
+                  Back to Homepage
                 </Link>
               </div>
 
@@ -454,7 +482,7 @@ export default function AssessmentRunnerPage() {
         )}
       </main>
 
-      {/* Main Footer */}
+      {/* Footer */}
       <div className="relative z-20">
         <Footer onOpenTest={() => router.push('/')} />
       </div>
