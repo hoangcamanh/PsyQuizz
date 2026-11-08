@@ -51,20 +51,12 @@ export default function PurposeSection({
   return (
     <section
       id="assessments"
-      className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 relative z-20 overflow-hidden"
-      style={{
-        background:
-          'linear-gradient(135deg, #c7c0ff 0%, #e2dfff 20%, #ffffff 50%, #fcd6ed 80%, #f6aada 100%)',
-      }}
+      className="pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-6 lg:px-8 relative z-20"
     >
       {/* Anchor for #about */}
       <span id="about" className="absolute -top-10 left-0" />
 
-      {/* Subtle ambient light glows */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-300/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-300/35 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Giant Luminous White Container Card */}
+      {/* Giant Luminous White Container Card for Core Psychological Assessments */}
       <motion.div
         initial={{ opacity: 0, y: 35 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -136,6 +128,7 @@ export default function PurposeSection({
             </motion.div>
           ))}
         </div>
+
       </motion.div>
     </section>
   );

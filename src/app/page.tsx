@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import PurposeSection from '@/components/PurposeSection';
+import ExploreSection from '@/components/ExploreSection';
 import TechnologySection from '@/components/TechnologySection';
 import AssessmentModal from '@/components/AssessmentModal';
 import AuthModal from '@/components/AuthModal';
@@ -59,10 +60,29 @@ export default function HomePage() {
           }}
         />
 
-        {/* Section 2: Core Psychological Assessments */}
-        <PurposeSection
-          onSelectAssessment={handleSelectAssessment}
-        />
+        {/* Continuous Pastel Gradient Container for Assessments (1) and Explore World (2) */}
+        <div
+          className="relative z-20 overflow-hidden"
+          style={{
+            background:
+              'linear-gradient(135deg, #c7c0ff 0%, #e2dfff 20%, #ffffff 50%, #fcd6ed 80%, #f6aada 100%)',
+          }}
+        >
+          {/* Subtle ambient light glows */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-300/30 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 right-0 w-96 h-96 bg-pink-300/35 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Section (1): Core Psychological Assessments */}
+          <PurposeSection
+            onSelectAssessment={handleSelectAssessment}
+          />
+
+          {/* Spacing Gap: Giữa (1) và (2) kéo dài background cách nhau một khoảng */}
+          <div className="h-10 sm:h-14 md:h-20" />
+
+          {/* Section (2): Explore the World Within You */}
+          <ExploreSection />
+        </div>
 
         {/* Section 3: Technology Grid */}
         <TechnologySection />
