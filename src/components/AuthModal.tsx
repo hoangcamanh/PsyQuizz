@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, ShieldCheck, User, Mail, Lock, ArrowRight, Check } from 'lucide-react';
+import { X, ShieldCheck, Mail, Lock, ArrowRight, Check } from 'lucide-react';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export default function AuthModal({
   onClose,
   onSuccess,
 }: AuthModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'anonymous' | 'login' | 'signup'>('anonymous');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,8 +33,8 @@ export default function AuthModal({
       setLoading(false);
       setSubmittedMessage(
         activeTab === 'anonymous'
-          ? 'Đã kích hoạt phiên khách ẩn danh! Bạn có thể làm bài ngay.'
-          : 'Thao tác tài khoản thành công!'
+          ? t('common.authModal.successAnonymous')
+          : t('common.authModal.successAccount')
       );
       setTimeout(() => {
         onSuccess();
@@ -65,15 +67,15 @@ export default function AuthModal({
           </div>
           <h3 className="text-2xl font-extrabold text-white">
             {activeTab === 'anonymous'
-              ? 'Truy cập Ẩn danh'
+              ? t('common.authModal.anonymousTitle')
               : activeTab === 'signup'
-              ? 'Tạo tài khoản'
-              : 'Đăng nhập'}
+              ? t('common.authModal.signupTitle')
+              : t('common.authModal.loginTitle')}
           </h3>
           <p className="text-xs sm:text-sm text-gray-300">
             {activeTab === 'anonymous'
-              ? 'Làm bài ngay mà không cần để lại danh tính cá nhân'
-              : 'Lưu giữ lịch sử kết quả của bạn an toàn'}
+              ? t('common.authModal.anonymousSubtitle')
+              : t('common.authModal.accountSubtitle')}
           </p>
         </div>
 
@@ -87,7 +89,7 @@ export default function AuthModal({
                 : 'text-gray-400 hover:text-white'
             }`}
           >
-            Ẩn danh (Guest)
+            {t('common.authModal.tabAnonymous')}
           </button>
           <button
             onClick={() => setActiveTab('signup')}
@@ -97,7 +99,7 @@ export default function AuthModal({
                 : 'text-gray-400 hover:text-white'
             }`}
           >
-            Đăng ký
+            {t('common.authModal.tabSignup')}
           </button>
           <button
             onClick={() => setActiveTab('login')}
@@ -107,7 +109,7 @@ export default function AuthModal({
                 : 'text-gray-400 hover:text-white'
             }`}
           >
-            Đăng nhập
+            {t('common.authModal.tabLogin')}
           </button>
         </div>
 
@@ -125,12 +127,12 @@ export default function AuthModal({
                 <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-900/50 space-y-2 text-xs text-gray-300">
                   <div className="flex items-center gap-2 text-brand-teal font-semibold">
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Cam kết bảo mật dữ liệu:</span>
+                    <span>{t('common.authModal.securityCommitmentTitle')}</span>
                   </div>
                   <ul className="space-y-1 pl-4 list-disc text-gray-300">
-                    <li>Không yêu cầu họ tên, email hay số điện thoại.</li>
-                    <li>Điểm số tính toán trực tiếp trong trình duyệt của bạn.</li>
-                    <li>Tuân thủ Luật Bảo vệ Dữ liệu Cá nhân số 91/2025/QH15.</li>
+                    <li>{t('common.authModal.bullet1')}</li>
+                    <li>{t('common.authModal.bullet2')}</li>
+                    <li>{t('common.authModal.bullet3')}</li>
                   </ul>
                 </div>
 
@@ -140,10 +142,10 @@ export default function AuthModal({
                   className="w-full py-3.5 rounded-full bg-gradient-to-r from-brand-purple via-pink-600 to-brand-teal text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-purple-900/50 hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   {loading ? (
-                    <span className="animate-pulse">Đang chuẩn bị phiên...</span>
+                    <span className="animate-pulse">{t('common.authModal.preparingSession')}</span>
                   ) : (
                     <>
-                      <span>Bắt đầu phiên Ẩn danh ngay</span>
+                      <span>{t('common.authModal.btnStartAnonymous')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -152,13 +154,13 @@ export default function AuthModal({
             ) : (
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-300">Email của bạn</label>
+                  <label className="text-xs font-semibold text-gray-300">{t('common.authModal.emailLabel')}</label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type="email"
                       required
-                      placeholder="ban@example.com"
+                      placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-10 pr-4 py-3 rounded-xl bg-purple-950/40 border border-purple-800/60 focus:border-brand-purple focus:outline-none text-sm text-white placeholder-gray-500"
@@ -167,7 +169,7 @@ export default function AuthModal({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-300">Mật khẩu</label>
+                  <label className="text-xs font-semibold text-gray-300">{t('common.authModal.passwordLabel')}</label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
@@ -187,10 +189,10 @@ export default function AuthModal({
                   className="w-full py-3.5 rounded-full bg-gradient-to-r from-brand-purple via-pink-600 to-brand-teal text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-purple-900/50 hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   {loading ? (
-                    <span className="animate-pulse">Đang xử lý...</span>
+                    <span className="animate-pulse">{t('common.authModal.processing')}</span>
                   ) : (
                     <>
-                      <span>{activeTab === 'signup' ? 'Đăng ký tài khoản' : 'Đăng nhập'}</span>
+                      <span>{activeTab === 'signup' ? t('common.authModal.btnSignup') : t('common.authModal.btnLogin')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}

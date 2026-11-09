@@ -12,26 +12,22 @@ import {
   CheckCircle2, 
   RotateCcw, 
   ShieldAlert, 
-  Sparkles, 
-  ExternalLink,
-  BookOpen, 
-  Copy, 
-  Check, 
   Heart 
 } from 'lucide-react';
 import { getAssessmentById } from '@/data/assessments';
 import { PsyQuizzNotebook } from '@/components/PsyQuizzNotebook';
+import { useTranslation } from '@/i18n/I18nContext';
 
 export default function AssessmentRunnerPage() {
   const params = useParams();
   const router = useRouter();
+  const { locale, t } = useTranslation();
   const assessmentId = params?.id as string;
-  const assessment = useMemo(() => getAssessmentById(assessmentId), [assessmentId]);
+  const assessment = useMemo(() => getAssessmentById(assessmentId, locale), [assessmentId, locale]);
 
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
   const [showExitModal, setShowExitModal] = useState(false);
 
   // Warn before browser unload/refresh if test is in progress
@@ -67,15 +63,15 @@ export default function AssessmentRunnerPage() {
         <main className="flex-1 flex items-center justify-center p-6 text-center z-10">
           <div className="p-8 rounded-2xl bg-[#0d0818] border border-white/15 max-w-md space-y-4 shadow-2xl">
             <ShieldAlert className="w-12 h-12 text-amber-400 mx-auto" />
-            <h2 className="text-xl font-bold text-white">Assessment Not Found</h2>
+            <h2 className="text-xl font-bold text-white">{t('common.runner.notFoundTitle')}</h2>
             <p className="text-gray-400 text-sm">
-              The requested assessment with code &ldquo;{assessmentId}&rdquo; is not available in our registry.
+              {t('common.runner.notFoundMessage', { id: assessmentId })}
             </p>
             <Link
               href="/"
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 font-semibold text-sm transition-all"
             >
-              <ArrowLeft className="w-4 h-4" /> Back to Homepage
+              <ArrowLeft className="w-4 h-4" /> {t('common.runner.backHome')}
             </Link>
           </div>
         </main>
@@ -158,12 +154,6 @@ export default function AssessmentRunnerPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCopyPrompt = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedPrompt(text);
-    setTimeout(() => setCopiedPrompt(null), 2000);
-  };
-
   const results = useMemo(() => {
     if (!isCompleted) return null;
     return assessment.calculateResults(answers);
@@ -172,7 +162,7 @@ export default function AssessmentRunnerPage() {
   return (
     <div className="min-h-screen bg-[#080314] text-white flex flex-col justify-between selection:bg-brand-purple selection:text-white relative overflow-hidden">
       
-      {/* 1:1 Silky Wave WebGL Background */}
+      {/* Silky Wave WebGL Background */}
       <WaveBackground />
 
       {/* Dark overlay & ambient cosmic glows */}
@@ -192,7 +182,7 @@ export default function AssessmentRunnerPage() {
         />
       </div>
 
-      {/* Dedicated Questionnaire Runner Container with responsive width: max-w-4xl during quiz, 95% viewport width on results */}
+      {/* Dedicated Questionnaire Runner Container */}
       <main className={`flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10 flex flex-col justify-center transition-all duration-300 ${
         isCompleted ? 'max-w-[95vw] min-w-[320px]' : 'max-w-4xl'
       }`}>
@@ -208,7 +198,7 @@ export default function AssessmentRunnerPage() {
                   onClick={handleAttemptExit}
                   className="text-gray-400 hover:text-white text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back
+                  <ArrowLeft className="w-3.5 h-3.5" /> {t('common.runner.back')}
                 </button>
                 <span className="text-white/20">|</span>
                 <div>
@@ -223,7 +213,7 @@ export default function AssessmentRunnerPage() {
 
               <div className="flex items-center gap-3">
                 <span className="text-xs text-purple-300 bg-purple-950/70 border border-purple-800/40 px-3 py-1 rounded-full font-mono font-bold">
-                  {currentIndex + 1} of {totalQuestions}
+                  {currentIndex + 1} / {totalQuestions}
                 </span>
                 <button
                   onClick={handleReset}
@@ -243,15 +233,15 @@ export default function AssessmentRunnerPage() {
               />
             </div>
 
-            {/* Body with ample breathing room */}
+            {/* Body */}
             <div className="p-6 sm:p-10 space-y-8">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Statement #{currentQuestion.id}
+                    {locale === 'vi' ? `CÂU ${currentQuestion.id}` : `STATEMENT #${currentQuestion.id}`}
                   </span>
                   <span className="text-xs text-brand-teal font-medium font-mono">
-                    {progressPercent}% Completed
+                    {t('common.runner.percentComplete', { percent: progressPercent })}
                   </span>
                 </div>
 
@@ -329,7 +319,7 @@ export default function AssessmentRunnerPage() {
                 disabled={currentIndex === 0}
                 className="px-5 py-2.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-medium transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1.5"
               >
-                <ArrowLeft className="w-3.5 h-3.5" /> Previous
+                <ArrowLeft className="w-3.5 h-3.5" /> {t('common.runner.prev')}
               </button>
 
               {answeredCount === totalQuestions ? (
@@ -338,7 +328,7 @@ export default function AssessmentRunnerPage() {
                   onClick={handleFinish}
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 animate-pulse"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> View Analysis Results
+                  <CheckCircle2 className="w-4 h-4" /> {t('common.runner.viewResults')}
                 </button>
               ) : (
                 <button
@@ -347,21 +337,21 @@ export default function AssessmentRunnerPage() {
                   disabled={currentIndex === totalQuestions - 1}
                   className="px-5 py-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 text-xs font-medium transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1.5"
                 >
-                  Next <ArrowRight className="w-3.5 h-3.5" />
+                  {t('common.runner.next')} <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
           </div>
         ) : (
-          /* ================= RESULTS DASHBOARD (100% ENGLISH, 95% PANORAMIC VIEW) ================= */
+          /* ================= RESULTS DASHBOARD ================= */
           results && (
             <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col space-y-10 p-8 sm:p-12 lg:p-14 animate-in fade-in duration-300">
               
-              {/* Header: Stacked layout with generous spacing */}
+              {/* Header */}
               <div className="border-b border-white/10 pb-6 space-y-3">
                 <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
-                  Assessment Report: {assessment.code}
+                  {t('common.runner.reportTitle', { code: assessment.code })}
                 </span>
 
                 <div className="space-y-1.5">
@@ -374,7 +364,7 @@ export default function AssessmentRunnerPage() {
                 </div>
               </div>
 
-              {/* Dimension Score Cards: Generous 3-column grid (Chia 3-2 for 5 KPI cards without squeezing) */}
+              {/* Dimension Score Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.values(results.scores).map((dim) => {
                   const percent = Math.min(100, Math.round((dim.score / dim.maxScore) * 100));
@@ -460,14 +450,14 @@ export default function AssessmentRunnerPage() {
                   onClick={handleReset}
                   className="px-5 py-2.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-medium transition-colors flex items-center gap-1.5"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Retake Assessment
+                  <RotateCcw className="w-3.5 h-3.5" /> {t('common.runner.retake')}
                 </button>
 
                 <Link
                   href="/"
                   className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-semibold transition-colors"
                 >
-                  Back to Homepage
+                  {t('common.runner.backHome')}
                 </Link>
               </div>
 
@@ -481,7 +471,7 @@ export default function AssessmentRunnerPage() {
         <Footer onOpenTest={() => router.push('/')} />
       </div>
 
-      {/* Exit Confirmation Dialog when user tries to leave mid-test */}
+      {/* Exit Confirmation Dialog */}
       {showExitModal && (
         <div
           role="dialog"
@@ -495,10 +485,10 @@ export default function AssessmentRunnerPage() {
 
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white">
-                Leave Assessment?
+                {t('common.runner.exitTitle')}
               </h3>
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                You haven&apos;t finished your test yet. If you leave now, your current answers will be lost and won&apos;t be saved.
+                {t('common.runner.exitMessage')}
               </p>
             </div>
 
@@ -508,14 +498,14 @@ export default function AssessmentRunnerPage() {
                 onClick={() => setShowExitModal(false)}
                 className="flex-1 px-4 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-bold transition-all shadow"
               >
-                Continue Test
+                {t('common.runner.continueTest')}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmExit}
                 className="flex-1 px-4 py-2.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 text-xs font-semibold transition-all"
               >
-                Leave
+                {t('common.runner.confirmLeave')}
               </button>
             </div>
           </div>

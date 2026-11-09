@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300..900;1,300..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,10 +14,21 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body,
+button,
+input,
+textarea,
+select,
+h1, h2, h3, h4, h5, h6,
+p, span, a, label, li {
+  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: #080314;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   overflow-x: hidden;
 }
 
@@ -158,7 +171,7 @@ body {
   animation: orbitTravel 42s linear infinite;
   display: flex;
   flex-direction: column;
-  font-family: Inter, sans-serif;
+  font-family: 'Libre Franklin', sans-serif !important;
   gap: 8px;
   left: 0;
   offset-anchor: 50% 56px;

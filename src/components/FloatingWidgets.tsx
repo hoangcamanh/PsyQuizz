@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowUp, HeartHandshake, PhoneCall, Sparkles, X, ShieldAlert } from 'lucide-react';
+import { ArrowUp, HeartHandshake, PhoneCall, X, ShieldAlert } from 'lucide-react';
+import { useTranslation } from '@/i18n/I18nContext';
 
 export default function FloatingWidgets() {
+  const { t } = useTranslation();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showCrisisModal, setShowCrisisModal] = useState(false);
 
@@ -21,15 +23,14 @@ export default function FloatingWidgets() {
 
   return (
     <>
-      {/* Bottom-Left Floating Wellbeing / Support Button (Matching sparklingtech.es widget) */}
+      {/* Bottom-Left Floating Wellbeing / Support Button */}
       <div className="fixed bottom-6 left-6 z-40">
         <button
           onClick={() => setShowCrisisModal(true)}
           className="relative group w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-brand-purple via-pink-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-purple-900/50 hover:shadow-purple-600/70 hover:scale-110 active:scale-95 transition-all duration-300 border border-purple-300/40"
-          title="Hỗ trợ & Đường dây nóng tâm lý"
-          aria-label="Wellbeing & Crisis Support"
+          title={t('common.floatingWidgets.supportTitle')}
+          aria-label={t('common.floatingWidgets.supportAria')}
         >
-          {/* Lotus / Peace / Heart Icon */}
           <HeartHandshake className="w-6 h-6 sm:w-7 sm:h-7 text-purple-100 group-hover:text-white transition-colors" />
           <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-brand-teal border-2 border-[#080314] animate-ping" />
           <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-brand-teal border-2 border-[#080314]" />
@@ -42,8 +43,8 @@ export default function FloatingWidgets() {
           <button
             onClick={scrollToTop}
             className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#180b38]/90 hover:bg-brand-purple text-gray-300 hover:text-white flex items-center justify-center shadow-xl border border-purple-700/50 hover:scale-110 active:scale-95 transition-all duration-300 backdrop-blur-md"
-            title="Lên đầu trang"
-            aria-label="Scroll to top"
+            title={t('common.floatingWidgets.scrollTopTitle')}
+            aria-label={t('common.floatingWidgets.scrollTopAria')}
           >
             <ArrowUp className="w-5 h-5" />
           </button>
@@ -69,8 +70,8 @@ export default function FloatingWidgets() {
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-white">Bạn đang cần lắng nghe?</h4>
-                <p className="text-xs text-gray-400">Đường dây nóng hỗ trợ tâm lý miễn phí tại Việt Nam</p>
+                <h4 className="text-lg font-bold text-white">{t('common.floatingWidgets.modalTitle')}</h4>
+                <p className="text-xs text-gray-400">{t('common.floatingWidgets.modalSubtitle')}</p>
               </div>
             </div>
 
@@ -80,8 +81,8 @@ export default function FloatingWidgets() {
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-purple-950/40 border border-purple-800/50 hover:bg-purple-900/40 transition-colors group"
               >
                 <div>
-                  <p className="text-sm font-bold text-white group-hover:text-brand-teal">Đường dây nóng Ngày Mai</p>
-                  <p className="text-xs text-gray-400">Hỗ trợ người trầm cảm và khủng hoảng tâm lý</p>
+                  <p className="text-sm font-bold text-white group-hover:text-brand-teal">{t('common.floatingWidgets.ngayMaiTitle')}</p>
+                  <p className="text-xs text-gray-400">{t('common.floatingWidgets.ngayMaiDesc')}</p>
                 </div>
                 <div className="flex items-center gap-1 text-sm font-bold text-brand-teal">
                   <PhoneCall className="w-4 h-4" />
@@ -94,8 +95,8 @@ export default function FloatingWidgets() {
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-purple-950/40 border border-purple-800/50 hover:bg-purple-900/40 transition-colors group"
               >
                 <div>
-                  <p className="text-sm font-bold text-white group-hover:text-brand-teal">Tổng đài Quốc gia 111</p>
-                  <p className="text-xs text-gray-400">Bảo vệ trẻ em và thanh thiếu niên 24/7</p>
+                  <p className="text-sm font-bold text-white group-hover:text-brand-teal">{t('common.floatingWidgets.child111Title')}</p>
+                  <p className="text-xs text-gray-400">{t('common.floatingWidgets.child111Desc')}</p>
                 </div>
                 <div className="flex items-center gap-1 text-sm font-bold text-brand-teal">
                   <PhoneCall className="w-4 h-4" />
@@ -105,7 +106,7 @@ export default function FloatingWidgets() {
             </div>
 
             <p className="text-xs text-gray-400 text-center">
-              PsyQuizz đồng hành cùng bạn trên hành trình chăm sóc sức khỏe tinh thần.
+              {t('common.floatingWidgets.bottomMessage')}
             </p>
           </div>
         </div>

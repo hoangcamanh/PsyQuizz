@@ -21,8 +21,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        heading: ['Nunito Sans', 'Inter', 'sans-serif'],
-        sans: ['Inter', 'sans-serif'],
+        heading: ['"Libre Franklin"', 'sans-serif'],
+        sans: ['"Libre Franklin"', 'sans-serif'],
+        mono: ['"Libre Franklin"', 'monospace'],
       },
       animation: {
         'orbit-spin': 'orbit 25s linear infinite',

@@ -2,8 +2,11 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { useTranslation } from '@/i18n/I18nContext';
 
 export default function ExploreSection() {
+  const { t } = useTranslation();
+
   return (
     <section className="relative w-full overflow-hidden flex flex-col items-center">
       
@@ -20,24 +23,24 @@ export default function ExploreSection() {
       </div>
 
       {/* Centered Content Positioned Below the Dome */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 pt-4 sm:pt-6 md:pt-8">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold tracking-tight text-[#160f29] leading-tight drop-shadow-[0_2px_12px_rgba(255,255,255,0.9)]">
-          Explore the World Within You.
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5 pt-8 sm:pt-12 md:pt-16">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-extrabold tracking-tight text-[#160f29] leading-tight drop-shadow-[0_2px_12px_rgba(255,255,255,0.9)]">
+          {t('landing.explore.heading')}
         </h2>
         <p className="text-gray-700 text-sm sm:text-base md:text-lg font-medium leading-relaxed max-w-2xl mx-auto drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)]">
-          Understand your emotions, discover your personality, and gain meaningful insights through research-informed psychological assessments.
+          {t('landing.explore.description')}
         </p>
       </div>
 
-      {/* Kéo dài background / khoảng trắng vừa vặn rồi mới đến gradient */}
-      <div className="h-20 sm:h-32 md:h-44 lg:h-52 w-full" />
+      {/* Extended whitespace before transition */}
+      <div className="h-28 sm:h-40 md:h-56 lg:h-64 w-full" />
 
-      {/* Gradient chuyển tiếp mượt mà với phần nền đen dưới (#060210) */}
+      {/* Enhanced, Taller & Richer Gradient Transition to dark base (#060210) */}
       <div
-        className="w-full h-36 sm:h-48 md:h-60 pointer-events-none"
+        className="w-full h-72 sm:h-96 md:h-[480px] lg:h-[580px] pointer-events-none"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(6, 2, 16, 0) 0%, rgba(6, 2, 16, 0.05) 20%, rgba(6, 2, 16, 0.2) 40%, rgba(6, 2, 16, 0.5) 65%, rgba(6, 2, 16, 0.85) 85%, #060210 100%)',
+            'linear-gradient(to bottom, rgba(6, 2, 16, 0) 0%, rgba(18, 7, 44, 0.08) 15%, rgba(24, 10, 56, 0.28) 32%, rgba(18, 7, 42, 0.56) 52%, rgba(12, 5, 28, 0.82) 74%, rgba(6, 2, 16, 0.96) 90%, #060210 100%)',
         }}
       />
 

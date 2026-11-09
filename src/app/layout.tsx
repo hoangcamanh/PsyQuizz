@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { I18nProvider } from '@/i18n/I18nContext';
 
 export const metadata: Metadata = {
   title: 'PsyQuizz — Know Your Mind, Discover Yourself',
@@ -16,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -25,12 +26,14 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito+Sans:wght@400;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300..900;1,300..900&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className="bg-brand-cosmic text-white selection:bg-brand-purple selection:text-white antialiased min-h-screen">
-        {children}
+        <I18nProvider>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

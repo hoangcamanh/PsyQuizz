@@ -10,13 +10,20 @@ import AssessmentModal from '@/components/AssessmentModal';
 import AuthModal from '@/components/AuthModal';
 import FloatingWidgets from '@/components/FloatingWidgets';
 import Footer from '@/components/Footer';
-import { ASSESSMENTS, AssessmentData } from '@/config/assessments';
+import { getLocalizedAssessments, AssessmentData } from '@/config/assessments';
+import { useTranslation } from '@/i18n/I18nContext';
 
 export default function HomePage() {
+  const { locale } = useTranslation();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
-  const [selectedAssessment, setSelectedAssessment] = useState<AssessmentData | null>(null);
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
   const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
+
+  const localizedAssessments = getLocalizedAssessments(locale);
+  const selectedAssessment = selectedAssessmentId
+    ? localizedAssessments.find(a => a.id === selectedAssessmentId) || null
+    : null;
 
   const handleOpenAuth = (mode: 'login' | 'signup') => {
     setAuthMode(mode);
@@ -24,7 +31,7 @@ export default function HomePage() {
   };
 
   const handleSelectAssessment = (assessment: AssessmentData) => {
-    setSelectedAssessment(assessment);
+    setSelectedAssessmentId(assessment.id);
     setAssessmentModalOpen(true);
   };
 
@@ -34,7 +41,7 @@ export default function HomePage() {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     } else {
-      setSelectedAssessment(ASSESSMENTS[0]);
+      setSelectedAssessmentId('dass-21');
       setAssessmentModalOpen(true);
     }
   };

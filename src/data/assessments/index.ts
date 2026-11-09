@@ -1,14 +1,21 @@
 import { AssessmentDefinition } from './types';
-import { DASS21_ASSESSMENT } from './dass21';
-import { BFI44_ASSESSMENT } from './bfi44';
-import { EYSENCK_ASSESSMENT } from './eysenck';
-import { ADHD_ASSESSMENT } from './adhd';
+import { Locale } from '@/i18n/types';
+import { createDass21Definition } from './content/dass21';
+import { createBfi44Definition } from './content/bfi44';
+import { createEysenckDefinition } from './content/eysenck';
+import { createAdhdDefinition } from './content/adhd';
 
 export * from './types';
-export * from './dass21';
-export * from './bfi44';
-export * from './eysenck';
-export * from './adhd';
+export * from './content/dass21';
+export * from './content/bfi44';
+export * from './content/eysenck';
+export * from './content/adhd';
+
+// Backwards-compatible static definitions (default EN)
+export const DASS21_ASSESSMENT = createDass21Definition('en');
+export const BFI44_ASSESSMENT = createBfi44Definition('en');
+export const EYSENCK_ASSESSMENT = createEysenckDefinition('en');
+export const ADHD_ASSESSMENT = createAdhdDefinition('en');
 
 export const ASSESSMENTS_REGISTRY: Record<string, AssessmentDefinition> = {
   'dass-21': DASS21_ASSESSMENT,
@@ -19,6 +26,17 @@ export const ASSESSMENTS_REGISTRY: Record<string, AssessmentDefinition> = {
 
 export const ALL_ASSESSMENTS: AssessmentDefinition[] = Object.values(ASSESSMENTS_REGISTRY);
 
-export function getAssessmentById(id: string): AssessmentDefinition | undefined {
-  return ASSESSMENTS_REGISTRY[id];
+export function getAssessmentById(id: string, locale: Locale = 'en'): AssessmentDefinition | undefined {
+  switch (id) {
+    case 'dass-21':
+      return createDass21Definition(locale);
+    case 'bfi-44':
+      return createBfi44Definition(locale);
+    case 'eysenck':
+      return createEysenckDefinition(locale);
+    case 'adhd':
+      return createAdhdDefinition(locale);
+    default:
+      return undefined;
+  }
 }

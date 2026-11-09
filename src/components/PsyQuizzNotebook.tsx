@@ -12,14 +12,13 @@ import {
   FileText, 
   Edit3, 
   RotateCcw, 
-  ShieldCheck, 
   HelpCircle, 
   Bookmark, 
-  User, 
   Bot 
 } from 'lucide-react';
 import { AssessmentDefinition } from '@/data/assessments/types';
 import { KNOWLEDGE_BASE, queryAssessmentKnowledge } from '@/data/assessments/knowledgeBase';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface NotebookMessage {
   id: string;
@@ -99,22 +98,41 @@ function FormattedMessageText({ content }: { content: string }) {
 
         // Bullet lists
         const lines = trimmed.split('\n');
-        const hasListItems = lines.some((l) => /^(\s*[-*•]|\s*\d+\.)\s+/.test(l.trim()));
+        const isBulletBlock = lines.every((line) => line.trim().startsWith('* ') || line.trim().startsWith('- ') || line.trim().startsWith('• ') || line.trim() === '');
 
-        if (hasListItems) {
+        if (isBulletBlock) {
           return (
-            <div key={bIdx} className="space-y-2 pt-1">
+            <ul key={bIdx} className="space-y-2 list-none pl-1">
+              {lines.map((line, lIdx) => {
+                const cleanLine = line.trim().replace(/^[-*•]\s+/, '');
+                if (!cleanLine) return null;
+                return (
+                  <li key={lIdx} className="flex items-start gap-2.5">
+                    <span className="text-purple-400 text-base leading-tight select-none mt-0.5">•</span>
+                    <span className="flex-1 leading-relaxed">
+                      {renderInlineText(cleanLine)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+
+        // Numbered list
+        const isNumberedBlock = lines.every((line) => /^\d+\.\s+/.test(line.trim()) || line.trim() === '');
+        if (isNumberedBlock) {
+          return (
+            <div key={bIdx} className="space-y-2 pl-1">
               {lines.map((line, lIdx) => {
                 const tLine = line.trim();
-                const isItem = /^(\s*[-*•]|\s*\d+\.)\s+/.test(tLine);
-                if (isItem) {
-                  const cleanText = tLine.replace(/^(\s*[-*•]|\s*\d+\.)\s+/, '');
+                if (!tLine) return null;
+                const match = tLine.match(/^(\d+\.)\s+(.+)$/);
+                if (match) {
                   return (
-                    <div key={lIdx} className="flex items-start gap-2.5 pl-1">
-                      <span className="text-brand-teal mt-1 shrink-0 text-xs">•</span>
-                      <div className="flex-1 leading-relaxed">
-                        {renderInlineText(cleanText)}
-                      </div>
+                    <div key={lIdx} className="flex items-start gap-2">
+                      <span className="font-bold text-purple-300 font-mono text-xs mt-0.5">{match[1]}</span>
+                      <span className="flex-1 leading-relaxed">{renderInlineText(match[2])}</span>
                     </div>
                   );
                 }
@@ -145,20 +163,26 @@ function FormattedMessageText({ content }: { content: string }) {
 }
 
 export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNotebookProps) {
+  const { locale, t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'chat' | 'digest' | 'journal'>('chat');
   
   // Knowledge base reference
   const kb = KNOWLEDGE_BASE[assessment.id] || KNOWLEDGE_BASE['adhd'];
+  const isVi = locale === 'vi';
 
   // Chat State
+  const initialWelcomeText = isVi
+    ? `Xin chào! Tôi là **Trợ lý Nghiên cứu PsyQuizz** đồng hành cùng bài đánh giá **${assessment.name}**.\n\nTôi được kết nối với tài liệu khoa học chuẩn hóa (${kb.canonicalSource}). Bạn có thể đặt câu hỏi về hồ sơ điểm số, cơ chế tâm lý sinh học, định hướng công việc phù hợp, hoặc các chiến lược thích nghi dựa trên bằng chứng khoa học.\n\nNhập câu hỏi của bạn vào ô bên dưới để bắt đầu!`
+    : `Hello! I am your **PsyQuizz Research Companion** for the **${assessment.name}**.\n\nI am connected with verified scientific literature (${kb.canonicalSource}). Ask me anything about your score profile, psychological mechanisms, career alignment, or evidence-based lifestyle adaptations.\n\nType your question in the input box below to begin!`;
+
   const [messages, setMessages] = useState<NotebookMessage[]>([
     {
       id: 'welcome',
       sender: 'assistant',
-      text: `Hello! I am your **PsyQuizz Research Companion** for the **${assessment.name}**.\n\nI am connected with verified scientific literature (${kb.canonicalSource}). Ask me anything about your score profile, psychological mechanisms, career alignment, or evidence-based lifestyle adaptations.\n\nType your question in the input box below to begin!`,
+      text: initialWelcomeText,
       source: kb.canonicalSource,
       citation: kb.academicCitation,
-      timestamp: 'Just now'
+      timestamp: isVi ? 'Vừa xong' : 'Just now'
     }
   ]);
   const [inputText, setInputText] = useState('');
@@ -183,7 +207,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
     }
   }, [journalStorageKey]);
 
-  // Scroll ONLY the inner chat container (NEVER jumps the browser window)
+  // Scroll ONLY the inner chat container
   useEffect(() => {
     if (activeTab === 'chat' && chatScrollContainerRef.current) {
       chatScrollContainerRef.current.scrollTo({
@@ -216,7 +240,8 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
           assessmentId: assessment.id,
           question: text,
           userResultsSummary: resultsSummary || assessment.subtitle,
-          history: messages.slice(-4)
+          history: messages.slice(-4),
+          locale
         })
       });
 
@@ -237,7 +262,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       console.warn('API fetch error, using local fallback:', err);
-      const fallbackResult = queryAssessmentKnowledge(assessment.id, text, resultsSummary);
+      const fallbackResult = queryAssessmentKnowledge(assessment.id, text, resultsSummary, locale);
       const assistantMessage: NotebookMessage = {
         id: `assistant-${Date.now()}`,
         sender: 'assistant',
@@ -269,7 +294,10 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
   };
 
   const handleClearJournal = () => {
-    if (window.confirm('Clear all personal notes for this assessment?')) {
+    const confirmMsg = isVi 
+      ? 'Xóa toàn bộ ghi chú cá nhân của bạn cho bài đánh giá này?'
+      : 'Clear all personal notes for this assessment?';
+    if (window.confirm(confirmMsg)) {
       setJournalContent('');
       if (typeof window !== 'undefined') {
         localStorage.removeItem(journalStorageKey);
@@ -285,15 +313,15 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
 
   return (
     <div className="w-full h-[800px] sm:h-[860px] flex flex-col rounded-3xl bg-gradient-to-b from-[#130b29] to-[#0a0517] border border-purple-500/30 overflow-hidden shadow-2xl transition-all">
-      {/* 1. PERMANENT TOP HEADER (Always fixed at the top of the box) */}
+      {/* 1. PERMANENT TOP HEADER */}
       <div className="shrink-0 p-6 sm:p-8 border-b border-white/10 space-y-4 bg-[#130b29]/95 backdrop-blur-md z-10">
         {/* Eyebrow */}
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-purple-400">
-            In-Depth Research with NotebookLM
+            {t('common.notebook.title')}
           </span>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-purple/20 text-brand-purple-light border border-purple-500/30">
-            In-App Hub
+            {t('common.notebook.connectedBadge')}
           </span>
         </div>
 
@@ -308,7 +336,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                 PsyQuizz Research Notebook
               </h3>
               <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                Grounded academic companion for {assessment.name}
+                {isVi ? `Tài liệu khoa học chuẩn hóa cho ${assessment.name}` : `Grounded academic companion for ${assessment.name}`}
               </p>
             </div>
           </div>
@@ -327,7 +355,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
           )}
         </div>
 
-        {/* 3-Tab Bar (Spacious, full text, never truncated) */}
+        {/* 3-Tab Bar */}
         <div className="pt-2">
           <div className="inline-flex flex-wrap items-center gap-3 p-1.5 rounded-2xl bg-black/40 border border-white/10">
             <button
@@ -339,7 +367,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
               }`}
             >
               <MessageSquare className="w-4 h-4 shrink-0 text-purple-300" />
-              <span>Ask Assistant</span>
+              <span>{t('common.notebook.tabChat')}</span>
             </button>
 
             <button
@@ -351,7 +379,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
               }`}
             >
               <FileText className="w-4 h-4 shrink-0 text-brand-teal" />
-              <span>Academic Digest</span>
+              <span>{t('common.notebook.tabDigest')}</span>
             </button>
 
             <button
@@ -363,18 +391,18 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
               }`}
             >
               <Edit3 className="w-4 h-4 shrink-0 text-pink-400" />
-              <span>My Journal</span>
+              <span>{t('common.notebook.tabJournal')}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* 2. BODY CONTAINER (Fills available space) */}
+      {/* 2. BODY CONTAINER */}
       <div className="flex-1 min-h-0 flex flex-col">
         {/* TAB 1: ASK ASSISTANT */}
         {activeTab === 'chat' && (
           <div className="flex-1 min-h-0 flex flex-col">
-            {/* Scrollable Conversation Stream (Scrolls ONLY inside this div) */}
+            {/* Scrollable Conversation Stream */}
             <div 
               ref={chatScrollContainerRef}
               className="flex-1 min-h-0 p-6 sm:p-9 space-y-6 overflow-y-auto"
@@ -396,49 +424,39 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                             : 'bg-[#180e33] border border-purple-500/30 text-gray-100 rounded-tl-none'
                         }`}
                       >
-                        {/* Properly formatted Markdown with line breaks & bullet lists */}
                         <FormattedMessageText content={msg.text} />
-
-                        {/* Italic and subtle/muted citation footer */}
-                        {msg.citation && (
-                          <div className="pt-2.5 mt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
-                            <div className="flex items-start gap-1.5 min-w-0 flex-1">
-                              <ShieldCheck className="w-3.5 h-3.5 text-gray-500 shrink-0 mt-0.5" />
-                              <span className="font-mono text-[11px] leading-snug break-words [overflow-wrap:anywhere] italic text-gray-400">
-                                Source: {msg.citation}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => handleCopyMessage(msg.id, msg.text)}
-                              className="self-end sm:self-auto inline-flex items-center gap-1 text-gray-400 hover:text-white px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-all text-[11px] shrink-0"
-                              title="Copy response"
-                            >
-                              {copiedId === msg.id ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                                  <span className="text-emerald-400">Copied</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5" />
-                                  <span>Copy</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        )}
                       </div>
 
-                      <span className="text-[11px] text-gray-500 block px-2">
-                        {msg.timestamp}
-                      </span>
+                      {/* Assistant Metadata (Academic Source + Copy Action) */}
+                      {msg.sender === 'assistant' && (
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-400 pl-1">
+                          {msg.source && (
+                            <span className="px-2 py-0.5 rounded-md bg-purple-950/60 border border-purple-800/40 text-purple-300 font-mono text-[10px]">
+                              {msg.source}
+                            </span>
+                          )}
+                          <span>•</span>
+                          <span>{msg.timestamp}</span>
+                          <button
+                            onClick={() => handleCopyMessage(msg.id, msg.text)}
+                            className="ml-auto text-gray-400 hover:text-white flex items-center gap-1 text-[11px] p-1 rounded hover:bg-white/5 transition-colors"
+                            title="Copy answer"
+                          >
+                            {copiedId === msg.id ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-400" />
+                                <span className="text-emerald-400">{t('common.notebook.btnCopied')}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>{t('common.notebook.btnCopy')}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
-
-                    {msg.sender === 'user' && (
-                      <div className="w-8 h-8 rounded-full bg-purple-600/40 border border-purple-400/40 flex items-center justify-center shrink-0 text-white mt-1 shadow-sm">
-                        <User className="w-4 h-4" />
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}
@@ -450,13 +468,13 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                   </div>
                   <div className="px-4 py-3 rounded-2xl rounded-tl-none bg-[#180e33] border border-purple-500/30 text-xs text-purple-300 flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
-                    <span>Gemini AI is analyzing research literature...</span>
+                    <span>{isVi ? 'Gemini AI đang phân tích tài liệu nghiên cứu...' : 'Gemini AI is analyzing research literature...'}</span>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* PERMANENT BOTTOM INPUT BAR (Always visible and pinned at the bottom) */}
+            {/* Bottom Input Bar */}
             <div className="shrink-0 p-4 sm:p-5 bg-[#0f0822] border-t border-purple-500/20">
               <form
                 onSubmit={(e) => {
@@ -469,7 +487,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  placeholder={`Ask anything about ${assessment.code} or your results...`}
+                  placeholder={isVi ? `Đặt câu hỏi về ${assessment.code} hoặc kết quả của bạn...` : `Ask anything about ${assessment.code} or your results...`}
                   disabled={isLoading}
                   className="flex-1 bg-black/60 border border-white/15 focus:border-purple-400 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-gray-500 focus:outline-none transition-all disabled:opacity-50 shadow-inner"
                 />
@@ -478,7 +496,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                   disabled={!inputText.trim() || isLoading}
                   className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-purple-600/25 shrink-0 active:scale-95"
                 >
-                  <span>Send</span>
+                  <span>{isVi ? 'Gửi' : 'Send'}</span>
                   <Send className="w-4 h-4" />
                 </button>
               </form>
@@ -494,14 +512,14 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
               <div className="flex items-center gap-2.5">
                 <Bookmark className="w-5 h-5 text-brand-teal" />
                 <h4 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
-                  Foundational Theoretical Model
+                  {isVi ? 'Mô hình Lý thuyết Nền tảng' : 'Foundational Theoretical Model'}
                 </h4>
               </div>
               <p className="text-sm text-gray-200 leading-relaxed">
                 {kb.foundationalTheory}
               </p>
               <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 text-xs text-purple-300 font-mono break-words [overflow-wrap:anywhere]">
-                Academic Citation: {kb.academicCitation}
+                {isVi ? 'Trích dẫn học thuật' : 'Academic Citation'}: {kb.academicCitation}
               </div>
             </div>
 
@@ -509,7 +527,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
             <div className="space-y-4">
               <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <FileText className="w-4 h-4 text-purple-400" />
-                Curated Research Literature
+                {isVi ? 'Tổng hợp Y văn Nghiên cứu' : 'Curated Research Literature'}
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {kb.articles.map((art, idx) => (
@@ -529,11 +547,11 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                       </p>
                     </div>
                     <div className="pt-2.5 border-t border-white/10 space-y-1.5">
-                      <span className="text-xs font-semibold text-gray-400 block">Key Scientific Takeaways:</span>
-                      {art.keyTakeaways.map((t, i) => (
+                      <span className="text-xs font-semibold text-gray-400 block">{isVi ? 'Điểm cốt lõi:' : 'Key Scientific Takeaways:'}</span>
+                      {art.keyTakeaways.map((tItem, i) => (
                         <div key={i} className="text-xs text-gray-300 flex items-start gap-2">
                           <span className="text-brand-teal shrink-0">•</span>
-                          <span>{t}</span>
+                          <span>{tItem}</span>
                         </div>
                       ))}
                     </div>
@@ -546,7 +564,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
             <div className="space-y-3">
               <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <HelpCircle className="w-4 h-4 text-brand-teal" />
-                Peer-Reviewed Frequently Asked Questions
+                {isVi ? 'Câu hỏi Thường gặp theo Y văn Thực chứng' : 'Peer-Reviewed Frequently Asked Questions'}
               </h4>
               <div className="space-y-3">
                 {kb.faq.map((item, idx) => (
@@ -574,16 +592,16 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
               <div className="space-y-1">
                 <h4 className="text-base font-bold text-white flex items-center gap-2">
                   <Edit3 className="w-5 h-5 text-purple-400" />
-                  Personal Reflection & Action Journal
+                  {t('common.notebook.journalTitle')}
                 </h4>
                 <p className="text-xs text-gray-400">
-                  Record personal takeaways, reflections, or questions to discuss with a mentor or psychologist.
+                  {t('common.notebook.journalSubtitle')}
                 </p>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                 {isJournalSaved && (
                   <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 animate-pulse bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                    <Check className="w-3.5 h-3.5" /> Auto-saved
+                    <Check className="w-3.5 h-3.5" /> {t('common.notebook.btnSaved')}
                   </span>
                 )}
                 <button
@@ -592,7 +610,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
                   className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-purple-400 text-gray-300 hover:text-white text-xs font-semibold transition-all disabled:opacity-40 flex items-center gap-1.5"
                 >
                   {copiedId === 'journal' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedId === 'journal' ? 'Copied' : 'Copy Notes'}</span>
+                  <span>{copiedId === 'journal' ? t('common.notebook.btnCopied') : t('common.notebook.btnCopy')}</span>
                 </button>
                 <button
                   onClick={handleClearJournal}
@@ -609,12 +627,14 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
               <textarea
                 value={journalContent}
                 onChange={handleJournalChange}
-                placeholder={`Write your personal notes for ${assessment.name} here...\n\nPrompts for reflection:\n1. What surprised me most about my scores:\n2. One concrete habit or environmental adjustment I want to try this week:\n3. Questions I want to bring to a professional or trusted mentor:`}
+                placeholder={isVi
+                  ? `Viết ghi chú cá nhân của bạn cho bài kiểm tra ${assessment.name} tại đây...\n\nGợi ý chiêm nghiệm:\n1. Điều gì làm bạn ngạc nhiên nhất về kết quả điểm số:\n2. Một thói quen hoặc thay đổi môi trường cụ thể bạn muốn thử áp dụng tuần này:\n3. Câu hỏi bạn muốn thảo luận thêm với chuyên gia tâm lý:`
+                  : `Write your personal notes for ${assessment.name} here...\n\nPrompts for reflection:\n1. What surprised me most about my scores:\n2. One concrete habit or environmental adjustment I want to try this week:\n3. Questions I want to bring to a professional or trusted mentor:`}
                 className="flex-1 w-full p-5 rounded-2xl bg-black/40 border border-white/15 focus:border-purple-400 text-sm text-gray-100 placeholder-gray-500 focus:outline-none font-sans leading-relaxed resize-none transition-all"
               />
               <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-500 gap-1 pt-1">
-                <span>🔒 Encrypted locally in your browser storage. PsyQuizz never uploads your private notes.</span>
-                <span>{journalContent.length} characters</span>
+                <span>🔒 {isVi ? 'Được mã hóa cục bộ trong trình duyệt. PsyQuizz không bao giờ tải lên ghi chú riêng tư của bạn.' : 'Encrypted locally in your browser storage. PsyQuizz never uploads your private notes.'}</span>
+                <span>{journalContent.length} {isVi ? 'ký tự' : 'characters'}</span>
               </div>
             </div>
           </div>

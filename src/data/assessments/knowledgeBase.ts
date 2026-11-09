@@ -350,7 +350,8 @@ export const KNOWLEDGE_BASE: Record<string, CuratedAssessmentKnowledge> = {
 export function queryAssessmentKnowledge(
   assessmentId: string,
   userQuestion: string,
-  userResultsSummary?: string
+  userResultsSummary?: string,
+  locale: 'en' | 'vi' = 'en'
 ): { answer: string; source: string; citation: string; tags: string[] } {
   const kb = KNOWLEDGE_BASE[assessmentId] || KNOWLEDGE_BASE['adhd'];
   const qLower = userQuestion.toLowerCase().trim();
@@ -377,6 +378,20 @@ export function queryAssessmentKnowledge(
   // 2. Career / Vocational Questions
   if (matchesAny(['career', 'job', 'work', 'profession', 'nghề', 'công việc', 'phù hợp'])) {
     if (assessmentId === 'bfi-44') {
+      if (locale === 'vi') {
+        return {
+          answer: `### Định hướng Nghề nghiệp & Môi trường Làm việc (Mô hình Big Five)\n\n` +
+            `Theo các nghiên cứu tâm lý học tổ chức (*Barrick & Mount, 1991; John & Srivastava, 1999*):\n\n` +
+            `• **Tính Tận tâm (Conscientiousness):** Chỉ số dự báo đáng tin cậy nhất về hiệu quả công việc dài hạn ở hầu hết các ngành nghề (tài chính, quản trị, y dược, pháp lý).\n` +
+            `• **Tính Cởi mở (Openness):** Phù hợp nhất với môi trường năng động, linh hoạt đòi hỏi sự đổi mới sáng tạo (nghệ thuật, R&D, thiết kế, tư vấn chiến lược).\n` +
+            `• **Tính Hướng ngoại (Extraversion):** Tỏa sáng trong các vai trò tương tác cao, đàm phán và thuyết phục (kinh doanh, truyền thông, đối ngoại, quản trị nhân sự).\n` +
+            `• **Tính Dễ chịu (Agreeableness):** Xuất sắc trong các môi trường hướng tới con người và dịch vụ (tư vấn tâm lý, chăm sóc khách hàng, gắn kết cộng đồng).\n\n` +
+            `💡 **Lời khuyên thực tiễn:** Hãy lựa chọn môi trường làm việc phát huy đúng các nét nhân cách tự nhiên thay vì liên tục ép bản thân vào các khuôn mẫu gượng ép.`,
+          source: kb.canonicalSource,
+          citation: 'Barrick & Mount (1991); John & Srivastava (1999)',
+          tags: ['Định hướng nghề nghiệp', 'Tâm lý học tổ chức']
+        };
+      }
       return {
         answer: `### Career & Workplace Alignment (Five-Factor Model)\n\n` +
           `According to organizational psychology research (*Barrick & Mount, 1991; John & Srivastava, 1999*):\n\n` +
@@ -391,6 +406,19 @@ export function queryAssessmentKnowledge(
       };
     }
     if (assessmentId === 'eysenck') {
+      if (locale === 'vi') {
+        return {
+          answer: `### Môi trường Nghề nghiệp theo Khí chất Sinh học\n\n` +
+            `Theo thuyết khí chất của Hans Eysenck (*Eysenck & Eysenck, 1964*):\n\n` +
+            `• **Khí chất Hoạt bát (Sanguine):** Thích hợp trong các công việc đối ngoại, truyền cảm hứng và giao tiếp xã hội phong phú (truyền thông, dịch vụ, khởi nghiệp, quan hệ công chúng).\n` +
+            `• **Khí chất Nóng nảy (Choleric):** Thể hiện năng lực vượt trội trong các môi trường cạnh tranh, đòi hỏi quyết đoán và ứng phó dưới áp lực cao (xử lý khủng hoảng, quản lý tiến độ, lãnh đạo mục tiêu).\n` +
+            `• **Khí chất Điềm đạm (Phlegmatic):** Rất đáng tin cậy trong các công việc cần sự kiên nhẫn, điềm tĩnh và có tính hệ thống cao (nghiên cứu khoa học, lập trình, kế toán - tài chính, kiểm toán).\n` +
+            `• **Khí chất U sầu (Melancholic):** Có thế mạnh đặc biệt trong các lĩnh vực đòi hỏi sự tinh tế, tập trung sâu và chất lượng hoàn hảo (nghệ thuật sáng tác, phân tích dữ liệu, viết lách, học thuật).`,
+          source: kb.canonicalSource,
+          citation: kb.academicCitation,
+          tags: ['Khí chất & Nghề nghiệp', 'Mô hình EPI']
+        };
+      }
       return {
         answer: `### Vocational Fit Based on Biological Temperament\n\n` +
           `According to Eysenck's temperament typology (*Eysenck & Eysenck, 1964*):\n\n` +
@@ -404,6 +432,18 @@ export function queryAssessmentKnowledge(
       };
     }
     if (assessmentId === 'adhd') {
+      if (locale === 'vi') {
+        return {
+          answer: `### Môi trường Làm việc Phù hợp cho Bộ não ADHD\n\n` +
+            `Nghiên cứu (*Barkley, 2006; Ratey & Johnson, 2021*) chỉ ra rằng người có đặc điểm ADHD phát huy thế mạnh tốt nhất trong môi trường có **tính mới lạ, tính cấp bách, sự đam mê và quyền tự chủ cao**:\n\n` +
+            `• **Công việc kích thích cao, năng động:** Kỹ thuật phần mềm, thiết kế sáng tạo, y học cấp cứu, khởi nghiệp, phóng viên điều tra.\n` +
+            `• **Môi trường dễ gây cản trở:** Các công việc hành chính lặp đi lặp lại với sự kiểm soát vi mô gắt gao thường dễ dẫn đến sự trì hoãn và kiệt sức nhận thức.\n\n` +
+            `💡 **Chiến lược:** Thiết lập quy trình làm việc với các cột mốc ngắn, phản hồi liên tục và áp dụng kỹ thuật "body doubling" (làm việc cùng người khác).`,
+          source: kb.canonicalSource,
+          citation: 'Barkley, R. A. (2006)',
+          tags: ['Nghề nghiệp ADHD', 'Hỗ trợ môi trường làm việc']
+        };
+      }
       return {
         answer: `### Career Environments for ADHD Brains\n\n` +
           `Research (*Barkley, 2006; Ratey & Johnson, 2021*) highlights that ADHD minds thrive when environments provide **novelty, urgency, interest, and autonomy**:\n\n` +
@@ -419,6 +459,19 @@ export function queryAssessmentKnowledge(
 
   // 3. Questions about changing / improving / neuroplasticity
   if (matchesAny(['change', 'improve', 'cải thiện', 'thay đổi', 'rèn luyện', 'modify', 'growth', 'neuroplasticity'])) {
+    if (locale === 'vi') {
+      return {
+        answer: `### Liệu các Nét Tính cách & Khí chất có thể Thay đổi? (Tính Mềm dẻo Não bộ & Nguyên tắc Trưởng thành)\n\n` +
+          `Có. Các nghiên cứu tâm lý học theo chiều dọc (*Roberts và cs., 2017; Davidson & McEwen, 2012*) khẳng định:\n\n` +
+          `1. **Tính di truyền sinh học và biểu hiện thực tế:** Mặc dù nền tảng thần kinh có khoảng 40–50% do di truyền, biểu hiện hành vi hàng ngày được định hình mạnh mẽ bởi môi trường và thói quen rèn luyện.\n` +
+          `2. **Nguyên tắc trưởng thành (Maturity Principle):** Khi trưởng thành, mức độ Tận tâm và Dễ chịu có xu hướng tăng lên, trong khi tính Bất ổn cảm xúc giảm dần nhờ sự tích lũy các kỹ năng điều hòa cảm xúc.\n` +
+          `3. **Can thiệp có chủ đích:** Thực hành tái cấu trúc nhận thức, xây dựng chuỗi thói quen và sắp xếp môi trường sống mang lại sự cải thiện rõ rệt cho các chỉ số tâm lý sau 3 đến 6 tháng.\n\n` +
+          `*Kết luận:* Điểm số trắc nghiệm phản ánh trạng thái hiện tại của bạn, không phải là một số phận bất biến.`,
+        source: kb.canonicalSource,
+        citation: 'Roberts, B. W., et al. (2017). Psychological Bulletin',
+        tags: ['Tính mềm dẻo não bộ', 'Phát triển bản thân']
+      };
+    }
     return {
       answer: `### Can Traits & Temperament Change? (Neuroplasticity & The Maturity Principle)\n\n` +
         `Yes. Longitudinal personality research (*Roberts et al., 2017; Davidson & McEwen, 2012*) demonstrates:\n\n` +
@@ -434,6 +487,18 @@ export function queryAssessmentKnowledge(
 
   // 4. Clinical diagnosis vs educational screening
   if (matchesAny(['diagnosis', 'bệnh', 'disorder', 'chẩn đoán', 'sick', 'illness', 'doctor', 'bác sĩ'])) {
+    if (locale === 'vi') {
+      return {
+        answer: `### Sàng lọc Tâm lý Giáo dục so với Chẩn đoán Bệnh học Lâm sàng\n\n` +
+          `Một nguyên tắc khoa học cốt lõi trong tâm lý học thực chứng:\n\n` +
+          `• **Thang đo sàng lọc:** Bài kiểm tra này là một công cụ tự đánh giá chuẩn hóa nhằm phản ánh các xu hướng nhận thức, hành vi và trạng thái cảm xúc của bạn.\n` +
+          `• **Không phải chẩn đoán y khoa:** Điểm số cao **không đồng nghĩa** với việc bạn bị rối loạn tâm thần hay bệnh lý lâm sàng. Chẩn đoán y khoa chính thức đòi hỏi quy trình thăm khám trực tiếp, phỏng vấn lâm sàng sâu và đánh giá lịch sử phát triển bởi bác sĩ tâm thần hoặc chuyên gia tâm lý có chứng chỉ hành nghề.\n\n` +
+          `*Khuyến nghị:* Hãy xem báo cáo này như tài liệu tham khảo có cấu trúc giúp bạn trao đổi cởi mở, hiệu quả hơn với chuyên gia y tế hoặc tâm lý nếu bạn gặp cản trở trong cuộc sống.`,
+        source: kb.canonicalSource,
+        citation: kb.academicCitation,
+        tags: ['Khuyến nghị lâm sàng', 'Quy chuẩn sàng lọc']
+      };
+    }
     return {
       answer: `### Clinical Screening vs. Diagnostic Assessment\n\n` +
         `An essential scientific principle across psychometric literature:\n\n` +

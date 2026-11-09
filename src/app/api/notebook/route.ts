@@ -4,7 +4,7 @@ import { KNOWLEDGE_BASE, queryAssessmentKnowledge } from '@/data/assessments/kno
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { assessmentId, question, userResultsSummary, history } = body;
+    const { assessmentId, question, userResultsSummary, history, locale } = body;
 
     if (!assessmentId || !question) {
       return NextResponse.json(
@@ -15,12 +15,16 @@ export async function POST(req: NextRequest) {
 
     const kb = KNOWLEDGE_BASE[assessmentId];
     const apiKey = process.env.GEMINI_API_KEY;
-
-    const modelName = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
+    const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const isVi = locale === 'vi';
 
     // If Gemini API key is available, call Gemini with strict grounding prompt
     if (apiKey && apiKey !== 'your-gemini-api-key') {
       try {
+        const langDirective = isVi
+          ? '3. Write your response entirely in natural, compassionate, and academically rigorous VIETNAMESE (Tiếng Việt). Do NOT apologize to the user or state rules about language constraints. Answer directly and insightfully in Vietnamese.'
+          : '3. Write your response naturally in clear, accessible, and compassionate English. Do NOT apologize to the user or state rules about language constraints. Answer directly and insightfully.';
+
         const systemPrompt = `You are the PsyQuizz In-App Academic Research Assistant.
 Your task is to provide compassionate, scientifically rigorous, and strictly grounded psychological answers based on the curated literature of:
 Assessment: ${kb?.title || assessmentId}
@@ -32,7 +36,7 @@ Neurobiology / Mechanisms: ${kb?.neurobiologyNote || 'Cognitive and psychologica
 STRICT RULES:
 1. DO NOT HALLUCINATE OR INVENT FACTS. Strictly ground your response in the theoretical and empirical literature of this assessment.
 2. The user recently took this assessment and their profile summary is: "${userResultsSummary || 'Completed test'}".
-3. Write your response naturally in clear, accessible English. NEVER apologize to the user, lecture them, or state rules about language constraints (even if the user query was in Vietnamese or another language). Simply answer the question directly, warmly, and insightfully.
+${langDirective}
 4. Emphasize that psychometric scores describe current patterns, tendencies, and adaptations—not categorical medical diseases or unalterable flaws.
 5. Provide actionable, evidence-based coping or development strategies.
 6. Format your answer with clean markdown: use bullet points (* or -) on separate lines and bold titles so each point is clearly spaced.
@@ -84,7 +88,7 @@ STRICT RULES:
     }
 
     // Grounded Local Knowledge Synthesizer (Zero-latency, 100% grounded, no hallucinations)
-    const result = queryAssessmentKnowledge(assessmentId, question, userResultsSummary);
+    const result = queryAssessmentKnowledge(assessmentId, question, userResultsSummary, locale);
 
     return NextResponse.json({
       answer: result.answer,
