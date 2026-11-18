@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
     if (apiKey && apiKey !== 'your-gemini-api-key') {
       try {
         const langDirective = isVi
-          ? '3. Write your response entirely in natural, compassionate, and academically rigorous VIETNAMESE (Tiếng Việt). Do NOT apologize to the user or state rules about language constraints. Answer directly and insightfully in Vietnamese.'
-          : '3. Write your response naturally in clear, accessible, and compassionate English. Do NOT apologize to the user or state rules about language constraints. Answer directly and insightfully.';
+          ? '3. LANGUAGE: Respond entirely in natural, empathetic, and academically rigorous VIETNAMESE (Tiếng Việt). Do NOT apologize to the user or state rules about language constraints. Answer directly, warmly, and insightfully in Vietnamese.'
+          : '3. LANGUAGE: If the user query is in Vietnamese, respond warmly in Vietnamese. Otherwise, write your response naturally in clear, accessible, and compassionate English. Do NOT apologize to the user, lecture them, or state rules about language constraints. Answer directly and insightfully.';
 
         const systemPrompt = `You are the PsyQuizz In-App Academic Research Assistant.
 Your task is to provide compassionate, scientifically rigorous, and strictly grounded psychological answers based on the curated literature of:
@@ -37,11 +37,12 @@ STRICT RULES:
 1. DO NOT HALLUCINATE OR INVENT FACTS. Strictly ground your response in the theoretical and empirical literature of this assessment.
 2. The user recently took this assessment and their profile summary is: "${userResultsSummary || 'Completed test'}".
 ${langDirective}
-4. Emphasize that psychometric scores describe current patterns, tendencies, and adaptations—not categorical medical diseases or unalterable flaws.
-5. Provide actionable, evidence-based coping or development strategies.
-6. Format your answer with clean markdown: use bullet points (* or -) on separate lines and bold titles so each point is clearly spaced.
-7. Always end with a clear citation tag: "[Source: ${kb?.academicCitation || 'Psychological Literature'}]".
-8. Keep answers structured, insightful, and under 250 words.`;
+4. NEVER say "I apologize, but as the PsyQuizz Research Assistant, I am required to provide all academic insights in 100% English" or mention any language restrictions.
+5. Emphasize that psychometric scores describe current patterns, tendencies, and adaptations—not categorical medical diseases or unalterable flaws.
+6. Provide actionable, evidence-based coping or development strategies.
+7. FORMATTING: Use clean markdown. Use double newlines before and after headings. Put each bullet point on its own separate line starting with "* **Title:** description". NEVER clump multiple bullet points together on the same line.
+8. Always end with a citation on its own line: "[Source: ${kb?.academicCitation || 'Psychological Literature'}]".
+9. Keep answers structured, insightful, and under 250 words.`;
 
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,

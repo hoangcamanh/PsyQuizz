@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { I18nProvider } from '@/i18n/I18nContext';
+import { AnonymousProvider } from '@/context/AnonymousContext';
 
 export const metadata: Metadata = {
   title: 'PsyQuizz — Know Your Mind, Discover Yourself',
@@ -32,7 +33,9 @@ export default function RootLayout({
       </head>
       <body className="bg-brand-cosmic text-white selection:bg-brand-purple selection:text-white antialiased min-h-screen">
         <I18nProvider>
-          {children}
+          <AnonymousProvider>
+            {children}
+          </AnonymousProvider>
         </I18nProvider>
       </body>
     </html>

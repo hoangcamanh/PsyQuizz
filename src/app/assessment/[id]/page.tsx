@@ -364,9 +364,10 @@ export default function AssessmentRunnerPage() {
                 </div>
               </div>
 
-              {/* Dimension Score Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Object.values(results.scores).map((dim) => {
+              {/* Dimension Score Cards (3-2 Balanced Layout for 5-KPI Assessments like BFI-44) */}
+              {(() => {
+                const scoreEntries = Object.values(results.scores);
+                const renderCard = (dim: typeof scoreEntries[0]) => {
                   const percent = Math.min(100, Math.round((dim.score / dim.maxScore) * 100));
                   return (
                     <div
@@ -417,8 +418,34 @@ export default function AssessmentRunnerPage() {
                       </p>
                     </div>
                   );
-                })}
-              </div>
+                };
+
+                if (scoreEntries.length === 5) {
+                  // Balanced 3-2 Split: Row 1 has 3 cards, Row 2 has 2 centered cards
+                  const row1 = scoreEntries.slice(0, 3);
+                  const row2 = scoreEntries.slice(3, 5);
+                  return (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {row1.map(renderCard)}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full">
+                        {row2.map(renderCard)}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className={`grid gap-6 ${
+                    scoreEntries.length === 2 
+                      ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto w-full' 
+                      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                  }`}>
+                    {scoreEntries.map(renderCard)}
+                  </div>
+                );
+              })()}
 
               {/* Action Guidance Card */}
               {results.actionGuide && (

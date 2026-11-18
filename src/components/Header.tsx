@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { useTranslation } from '@/i18n/I18nContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import AnonymousKeyBadge from './AnonymousKeyBadge';
 
 interface HeaderProps {
   onOpenAuth?: (mode: 'login' | 'signup') => void;
@@ -62,8 +63,13 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
           </div>
         </Link>
 
-        {/* Right Navigation Links: Language Switcher, About Us & Take a Test (fixed-width slots to prevent shift) */}
-        <nav className="hidden md:flex items-center gap-5 lg:gap-7">
+        {/* Right Navigation Links: Anonymous Key, Language Switcher, About Us & Take a Test */}
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6">
+          {/* Anonymous Key Badge */}
+          <div className="shrink-0 flex items-center">
+            <AnonymousKeyBadge />
+          </div>
+
           {/* Flag Switcher placed to the LEFT of About Us */}
           <div className="shrink-0 flex items-center">
             <LanguageSwitcher />
@@ -109,7 +115,10 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#0c061d]/98 backdrop-blur-2xl border-b border-purple-900/40 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-          <LanguageSwitcher isMobile />
+          <div className="pb-2 border-b border-white/10 space-y-3">
+            <AnonymousKeyBadge isMobile />
+            <LanguageSwitcher isMobile />
+          </div>
           
           <Link
             href="#about"

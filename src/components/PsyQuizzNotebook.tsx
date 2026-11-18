@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   BookOpen, 
   Sparkles, 
@@ -14,11 +15,17 @@ import {
   RotateCcw, 
   HelpCircle, 
   Bookmark, 
-  Bot 
+  Bot,
+  Lock,
+  Crown,
+  QrCode,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { AssessmentDefinition } from '@/data/assessments/types';
 import { KNOWLEDGE_BASE, queryAssessmentKnowledge } from '@/data/assessments/knowledgeBase';
 import { useTranslation } from '@/i18n/I18nContext';
+import { useAnonymous } from '@/context/AnonymousContext';
 
 interface NotebookMessage {
   id: string;
@@ -66,19 +73,32 @@ function renderInlineText(str: string): React.ReactNode[] {
 
 // Comprehensive message formatter with proper paragraph & bullet list line breaking
 function FormattedMessageText({ content }: { content: string }) {
-  const normalized = content.replace(/\r\n/g, '\n');
+  let text = content.replace(/\r\n/g, '\n');
 
-  // Fix clumping if multiple bullet items (* **Item:**) were returned on a single line
-  const fixedContent = normalized.replace(/([^\n])\s*\*\s+\*\*/g, '$1\n\n* **');
+  // 1. Separate citation tag onto its own line
+  text = text.replace(/([^\n])\s*(\[Source:[^\]]+\])/gi, '$1\n\n$2');
+
+  // 2. Break apart clumped bullets that don't start on their own line
+  // Example: "...world. * **Neurobiology..." -> "...world.\n\n* **Neurobiology..."
+  text = text.replace(/([^\n])\s*([*•-])\s+(\*\*|[A-Z])/g, '$1\n\n$2 $3');
 
   // Split into blocks by double newlines
-  const blocks = fixedContent.split(/\n\n+/);
+  const blocks = text.split(/\n\n+/);
 
   return (
     <div className="space-y-3 font-sans text-sm leading-relaxed">
       {blocks.map((block, bIdx) => {
         const trimmed = block.trim();
         if (!trimmed) return null;
+
+        // Citation tag formatting: light, italic, subtle badge
+        if (trimmed.startsWith('[Source:') && trimmed.endsWith(']')) {
+          return (
+            <p key={bIdx} className="text-xs text-gray-400 italic pt-2 border-t border-white/5 font-serif">
+              {trimmed}
+            </p>
+          );
+        }
 
         // Headings
         if (trimmed.startsWith('### ')) {
@@ -96,16 +116,16 @@ function FormattedMessageText({ content }: { content: string }) {
           );
         }
 
-        // Bullet lists
-        const lines = trimmed.split('\n');
-        const isBulletBlock = lines.every((line) => line.trim().startsWith('* ') || line.trim().startsWith('- ') || line.trim().startsWith('• ') || line.trim() === '');
+        // Check lines
+        const lines = trimmed.split('\n').map((l) => l.trim()).filter(Boolean);
 
-        if (isBulletBlock) {
+        // If ALL lines in this block are bullets
+        const isAllBullets = lines.length > 0 && lines.every((l) => /^[-*•]\s+/.test(l));
+        if (isAllBullets) {
           return (
             <ul key={bIdx} className="space-y-2 list-none pl-1">
               {lines.map((line, lIdx) => {
-                const cleanLine = line.trim().replace(/^[-*•]\s+/, '');
-                if (!cleanLine) return null;
+                const cleanLine = line.replace(/^[-*•]\s+/, '');
                 return (
                   <li key={lIdx} className="flex items-start gap-2.5">
                     <span className="text-purple-400 text-base leading-tight select-none mt-0.5">•</span>
@@ -119,26 +139,24 @@ function FormattedMessageText({ content }: { content: string }) {
           );
         }
 
-        // Numbered list
-        const isNumberedBlock = lines.every((line) => /^\d+\.\s+/.test(line.trim()) || line.trim() === '');
-        if (isNumberedBlock) {
+        // If lines contain a mix of prose and bullets, handle line by line:
+        const hasAnyBullets = lines.some((l) => /^[-*•]\s+/.test(l));
+        if (hasAnyBullets) {
           return (
-            <div key={bIdx} className="space-y-2 pl-1">
+            <div key={bIdx} className="space-y-2">
               {lines.map((line, lIdx) => {
-                const tLine = line.trim();
-                if (!tLine) return null;
-                const match = tLine.match(/^(\d+\.)\s+(.+)$/);
-                if (match) {
+                if (/^[-*•]\s+/.test(line)) {
+                  const cleanLine = line.replace(/^[-*•]\s+/, '');
                   return (
-                    <div key={lIdx} className="flex items-start gap-2">
-                      <span className="font-bold text-purple-300 font-mono text-xs mt-0.5">{match[1]}</span>
-                      <span className="flex-1 leading-relaxed">{renderInlineText(match[2])}</span>
+                    <div key={lIdx} className="flex items-start gap-2.5 pl-1">
+                      <span className="text-purple-400 text-base leading-tight select-none mt-0.5">•</span>
+                      <span className="flex-1 leading-relaxed">{renderInlineText(cleanLine)}</span>
                     </div>
                   );
                 }
                 return (
                   <p key={lIdx} className="leading-relaxed">
-                    {renderInlineText(tLine)}
+                    {renderInlineText(line)}
                   </p>
                 );
               })}
@@ -165,6 +183,23 @@ function FormattedMessageText({ content }: { content: string }) {
 export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNotebookProps) {
   const { locale, t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'chat' | 'digest' | 'journal'>('chat');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Anonymous identity & AI question quota
+  const {
+    anonymousKey,
+    isPlus,
+    remainingAiQuestions,
+    maxFreeAiQuestions,
+    useAiQuestion,
+    activatePlus
+  } = useAnonymous();
+  const isQuotaExhausted = !isPlus && remainingAiQuestions <= 0;
   
   // Knowledge base reference
   const kb = KNOWLEDGE_BASE[assessment.id] || KNOWLEDGE_BASE['adhd'];
@@ -221,6 +256,12 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
     const text = (textToSend || inputText).trim();
     if (!text || isLoading) return;
 
+    // Check Anonymous AI Quota
+    if (isQuotaExhausted) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const userMessage: NotebookMessage = {
       id: `user-${Date.now()}`,
       sender: 'user',
@@ -231,6 +272,9 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
     setMessages((prev) => [...prev, userMessage]);
     if (!textToSend) setInputText('');
     setIsLoading(true);
+
+    // Decrement quota turn
+    useAiQuestion();
 
     try {
       const res = await fetch('/api/notebook', {
@@ -325,7 +369,7 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
           </span>
         </div>
 
-        {/* Title Row + Google NotebookLM Button */}
+        {/* Title Row + Google NotebookLM Button & Quota Indicator */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-gradient-to-br from-purple-600/30 to-brand-teal/20 border border-purple-400/40 text-brand-teal shrink-0 shadow-lg">
@@ -341,18 +385,51 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
             </div>
           </div>
 
-          {assessment.notebookLmUrl && (
-            <a
-              href={assessment.notebookLmUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-purple-400/60 text-xs font-semibold text-gray-200 hover:text-white transition-all shrink-0 self-start sm:self-auto shadow-sm"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
-              <span>Google NotebookLM</span>
-              <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
-            </a>
-          )}
+          <div className="flex items-center gap-2.5 flex-wrap self-start sm:self-auto">
+            {/* AI Quota Pill */}
+            {isPlus ? (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold shadow-sm">
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span>Plus Unlimited</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  remainingAiQuestions > 0
+                    ? 'bg-purple-950/60 text-purple-300 border-purple-500/30 hover:border-purple-400'
+                    : 'bg-red-950/70 text-red-300 border-red-500/50 hover:bg-red-900/60 animate-pulse'
+                }`}
+                title={isVi ? 'Nhấp để xem gói PsyQuizz Plus' : 'Click to view PsyQuizz Plus'}
+              >
+                <Sparkles className={`w-3.5 h-3.5 ${remainingAiQuestions > 0 ? 'text-brand-teal' : 'text-red-400'}`} />
+                <span>
+                  {isVi
+                    ? `${remainingAiQuestions}/${maxFreeAiQuestions} lượt hỏi AI`
+                    : `${remainingAiQuestions}/${maxFreeAiQuestions} free AI queries`}
+                </span>
+                {remainingAiQuestions === 0 && (
+                  <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.2 rounded-full font-bold ml-0.5">
+                    Hết
+                  </span>
+                )}
+              </button>
+            )}
+
+            {assessment.notebookLmUrl && (
+              <a
+                href={assessment.notebookLmUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-purple-400/60 text-xs font-semibold text-gray-200 hover:text-white transition-all shrink-0 shadow-sm"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
+                <span>Google NotebookLM</span>
+                <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
+              </a>
+            )}
+          </div>
         </div>
 
         {/* 3-Tab Bar */}
@@ -474,32 +551,68 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
               )}
             </div>
 
-            {/* Bottom Input Bar */}
+            {/* Bottom Input Bar or Quota Upgrade Banner */}
             <div className="shrink-0 p-4 sm:p-5 bg-[#0f0822] border-t border-purple-500/20">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSendMessage();
-                }}
-                className="flex items-center gap-3 w-full"
-              >
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder={isVi ? `Đặt câu hỏi về ${assessment.code} hoặc kết quả của bạn...` : `Ask anything about ${assessment.code} or your results...`}
-                  disabled={isLoading}
-                  className="flex-1 bg-black/60 border border-white/15 focus:border-purple-400 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-gray-500 focus:outline-none transition-all disabled:opacity-50 shadow-inner"
-                />
-                <button
-                  type="submit"
-                  disabled={!inputText.trim() || isLoading}
-                  className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-purple-600/25 shrink-0 active:scale-95"
+              {isQuotaExhausted ? (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/90 via-indigo-950/80 to-[#180e33] border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg animate-in fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-0.5 text-center sm:text-left">
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
+                        <span>{isVi ? 'Đã sử dụng hết 3 lượt hỏi AI miễn phí' : 'Used all 3 free AI queries'}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-bold">
+                          0/3
+                        </span>
+                      </h4>
+                      <p className="text-xs text-gray-300 leading-relaxed">
+                        {isVi
+                          ? 'Mở khóa PsyQuizz Plus để hỏi đáp vô hạn với Trợ lý AI và đối chiếu chéo chuyên sâu.'
+                          : 'Upgrade to PsyQuizz Plus for unlimited grounded AI research and cross-scale insights.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowUpgradeModal(true)}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white font-bold text-xs shadow-md transition-all shrink-0 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <Crown className="w-3.5 h-3.5" />
+                    <span>{isVi ? 'Mở khóa Plus (59k/tháng)' : 'Unlock Plus (59k/mo)'}</span>
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }}
+                  className="flex items-center gap-3 w-full"
                 >
-                  <span>{isVi ? 'Gửi' : 'Send'}</span>
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder={
+                      isVi
+                        ? `Đặt câu hỏi về ${assessment.code} hoặc kết quả của bạn (${remainingAiQuestions} lượt còn lại)...`
+                        : `Ask anything about ${assessment.code} (${remainingAiQuestions} free turns left)...`
+                    }
+                    disabled={isLoading}
+                    className="flex-1 bg-black/60 border border-white/15 focus:border-purple-400 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-gray-500 focus:outline-none transition-all disabled:opacity-50 shadow-inner"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!inputText.trim() || isLoading}
+                    className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-purple-600/25 shrink-0 active:scale-95"
+                  >
+                    <span>{isVi ? 'Gửi' : 'Send'}</span>
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         )}
@@ -640,6 +753,114 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
           </div>
         )}
       </div>
+
+      {/* ================= MODAL: PSYQUIZZ PLUS UPGRADE (ANONYMOUS FREEMIUM) ================= */}
+      {showUpgradeModal && mounted && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#180e33] to-[#0c0618] border border-purple-500/40 p-6 sm:p-8 text-white shadow-2xl space-y-6">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div className="space-y-2 text-center sm:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                <Crown className="w-4 h-4 text-amber-400" />
+                <span>PsyQuizz Plus • 100% Ẩn danh</span>
+              </div>
+              <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                {isVi ? 'Nâng cấp Gói PsyQuizz Plus' : 'Upgrade to PsyQuizz Plus'}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                {isVi
+                  ? 'Gắn quyền lợi trực tiếp vào Anonymous Key của bạn. Không cần Email, SĐT hay Mật khẩu.'
+                  : 'Bound directly to your Anonymous Key. Zero personal data required.'}
+              </p>
+            </div>
+
+            {/* Pricing Card */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-purple-500/30 flex items-center justify-between">
+              <div>
+                <span className="text-xs text-gray-400 block">{isVi ? 'Gói Hội viên Toàn diện' : 'Comprehensive Access'}</span>
+                <span className="text-2xl font-black text-white">59.000 <span className="text-sm font-normal text-purple-300">VNĐ/tháng</span></span>
+              </div>
+              <div className="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-400/40 text-[11px] font-mono text-purple-200">
+                Key: <strong className="text-white">{anonymousKey}</strong>
+              </div>
+            </div>
+
+            {/* Feature List */}
+            <ul className="space-y-3 text-xs sm:text-sm text-gray-200">
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">{isVi ? 'Hỏi đáp AI không giới hạn:' : 'Unlimited RAG AI Queries:'}</strong>{' '}
+                  {isVi ? 'Tra cứu tâm lý học thực chứng 24/7 với dữ liệu đã kiểm duyệt.' : 'Grounded in peer-reviewed psychology literature 24/7.'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">{isVi ? 'Báo cáo Phân tích Chéo Đa Thang Đo:' : 'Cross-Scale Analysis Report:'}</strong>{' '}
+                  {isVi ? 'Đối chiếu đồng thời DASS-21, Big Five, Eysenck và ADHD.' : 'Synthesizes DASS-21, Big Five, Eysenck, and ADHD profiles.'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">{isVi ? 'Lộ trình Hành động An toàn:' : 'Safe Next-Step Routing:'}</strong>{' '}
+                  {isVi ? 'Chiến lược thích nghi cá nhân hóa và phân tầng rủi ro chuyên sâu.' : 'Personalized self-care routines and clinical triage.'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">{isVi ? 'Bảo lưu Bằng Khóa Ẩn Danh:' : 'Preserved by Anonymous Key:'}</strong>{' '}
+                  {isVi ? 'Lưu khóa hoặc khôi phục bất cứ lúc nào qua liên kết riêng tư.' : 'Recover anytime using your private recovery link.'}
+                </span>
+              </li>
+            </ul>
+
+            {/* VietQR Sandbox Checkout Simulation */}
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  activatePlus();
+                  setShowUpgradeModal(false);
+                }}
+                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-purple-600 hover:from-emerald-400 hover:to-purple-500 text-white font-bold text-sm shadow-xl shadow-teal-500/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+              >
+                <QrColorIcon />
+                <span>{isVi ? 'Mở khóa Plus ngay (Mô phỏng VietQR)' : 'Unlock Plus Now (VietQR Demo)'}</span>
+              </button>
+              <p className="text-[11px] text-center text-gray-400">
+                {isVi
+                  ? '⚡ Hệ thống VietQR tự động kích hoạt quyền lợi trong 3–5 giây.'
+                  : '⚡ VietQR automated gateway activates access within 3–5 seconds.'}
+              </p>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
+  );
+}
+
+function QrColorIcon() {
+  return (
+    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+    </svg>
   );
 }
