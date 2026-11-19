@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useTranslation } from '@/i18n/I18nContext';
 import { 
   ShieldCheck, 
   DollarSign, 
@@ -61,11 +63,29 @@ export default function AdminDashboardPage() {
   const [adminPin, setAdminPin] = useState<string>('');
   const [loginError, setLoginError] = useState<string>('');
 
-  // Language State
-  const [adminLang, setAdminLang] = useState<'vi' | 'en'>('vi');
+  // Language State from global i18n
+  const { locale } = useTranslation();
+  const adminLang = locale;
 
   // Active Tab State
   const [activeTab, setActiveTab] = useState<'financial' | 'transactions' | 'subscribers' | 'affiliate' | 'traffic' | 'settings'>('financial');
+
+  // Operational Outflow Costs (Admin editable, default 0 clean slate)
+  const [aiTokensCost, setAiTokensCost] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('psyquizz_admin_outflow_ai');
+      if (saved !== null) return Number(saved) || 0;
+    }
+    return 0;
+  });
+
+  const [hostingCost, setHostingCost] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('psyquizz_admin_outflow_hosting');
+      if (saved !== null) return Number(saved) || 0;
+    }
+    return 0;
+  });
 
   // Live Telemetry & Persistence State
   const [liveData, setLiveData] = useState<RealtimeAnalyticsData>(() => getLiveAnalytics());
@@ -149,7 +169,7 @@ export default function AdminDashboardPage() {
   };
 
   // -------------------------------------------------------------
-  // FINANCIAL CALCULATIONS
+  // FINANCIAL CALCULATIONS & OPERATIONAL BREAKDOWN
   // -------------------------------------------------------------
   const financialSummary = useMemo(() => {
     const grossInflow = transactions
@@ -161,11 +181,9 @@ export default function AdminDashboardPage() {
 
     const totalRevenue = grossInflow + totalAffiliateCommission;
 
-    // Estimated Operational Outflows
-    const totalAiTokensCost = 1450000; // ~ 1.45m VND for Gemini/OpenAI API calls
-    const hostingVercelCost = 490000;  // ~ 490k VND for Server/Domain
-    const bankingGatewayFees = Math.round(grossInflow * 0.015); // ~ 1.5% fee
-    const totalOutflow = totalAiTokensCost + hostingVercelCost + bankingGatewayFees;
+    // Operational Outflows: AI tokens & Hosting editable, Gateway fees calculated automatically (1.5%)
+    const bankingGatewayFees = Math.round(grossInflow * 0.015);
+    const totalOutflow = aiTokensCost + hostingCost + bankingGatewayFees;
 
     const netProfit = totalRevenue - totalOutflow;
     const profitMargin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
@@ -174,14 +192,28 @@ export default function AdminDashboardPage() {
       grossInflow,
       totalAffiliateCommission,
       totalRevenue,
-      totalAiTokensCost,
-      hostingVercelCost,
+      totalAiTokensCost: aiTokensCost,
+      hostingVercelCost: hostingCost,
       bankingGatewayFees,
       totalOutflow,
       netProfit,
       profitMargin
     };
-  }, [transactions, affiliateProducts]);
+  }, [transactions, affiliateProducts, aiTokensCost, hostingCost]);
+
+  // Dynamic breakdown per premium plan
+  const monthlyTxns = useMemo(() => transactions.filter((t) => t.status === 'matched' && t.plan === 'monthly'), [transactions]);
+  const yearlyTxns = useMemo(() => transactions.filter((t) => t.status === 'matched' && t.plan === 'yearly'), [transactions]);
+  const lifetimeTxns = useMemo(() => transactions.filter((t) => t.status === 'matched' && t.plan === 'lifetime'), [transactions]);
+
+  const monthlyCount = monthlyTxns.length;
+  const monthlyAmount = monthlyTxns.reduce((sum, t) => sum + t.amount, 0);
+
+  const yearlyCount = yearlyTxns.length;
+  const yearlyAmount = yearlyTxns.reduce((sum, t) => sum + t.amount, 0);
+
+  const lifetimeCount = lifetimeTxns.length;
+  const lifetimeAmount = lifetimeTxns.reduce((sum, t) => sum + t.amount, 0);
 
   // Handle Simulate Bank Webhook Event
   const handleSimulatePayment = () => {
@@ -361,7 +393,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 bg-[#0d071f]/90 backdrop-blur-md border-b border-white/10 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-[#0d071f]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="p-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-brand-teal group-hover:scale-105 transition-transform">
@@ -376,41 +408,39 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* Language Switcher (Tiếng Việt / English) */}
-          <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/10 text-xs font-bold">
+        {/* Navigation Tabs in Header (Chữ bình thường, không icon, không màu mè, không thông số) */}
+        <nav className="flex items-center gap-1 sm:gap-4 overflow-x-auto text-xs sm:text-sm font-medium scrollbar-none">
+          {[
+            { id: 'financial', labelVi: 'Doanh Thu', labelEn: 'Revenue' },
+            { id: 'transactions', labelVi: 'Giao Dịch', labelEn: 'Transactions' },
+            { id: 'subscribers', labelVi: 'Tài Khoản', labelEn: 'Accounts' },
+            { id: 'affiliate', labelVi: 'Affiliate', labelEn: 'Affiliate' },
+            { id: 'traffic', labelVi: 'Phân Tích Lưu Lượng', labelEn: 'Traffic Analytics' },
+            { id: 'settings', labelVi: 'Quản lý Ngân Hàng Thụ Hưởng', labelEn: 'Bank Management' }
+          ].map((tab) => (
             <button
+              key={tab.id}
               type="button"
-              onClick={() => setAdminLang('vi')}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
-                adminLang === 'vi' ? 'bg-purple-600 text-white shadow' : 'text-gray-400 hover:text-white'
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-2.5 py-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+                activeTab === tab.id
+                  ? 'text-brand-teal font-bold border-b-2 border-brand-teal'
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
-              Tiếng Việt
+              {adminLang === 'vi' ? tab.labelVi : tab.labelEn}
             </button>
-            <button
-              type="button"
-              onClick={() => setAdminLang('en')}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
-                adminLang === 'en' ? 'bg-purple-600 text-white shadow' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              English
-            </button>
-          </div>
+          ))}
+        </nav>
 
-          <button
-            type="button"
-            onClick={() => setShowSimulateModal(true)}
-            className="px-3.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-teal-200 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-          >
-            <span>{adminLang === 'vi' ? 'Tạo Giao Dịch VPBank' : 'New VPBank Transfer'}</span>
-          </button>
+        <div className="flex items-center gap-3">
+          {/* Standard LanguageSwitcher Component */}
+          <LanguageSwitcher />
 
           <button
             type="button"
             onClick={handleLogout}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-colors"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-colors cursor-pointer"
             title={adminLang === 'vi' ? 'Đăng xuất' : 'Log out'}
           >
             <LogOut className="w-4 h-4" />
@@ -420,36 +450,6 @@ export default function AdminDashboardPage() {
 
       {/* Main Layout Body */}
       <div className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-8">
-        
-        {/* Navigation Tabs (GỌN GÀNG, BILINGUAL, KHÔNG ICON) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/10 scrollbar-none text-xs sm:text-sm font-semibold">
-          {[
-            { id: 'financial', label: adminLang === 'vi' ? 'Doanh Thu' : 'Revenue', count: `${(financialSummary.totalRevenue / 1000000).toFixed(1)}M` },
-            { id: 'transactions', label: adminLang === 'vi' ? 'Giao Dịch' : 'Transactions', count: transactions.length },
-            { id: 'subscribers', label: adminLang === 'vi' ? 'Tài Khoản' : 'Accounts', count: subscribers.filter(s => s.status === 'active').length },
-            { id: 'affiliate', label: adminLang === 'vi' ? 'Affiliate' : 'Affiliate', count: `${(financialSummary.totalAffiliateCommission / 1000).toFixed(0)}k` },
-            { id: 'traffic', label: adminLang === 'vi' ? 'Phân Tích Lưu Lượng' : 'Traffic Analytics', count: `${liveData.pageviews} views` },
-            { id: 'settings', label: adminLang === 'vi' ? 'Ngân Hàng Thụ Hưởng' : 'Bank Settings', count: 'VPBank' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2.5 rounded-2xl transition-all whitespace-nowrap flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? 'bg-purple-600 text-white font-bold shadow-lg shadow-purple-600/30'
-                  : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/5'
-              }`}
-            >
-              <span>{tab.label}</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
-                activeTab === tab.id ? 'bg-black/30 text-white' : 'bg-white/10 text-gray-300'
-              }`}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
         {/* ============================================================== */}
         {/* TAB 1: FINANCIAL OVERVIEW & CASHFLOW */}
         {/* ============================================================== */}
@@ -460,7 +460,9 @@ export default function AdminDashboardPage() {
               {/* Card 1: Gross Inflow */}
               <div className="p-5 rounded-3xl bg-[#12082b] border border-emerald-500/30 relative overflow-hidden space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400 font-semibold">Doanh Thu Thuần (Inflow)</span>
+                  <span className="text-xs text-gray-400 font-semibold">
+                    {adminLang === 'vi' ? 'Doanh Thu Thuần (Inflow)' : 'Gross Inflow'}
+                  </span>
                   <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
                     <TrendingUp className="w-4 h-4" />
                   </div>
@@ -469,14 +471,20 @@ export default function AdminDashboardPage() {
                   <div className="text-2xl font-extrabold text-white">
                     {financialSummary.grossInflow.toLocaleString()} đ
                   </div>
-                  <span className="text-[11px] text-emerald-400 font-mono">Từ 5 đơn VietQR đã khớp</span>
+                  <span className="text-[11px] text-emerald-400 font-mono">
+                    {adminLang === 'vi'
+                      ? `Từ ${transactions.filter((t) => t.status === 'matched').length} đơn VietQR đã khớp`
+                      : `From ${transactions.filter((t) => t.status === 'matched').length} matched VietQR orders`}
+                  </span>
                 </div>
               </div>
 
               {/* Card 2: Affiliate Commission */}
               <div className="p-5 rounded-3xl bg-[#12082b] border border-purple-500/30 relative overflow-hidden space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400 font-semibold">Hoa Hồng Affiliate</span>
+                  <span className="text-xs text-gray-400 font-semibold">
+                    {adminLang === 'vi' ? 'Hoa Hồng Affiliate' : 'Affiliate Commission'}
+                  </span>
                   <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
                     <ShoppingBag className="w-4 h-4" />
                   </div>
@@ -485,14 +493,18 @@ export default function AdminDashboardPage() {
                   <div className="text-2xl font-extrabold text-purple-300">
                     {financialSummary.totalAffiliateCommission.toLocaleString()} đ
                   </div>
-                  <span className="text-[11px] text-purple-400 font-mono">Ước tính từ Shopee/Tiki</span>
+                  <span className="text-[11px] text-purple-400 font-mono">
+                    {adminLang === 'vi' ? 'Ước tính từ Shopee/Tiki' : 'Estimated Shopee/Tiki'}
+                  </span>
                 </div>
               </div>
 
               {/* Card 3: Outflows / Costs */}
               <div className="p-5 rounded-3xl bg-[#12082b] border border-rose-500/30 relative overflow-hidden space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400 font-semibold">Chi Phí Vận Hành (Outflow)</span>
+                  <span className="text-xs text-gray-400 font-semibold">
+                    {adminLang === 'vi' ? 'Chi Phí Vận Hành (Outflow)' : 'Operational Costs'}
+                  </span>
                   <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400">
                     <TrendingDown className="w-4 h-4" />
                   </div>
@@ -501,14 +513,18 @@ export default function AdminDashboardPage() {
                   <div className="text-2xl font-extrabold text-white">
                     {financialSummary.totalOutflow.toLocaleString()} đ
                   </div>
-                  <span className="text-[11px] text-rose-400 font-mono">AI API + Server + Gateway fee</span>
+                  <span className="text-[11px] text-rose-400 font-mono">
+                    {adminLang === 'vi' ? 'AI API + Server + Phí cổng' : 'AI API + Server + Gateway fee'}
+                  </span>
                 </div>
               </div>
 
               {/* Card 4: Net Profit */}
               <div className="p-5 rounded-3xl bg-[#12082b] border border-teal-500/30 relative overflow-hidden space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400 font-semibold">Lợi Nhuận Ròng (Net Profit)</span>
+                  <span className="text-xs text-gray-400 font-semibold">
+                    {adminLang === 'vi' ? 'Lợi Nhuận Ròng (Net Profit)' : 'Net Profit'}
+                  </span>
                   <div className="p-2 rounded-xl bg-teal-500/20 text-teal-300">
                     <DollarSign className="w-4 h-4" />
                   </div>
@@ -517,7 +533,11 @@ export default function AdminDashboardPage() {
                   <div className="text-2xl font-extrabold text-teal-300">
                     {financialSummary.netProfit.toLocaleString()} đ
                   </div>
-                  <span className="text-[11px] text-teal-400 font-mono">Biên lợi nhuận: {financialSummary.profitMargin}%</span>
+                  <span className="text-[11px] text-teal-400 font-mono">
+                    {adminLang === 'vi'
+                      ? `Biên lợi nhuận: ${financialSummary.profitMargin}%`
+                      : `Profit margin: ${financialSummary.profitMargin}%`}
+                  </span>
                 </div>
               </div>
             </div>
@@ -529,7 +549,7 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                    <span>Dòng Tiền Vào Chi Tiết (Inflows)</span>
+                    <span>{adminLang === 'vi' ? 'Dòng Tiền Vào Chi Tiết (Inflows)' : 'Detailed Inflows'}</span>
                   </h3>
                   <span className="text-xs font-mono text-emerald-400 font-bold">
                     +{financialSummary.totalRevenue.toLocaleString()} đ
@@ -539,31 +559,45 @@ export default function AdminDashboardPage() {
                 <div className="space-y-3 text-xs">
                   <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-white block">Gói Premium Tháng (99k)</span>
-                      <span className="text-gray-400 text-[11px]">3 giao dịch</span>
+                      <span className="font-bold text-white block">
+                        {adminLang === 'vi' ? `Gói Premium Tháng (${(bankConfig.monthlyPrice / 1000).toFixed(0)}k)` : 'Monthly Premium Plan'}
+                      </span>
+                      <span className="text-gray-400 text-[11px]">
+                        {monthlyCount} {adminLang === 'vi' ? 'giao dịch' : 'transactions'}
+                      </span>
                     </div>
-                    <span className="font-mono text-emerald-400 font-bold">297,000 đ</span>
+                    <span className="font-mono text-emerald-400 font-bold">{monthlyAmount.toLocaleString()} đ</span>
                   </div>
 
                   <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-white block">Gói Premium 1 Năm (299k)</span>
-                      <span className="text-gray-400 text-[11px]">1 giao dịch</span>
+                      <span className="font-bold text-white block">
+                        {adminLang === 'vi' ? `Gói Premium 1 Năm (${(bankConfig.yearlyPrice / 1000).toFixed(0)}k)` : '1-Year Premium Plan'}
+                      </span>
+                      <span className="text-gray-400 text-[11px]">
+                        {yearlyCount} {adminLang === 'vi' ? 'giao dịch' : 'transactions'}
+                      </span>
                     </div>
-                    <span className="font-mono text-emerald-400 font-bold">299,000 đ</span>
+                    <span className="font-mono text-emerald-400 font-bold">{yearlyAmount.toLocaleString()} đ</span>
                   </div>
 
                   <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-white block">Gói Premium Trọn Đời Lifetime (699k)</span>
-                      <span className="text-gray-400 text-[11px]">1 giao dịch</span>
+                      <span className="font-bold text-white block">
+                        {adminLang === 'vi' ? `Gói Premium Trọn Đời Lifetime (${(bankConfig.lifetimePrice / 1000).toFixed(0)}k)` : 'Lifetime Premium Plan'}
+                      </span>
+                      <span className="text-gray-400 text-[11px]">
+                        {lifetimeCount} {adminLang === 'vi' ? 'giao dịch' : 'transactions'}
+                      </span>
                     </div>
-                    <span className="font-mono text-emerald-400 font-bold">699,000 đ</span>
+                    <span className="font-mono text-emerald-400 font-bold">{lifetimeAmount.toLocaleString()} đ</span>
                   </div>
 
                   <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-white block">Hoa Hồng Tiếp Thị Liên Kết (Affiliate)</span>
+                      <span className="font-bold text-white block">
+                        {adminLang === 'vi' ? 'Hoa Hồng Tiếp Thị Liên Kết (Affiliate)' : 'Affiliate Commissions'}
+                      </span>
                       <span className="text-gray-400 text-[11px]">Shopee, Tiki, Lazada</span>
                     </div>
                     <span className="font-mono text-purple-400 font-bold">{financialSummary.totalAffiliateCommission.toLocaleString()} đ</span>
@@ -571,49 +605,106 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Right: Dòng Tiền Ra (Outflows / Costs) */}
+              {/* Right: Dòng Tiền Ra (Outflows / Costs - Admin can edit manually) */}
               <div className="p-6 rounded-3xl bg-[#0e0722] border border-white/10 space-y-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
-                    <span>Chi Phí Vận Hành Dự Tính (Outflows)</span>
-                  </h3>
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
+                      <span>{adminLang === 'vi' ? 'Chi Phí Vận Hành Dự Tính (Outflows)' : 'Operational Outflows (Costs)'}</span>
+                    </h3>
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                      {adminLang === 'vi' ? 'Admin có thể tự điền các khoản chi phí bên dưới' : 'Admin can manually adjust operating cost inputs below'}
+                    </p>
+                  </div>
                   <span className="text-xs font-mono text-rose-400 font-bold">
                     -{financialSummary.totalOutflow.toLocaleString()} đ
                   </span>
                 </div>
 
                 <div className="space-y-3 text-xs">
-                  <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-white block">Gemini / OpenAI API Token Consumption</span>
-                      <span className="text-gray-400 text-[11px]">Chi phí gọi AI phân tích học thuật</span>
+                  {/* Editable Outflow 1: AI API Tokens */}
+                  <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <span className="font-bold text-white block">Gemini / OpenAI API Token</span>
+                      <span className="text-gray-400 text-[11px]">
+                        {adminLang === 'vi' ? 'Chi phí gọi AI phân tích học thuật (tự điền)' : 'AI API Token consumption (manual input)'}
+                      </span>
                     </div>
-                    <span className="font-mono text-rose-400 font-bold">1,450,000 đ</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <input
+                        type="number"
+                        min="0"
+                        step="10000"
+                        value={aiTokensCost}
+                        onChange={(e) => {
+                          const val = Math.max(0, Number(e.target.value));
+                          setAiTokensCost(val);
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('psyquizz_admin_outflow_ai', String(val));
+                          }
+                        }}
+                        className="w-28 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 text-right font-mono text-rose-300 font-bold text-xs focus:outline-none focus:border-purple-400"
+                      />
+                      <span className="text-gray-400 font-mono">đ</span>
+                    </div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-white block">Hạ Tầng Cloud & Domain (Vercel Pro)</span>
-                      <span className="text-gray-400 text-[11px]">Băng thông Next.js & Serverless</span>
+                  {/* Editable Outflow 2: Cloud Hosting & Domain */}
+                  <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <span className="font-bold text-white block">Hạ Tầng Cloud & Domain (Vercel)</span>
+                      <span className="text-gray-400 text-[11px]">
+                        {adminLang === 'vi' ? 'Băng thông & Serverless (tự điền)' : 'Server & bandwidth (manual input)'}
+                      </span>
                     </div>
-                    <span className="font-mono text-rose-400 font-bold">490,000 đ</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <input
+                        type="number"
+                        min="0"
+                        step="10000"
+                        value={hostingCost}
+                        onChange={(e) => {
+                          const val = Math.max(0, Number(e.target.value));
+                          setHostingCost(val);
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('psyquizz_admin_outflow_hosting', String(val));
+                          }
+                        }}
+                        className="w-28 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 text-right font-mono text-rose-300 font-bold text-xs focus:outline-none focus:border-purple-400"
+                      />
+                      <span className="text-gray-400 font-mono">đ</span>
+                    </div>
                   </div>
 
+                  {/* Formula-calculated Outflow 3: Banking Gateway Fees */}
                   <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-white block">Phí Cổng Đối Soát Ngân Hàng (SePAY / Casso)</span>
-                      <span className="text-gray-400 text-[11px]">Duy trì kết nối Open Banking</span>
+                      <span className="font-bold text-white block">
+                        {adminLang === 'vi' ? 'Phí Cổng Đối Soát Ngân Hàng (1.5%)' : 'Bank Gateway Reconciliation Fee (1.5%)'}
+                      </span>
+                      <span className="text-gray-400 text-[11px]">
+                        {adminLang === 'vi' ? 'Tự động tính: 1.5% x Doanh thu thuần' : 'Auto formula: 1.5% x Gross Inflow'}
+                      </span>
                     </div>
-                    <span className="font-mono text-rose-400 font-bold">{financialSummary.bankingGatewayFees.toLocaleString()} đ</span>
+                    <span className="font-mono text-rose-400 font-bold">
+                      {financialSummary.bankingGatewayFees.toLocaleString()} đ
+                    </span>
                   </div>
 
+                  {/* Result: Free Cash Flow */}
                   <div className="p-3 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-teal-300 block">Dòng Tiền Tự Do (Free Cash Flow)</span>
-                      <span className="text-gray-400 text-[11px]">Sẵn sàng tái đầu tư phát triển sản phẩm</span>
+                      <span className="font-bold text-teal-300 block">
+                        {adminLang === 'vi' ? 'Dòng Tiền Tự Do (Free Cash Flow)' : 'Free Cash Flow / Net Profit'}
+                      </span>
+                      <span className="text-gray-400 text-[11px]">
+                        {adminLang === 'vi' ? 'Doanh Thu - Tổng Chi Phí' : 'Total Revenue - Outflows'}
+                      </span>
                     </div>
-                    <span className="font-mono text-teal-300 font-extrabold text-sm">{financialSummary.netProfit.toLocaleString()} đ</span>
+                    <span className="font-mono text-teal-300 font-extrabold text-sm">
+                      {financialSummary.netProfit.toLocaleString()} đ
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1197,8 +1288,8 @@ export default function AdminDashboardPage() {
                   <Building2 className="w-5 h-5 text-teal-300" />
                   <span>
                     {adminLang === 'vi'
-                      ? 'Cài đặt Ngân Hàng Thụ Hưởng'
-                      : 'Receiving Bank Settings'}
+                      ? 'Quản lý Ngân Hàng Thụ Hưởng'
+                      : 'Receiving Bank Management'}
                   </span>
                 </h3>
                 <p className="text-xs text-gray-400">
@@ -1374,7 +1465,13 @@ export default function AdminDashboardPage() {
                     setTransactions([]);
                     setSubscribers([]);
                     setAffiliateProducts(INITIAL_AFFILIATE_PRODUCTS);
-                    showToast(adminLang === 'vi' ? 'Đã xóa toàn bộ dữ liệu giả lập và đặt lại hệ thống về mới toanh!' : 'System completely reset to clean state!');
+                    setAiTokensCost(0);
+                    setHostingCost(0);
+                    if (typeof window !== 'undefined') {
+                      localStorage.removeItem('psyquizz_admin_outflow_ai');
+                      localStorage.removeItem('psyquizz_admin_outflow_hosting');
+                    }
+                    showToast(adminLang === 'vi' ? 'Đã xóa toàn bộ dữ liệu giả lập và đặt lại hệ thống về mới toanh 100%!' : 'System completely reset to clean state (0 everywhere)!');
                   }}
                   className="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 font-bold text-xs transition-all cursor-pointer"
                 >
