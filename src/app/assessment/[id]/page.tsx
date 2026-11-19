@@ -12,18 +12,27 @@ import {
   CheckCircle2, 
   RotateCcw, 
   ShieldAlert, 
-  Heart 
+  Heart,
+  Download,
+  History,
+  FileText
 } from 'lucide-react';
 import { getAssessmentById } from '@/data/assessments';
 import { PsyQuizzNotebook } from '@/components/PsyQuizzNotebook';
 import SafeNextStepRouting from '@/components/SafeNextStepRouting';
 import { useTranslation } from '@/i18n/I18nContext';
 import { trackLiveEvent } from '@/lib/realtimeAnalytics';
+import { useAnonymous } from '@/context/AnonymousContext';
+import AssessmentVisualizer from '@/components/visualizations/AssessmentVisualizer';
+import ExportReportModal from '@/components/ExportReportModal';
+import AssessmentHistoryModal from '@/components/AssessmentHistoryModal';
+import { saveAssessmentToHistory } from '@/lib/assessmentHistory';
 
 export default function AssessmentRunnerPage() {
   const params = useParams();
   const router = useRouter();
   const { locale, t } = useTranslation();
+  const { anonymousKey } = useAnonymous();
   const assessmentId = params?.id as string;
   const assessment = useMemo(() => getAssessmentById(assessmentId, locale), [assessmentId, locale]);
 
@@ -31,6 +40,8 @@ export default function AssessmentRunnerPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   // Warn before browser unload/refresh if test is in progress
   React.useEffect(() => {
@@ -170,6 +181,42 @@ export default function AssessmentRunnerPage() {
     if (!isCompleted) return null;
     return assessment.calculateResults(answers);
   }, [assessment, answers, isCompleted]);
+
+  // Auto-save completed assessment into History
+  useEffect(() => {
+    if (isCompleted && results && assessment) {
+      let dassMetrics = undefined;
+      if (assessment.id === 'dass-21') {
+        dassMetrics = {
+          depression: results.scores.depression?.score ?? 0,
+          anxiety: results.scores.anxiety?.score ?? 0,
+          stress: results.scores.stress?.score ?? 0
+        };
+      }
+      saveAssessmentToHistory({
+        assessmentId: assessment.id,
+        code: assessment.code,
+        assessmentName: assessment.name,
+        title: results.title,
+        summary: results.summary,
+        riskTier: results.actionGuide?.riskTier,
+        scores: Object.fromEntries(
+          Object.entries(results.scores).map(([k, v]) => [
+            k,
+            {
+              id: v.id,
+              name: v.name,
+              score: v.score,
+              maxScore: v.maxScore,
+              levelLabel: v.levelLabel,
+              levelColor: v.levelColor
+            }
+          ])
+        ),
+        dassMetrics
+      });
+    }
+  }, [isCompleted, results, assessment]);
 
   return (
     <div className="min-h-screen bg-[#080314] text-white flex flex-col justify-between selection:bg-brand-purple selection:text-white relative overflow-hidden">
@@ -361,10 +408,33 @@ export default function AssessmentRunnerPage() {
             <div className="w-full rounded-3xl bg-[#0d0818]/90 backdrop-blur-xl border border-white/15 text-white shadow-2xl shadow-black overflow-hidden flex flex-col space-y-10 p-8 sm:p-12 lg:p-14 animate-in fade-in duration-300">
               
               {/* Header */}
-              <div className="border-b border-white/10 pb-6 space-y-3">
-                <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
-                  {t('common.runner.reportTitle', { code: assessment.code })}
-                </span>
+              <div className="border-b border-white/10 pb-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
+                    {t('common.runner.reportTitle', { code: assessment.code })}
+                  </span>
+
+                  {/* Top Action Buttons: Download PDF Report & View History */}
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowExportModal(true)}
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-500/20 to-emerald-500/20 hover:from-teal-500/30 hover:to-emerald-500/30 border border-teal-500/40 text-teal-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{locale === 'vi' ? 'Tải Báo Cáo PDF' : 'Download PDF Report'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowHistoryModal(true)}
+                      className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <History className="w-3.5 h-3.5 text-purple-400" />
+                      <span>{locale === 'vi' ? 'Lịch Sử' : 'My History'}</span>
+                    </button>
+                  </div>
+                </div>
 
                 <div className="space-y-1.5">
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
@@ -375,6 +445,13 @@ export default function AssessmentRunnerPage() {
                   </p>
                 </div>
               </div>
+
+              {/* Data Visualization Chart: Radar (BFI-44), Quadrant Plane (Eysenck), or Gauge Meters (DASS-21 / ADHD) */}
+              <AssessmentVisualizer
+                assessmentId={assessment.id}
+                scores={results.scores}
+                locale={locale}
+              />
 
               {/* Dimension Score Cards (3-2 Balanced Layout for 5-KPI Assessments like BFI-44) */}
               {(() => {
@@ -474,21 +551,32 @@ export default function AssessmentRunnerPage() {
               />
 
               {/* Bottom Buttons */}
-              <div className="flex justify-between items-center pt-2">
+              <div className="flex flex-wrap justify-between items-center gap-3 pt-4 border-t border-white/10">
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="px-5 py-2.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-medium transition-colors flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" /> {t('common.runner.retake')}
                 </button>
 
-                <Link
-                  href="/"
-                  className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-semibold transition-colors"
-                >
-                  {t('common.runner.backHome')}
-                </Link>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowExportModal(true)}
+                    className="px-4 py-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-teal-300 font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>{locale === 'vi' ? 'Tải Báo Cáo PDF' : 'Download PDF Report'}</span>
+                  </button>
+
+                  <Link
+                    href="/"
+                    className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-xs font-semibold transition-colors"
+                  >
+                    {t('common.runner.backHome')}
+                  </Link>
+                </div>
               </div>
 
             </div>
@@ -500,6 +588,30 @@ export default function AssessmentRunnerPage() {
       <div className="relative z-20">
         <Footer onOpenTest={() => router.push('/')} />
       </div>
+
+      {/* Export Report PDF Modal */}
+      {results && (
+        <ExportReportModal
+          assessment={{
+            id: assessment.id,
+            code: assessment.code,
+            name: assessment.name,
+            subtitle: assessment.subtitle,
+            disclaimer: assessment.disclaimer
+          }}
+          results={results}
+          locale={locale}
+          anonymousKey={anonymousKey}
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
+
+      {/* Assessment History Modal */}
+      <AssessmentHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+      />
 
       {/* Exit Confirmation Dialog */}
       {showExitModal && (

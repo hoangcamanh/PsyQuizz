@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Menu, X, Crown } from 'lucide-react';
+import { Menu, X, Crown, History } from 'lucide-react';
 import { useTranslation } from '@/i18n/I18nContext';
 import { useAnonymous } from '@/context/AnonymousContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import AnonymousKeyBadge from './AnonymousKeyBadge';
 import PremiumUpgradeModal from './PremiumUpgradeModal';
+import AssessmentHistoryModal from './AssessmentHistoryModal';
 
 interface HeaderProps {
   onOpenAuth?: (mode: 'login' | 'signup') => void;
@@ -21,6 +22,7 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const { t, locale } = useTranslation();
   const { isPlus } = useAnonymous();
 
@@ -67,59 +69,60 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
           </div>
         </Link>
 
-        {/* Right Navigation Links: Anonymous Key, Get Premium, Language Switcher, About Us & Take a Test */}
-        <nav className="hidden md:flex items-center gap-3 lg:gap-5">
-          {/* Anonymous Key Badge */}
-          <div className="shrink-0 flex items-center">
-            <AnonymousKeyBadge />
+        {/* Right Navigation Links: Take a Test, History, Language Switcher, Anonymous Key, Crown Icon */}
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6">
+          {/* 1. Take a Test (Text link format like About Us) */}
+          <div className="flex items-center justify-start shrink-0 mr-3 lg:mr-5">
+            <button
+              type="button"
+              onClick={onOpenTest}
+              className="text-gray-300 hover:text-white font-medium text-sm lg:text-[15px] transition-colors relative py-1 group inline-block cursor-pointer"
+            >
+              <span className="relative inline-block text-left whitespace-nowrap">
+                {t('common.header.takeTest')}
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-to-r from-brand-purple to-brand-teal transition-all duration-300 group-hover:w-full" />
+              </span>
+            </button>
           </div>
 
-          {/* Get Premium Button */}
-          <div className="shrink-0 flex items-center">
-            {isPlus ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold shadow-sm">
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span>PLUS VIP</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowUpgradeModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 hover:from-amber-500/30 hover:to-purple-600/40 border border-amber-500/40 hover:border-amber-400 text-amber-300 hover:text-amber-200 text-xs font-bold shadow-[0_0_15px_rgba(245,158,11,0.2)] transition-all active:scale-95 cursor-pointer"
-              >
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span>{locale === 'vi' ? 'Nâng Cấp Premium' : 'Get Premium'}</span>
-              </button>
-            )}
+          {/* 2. History (Text link format like About Us, replacing About Us) */}
+          <div className="flex items-center justify-start shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowHistoryModal(true)}
+              className="text-gray-300 hover:text-white font-medium text-sm lg:text-[15px] transition-colors relative py-1 group inline-block cursor-pointer"
+            >
+              <span className="relative inline-block text-left whitespace-nowrap">
+                {locale === 'vi' ? 'Lịch Sử' : 'History'}
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-to-r from-brand-purple to-brand-teal transition-all duration-300 group-hover:w-full" />
+              </span>
+            </button>
           </div>
 
-          {/* Flag Switcher placed to the LEFT of About Us */}
+          {/* 3. Flag Switcher (Tiếng Việt / English) */}
           <div className="shrink-0 flex items-center">
             <LanguageSwitcher />
           </div>
 
-          {/* About Us / Về chúng tôi: Fixed slot width with left alignment so the text start position & flag switcher NEVER shift */}
-          <div className="w-[102px] lg:w-[112px] flex items-center justify-start shrink-0">
-            <Link
-              href="#about"
-              className="text-gray-300 hover:text-white font-medium text-sm lg:text-[15px] transition-colors relative py-1 group inline-block"
-            >
-              <span className="relative inline-block text-left whitespace-nowrap">
-                {t('common.header.aboutUs')}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-to-r from-brand-purple to-brand-teal transition-all duration-300 group-hover:w-full" />
-              </span>
-            </Link>
+          {/* 4. Anonymous Account Key Badge */}
+          <div className="shrink-0 flex items-center">
+            <AnonymousKeyBadge />
           </div>
 
-          {/* Take a Test / Làm bài kiểm tra: Fixed width button so width never changes between EN and VI */}
-          <div className="w-[180px] lg:w-[196px] flex items-center justify-center shrink-0">
-            <button
-              onClick={onOpenTest}
-              className="w-full h-11 px-4 rounded-full border border-purple-500/50 hover:border-purple-400 text-white font-medium text-sm lg:text-[15px] bg-purple-950/40 hover:bg-purple-900/50 transition-all duration-300 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.25)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] active:scale-95 whitespace-nowrap"
-            >
-              <span>{t('common.header.takeTest')}</span>
-            </button>
-          </div>
+          {/* 5. Crown Icon Button (Only shown if user is NOT yet Premium) */}
+          {!isPlus && (
+            <div className="shrink-0 flex items-center">
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="p-2 rounded-full bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 hover:from-amber-500/30 hover:to-purple-600/40 border border-amber-500/40 hover:border-amber-400 text-amber-300 hover:text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.25)] transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 group"
+                title={locale === 'vi' ? 'Nâng Cấp Premium' : 'Get Premium'}
+                aria-label={locale === 'vi' ? 'Nâng Cấp Premium' : 'Get Premium'}
+              >
+                <Crown className="w-4 h-4 fill-amber-400 text-amber-300 group-hover:scale-115 transition-transform" />
+              </button>
+            </div>
+          )}
         </nav>
 
         {/* Mobile Hamburger Toggle */}
@@ -139,39 +142,45 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#0c061d]/98 backdrop-blur-2xl border-b border-purple-900/40 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="pb-2 border-b border-white/10 space-y-3">
-            <AnonymousKeyBadge isMobile />
+            <div className="flex items-center justify-between gap-2">
+              <AnonymousKeyBadge isMobile />
+              {!isPlus && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setShowUpgradeModal(true);
+                  }}
+                  className="p-2.5 rounded-full bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 border border-amber-500/40 text-amber-300 shrink-0"
+                  title={locale === 'vi' ? 'Nâng Cấp Premium' : 'Get Premium'}
+                >
+                  <Crown className="w-4 h-4 fill-amber-400 text-amber-300" />
+                </button>
+              )}
+            </div>
             <LanguageSwitcher isMobile />
           </div>
 
-          {!isPlus && (
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setShowUpgradeModal(true);
-              }}
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-center gap-2"
-            >
-              <Crown className="w-4 h-4 text-amber-400" />
-              <span>{locale === 'vi' ? 'Nâng Cấp Premium' : 'Get Premium'}</span>
-            </button>
-          )}
-          
-          <Link
-            href="#about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-base font-medium text-gray-200 hover:text-brand-teal py-2"
-          >
-            {t('common.header.aboutUs')}
-          </Link>
           <button
+            type="button"
             onClick={() => {
               setMobileMenuOpen(false);
               onOpenTest();
             }}
-            className="block w-full text-left text-base font-medium text-brand-teal py-2"
+            className="block w-full text-left text-base font-medium text-gray-200 hover:text-brand-teal py-2"
           >
             {t('common.header.takeTest')}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setShowHistoryModal(true);
+            }}
+            className="block w-full text-left text-base font-medium text-gray-200 hover:text-brand-teal py-2"
+          >
+            {locale === 'vi' ? 'Lịch Sử' : 'History'}
           </button>
         </div>
       )}
@@ -180,6 +189,12 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
       <PremiumUpgradeModal 
         isOpen={showUpgradeModal} 
         onClose={() => setShowUpgradeModal(false)} 
+      />
+
+      {/* Reusable Assessment History Modal */}
+      <AssessmentHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
       />
     </header>
   );

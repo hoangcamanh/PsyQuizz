@@ -166,23 +166,40 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
     <>
       {/* 1. Header Trigger Pill */}
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className={`group flex items-center gap-2 rounded-full border transition-all duration-300 ${
+        className={`group flex items-center gap-2 rounded-full border transition-all duration-300 relative cursor-pointer ${
           isMobile
-            ? 'w-full px-4 py-2.5 bg-purple-950/40 border-purple-500/40 text-sm justify-between'
+            ? isPlus
+              ? 'w-full px-4 py-2.5 bg-amber-500/15 border-amber-500/50 text-amber-200 text-sm justify-between shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+              : 'w-full px-4 py-2.5 bg-purple-950/40 border-purple-500/40 text-sm justify-between'
+            : isPlus
+            ? 'px-3.5 py-1.5 bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 hover:from-amber-500/30 hover:to-purple-600/40 border-amber-500/50 hover:border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
             : 'px-3 py-1.5 bg-[#140b2b]/90 hover:bg-purple-950/90 border-purple-500/30 hover:border-purple-400/60 shadow-sm'
         }`}
         title={language === 'vi' ? 'Xem mã bảo mật ẩn danh & tài khoản' : 'View anonymous identity key & account'}
       >
+        {/* Playful Tilted Gold Crown positioned at the top-right corner when Plus */}
+        {isPlus && (
+          <div 
+            className="absolute -top-2.5 -right-2 transform rotate-12 drop-shadow-[0_0_8px_rgba(245,158,11,0.85)] pointer-events-none z-10"
+            title="PsyQuizz Plus VIP Member"
+          >
+            <Crown className="w-4 h-4 fill-amber-400 text-amber-300" />
+          </div>
+        )}
+
         <div className="flex items-center gap-1.5">
           {isPlus ? (
-            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
+            <Crown className="w-3.5 h-3.5 fill-amber-400 text-amber-300 shrink-0" />
           ) : accountInfo ? (
             <UserCheck className="w-3.5 h-3.5 text-brand-teal shrink-0" />
           ) : (
             <ShieldCheck className="w-3.5 h-3.5 text-brand-teal shrink-0" />
           )}
-          <span className="font-mono text-xs font-semibold text-gray-200 group-hover:text-white">
+          <span className={`font-mono text-xs ${
+            isPlus ? 'text-amber-200 group-hover:text-amber-100 font-bold' : 'text-gray-200 group-hover:text-white font-semibold'
+          }`}>
             {accountInfo ? `@${accountInfo.username}` : anonymousKey}
           </span>
         </div>
@@ -190,12 +207,12 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
         <span 
           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
             isPlus
-              ? 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+              ? 'bg-amber-500/25 text-amber-300 border-amber-500/50 font-black tracking-wide'
               : 'bg-brand-purple/20 text-purple-300 border-purple-500/30'
           }`}
         >
           {isPlus 
-            ? 'PLUS' 
+            ? 'VIP' 
             : `${remainingAiQuestions}/${maxFreeAiQuestions} AI`}
         </span>
       </button>
@@ -204,10 +221,10 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
       {isOpen && mounted && createPortal(
         <div 
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 z-[99999] flex justify-center items-center overflow-y-auto p-4 sm:p-6 py-10 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          className="fixed inset-0 z-[99999] flex justify-center items-center overflow-y-auto p-4 sm:p-6 py-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
         >
           <div 
-            className="w-full max-w-lg my-auto rounded-3xl bg-[#0f0920] border border-purple-500/40 text-white shadow-2xl p-6 sm:p-7 space-y-4 sm:space-y-5 relative max-h-[88vh] overflow-y-auto [scrollbar-width:thin] animate-in zoom-in-95 duration-200"
+            className="w-full max-w-2xl my-auto rounded-3xl bg-[#0f0920] border border-purple-500/40 text-white shadow-2xl p-6 sm:p-7 space-y-4 relative animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button: Prominent, clear, rounded-full with border & hover glow */}
@@ -215,15 +232,15 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
               type="button"
               onClick={() => setIsOpen(false)}
               aria-label={language === 'vi' ? 'Đóng' : 'Close'}
-              className="absolute top-5 right-5 p-2.5 rounded-full text-gray-200 hover:text-white bg-white/10 hover:bg-white/20 border border-white/25 transition-all shadow-lg active:scale-95 z-20 flex items-center justify-center cursor-pointer"
+              className="absolute top-5 right-5 p-2 rounded-full text-gray-200 hover:text-white bg-white/10 hover:bg-white/20 border border-white/25 transition-all shadow-lg active:scale-95 z-20 flex items-center justify-center cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Modal Header */}
-            <div className="flex items-center gap-3 pr-12 pt-1">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-600/30 to-brand-teal/20 border border-purple-400/40 text-brand-teal shrink-0">
-                <Key className="w-6 h-6" />
+            <div className="flex items-center gap-3 pr-12">
+              <div className="p-2.5 rounded-2xl bg-gradient-to-br from-purple-600/30 to-brand-teal/20 border border-purple-400/40 text-brand-teal shrink-0">
+                <Key className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-extrabold text-white">
@@ -235,53 +252,12 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
               </div>
             </div>
 
-            {/* Admin Active Banner */}
-            {isAdminUser && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900/60 to-indigo-900/60 border border-purple-400/50 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-purple-500/20 text-brand-teal shrink-0">
-                    <LayoutDashboard className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white">
-                      {language === 'vi' ? 'Quản trị viên PsyQuizz Admin' : 'PsyQuizz Master Admin'}
-                    </p>
-                    <p className="text-[11px] text-purple-300">
-                      {language === 'vi' ? 'Đang kích hoạt quyền Quản trị hệ thống' : 'Logged in with Master Admin role'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsOpen(false);
-                      router.push('/admin');
-                    }}
-                    className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-black font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow"
-                  >
-                    <span>{language === 'vi' ? 'Vào Dashboard' : 'Open Admin'}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={logoutAdmin}
-                    className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white text-xs font-semibold transition-all flex items-center gap-1 border border-white/10"
-                    title={language === 'vi' ? 'Đăng xuất Admin' : 'Admin Logout'}
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>{language === 'vi' ? 'Thoát' : 'Exit'}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* 2-Option Tabs: Khóa Ẩn Danh vs Tài Khoản */}
             <div className="grid grid-cols-2 p-1 rounded-2xl bg-black/50 border border-white/10">
               <button
                 type="button"
                 onClick={() => setActiveTab('key')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   activeTab === 'key'
                     ? 'bg-purple-900/70 text-white border border-purple-400/40 shadow-sm'
                     : 'text-gray-400 hover:text-white'
@@ -294,7 +270,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
               <button
                 type="button"
                 onClick={() => setActiveTab('account')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   activeTab === 'account'
                     ? 'bg-purple-900/70 text-white border border-purple-400/40 shadow-sm'
                     : 'text-gray-400 hover:text-white'
@@ -312,16 +288,16 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
 
             {/* TAB 1: ANONYMOUS KEY CONTENT */}
             {activeTab === 'key' && (
-              <div className="space-y-4 animate-in fade-in duration-200">
+              <div className="space-y-3.5 animate-in fade-in duration-200">
                 {/* Privacy Promise Notice */}
-                <p className="text-xs text-gray-300 leading-relaxed bg-[#160c30] p-3.5 rounded-2xl border border-purple-500/20">
+                <p className="text-xs text-gray-300 leading-relaxed bg-[#160c30] p-3 rounded-2xl border border-purple-500/20">
                   {language === 'vi'
                     ? 'PsyQuizz không bao giờ thu thập Họ tên, Email hay Số điện thoại. Mã khóa dưới đây là định danh mật duy nhất kết nối với lịch sử bài test và gói PsyQuizz Plus của bạn.'
                     : 'PsyQuizz never collects your Name, Email, or Phone number. The secret key below is your unique cryptographic identifier binding all assessment results and Plus subscription perks.'}
                 </p>
 
                 {/* Key Display Card */}
-                <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/40 space-y-2">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-black/60 border border-purple-500/40 space-y-2">
                   <div className="flex items-center justify-between text-[11px] text-gray-400">
                     <span>{language === 'vi' ? 'Khóa bảo mật cá nhân' : 'Personal Secret Key'}</span>
                     <span className="text-emerald-400 font-semibold flex items-center gap-1">
@@ -335,7 +311,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                     </span>
                     <button
                       onClick={handleCopyKey}
-                      className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shrink-0"
+                      className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                     >
                       {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>{copiedKey ? (language === 'vi' ? 'Đã sao chép' : 'Copied') : (language === 'vi' ? 'Sao chép' : 'Copy Key')}</span>
@@ -345,7 +321,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
 
                 {/* Linked Account Callout (if linked) */}
                 {accountInfo && (
-                  <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 flex items-center justify-between text-xs">
+                  <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/30 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <UserCheck className="w-4 h-4 text-emerald-400" />
                       <span>{language === 'vi' ? 'Đã liên kết với tài khoản:' : 'Linked with account:'} <strong className="text-white">@{accountInfo.username}</strong></span>
@@ -353,7 +329,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                     <button
                       type="button"
                       onClick={() => setActiveTab('account')}
-                      className="text-purple-300 hover:text-white underline text-[11px]"
+                      className="text-purple-300 hover:text-white underline text-[11px] cursor-pointer"
                     >
                       {language === 'vi' ? 'Quản lý' : 'Manage'}
                     </button>
@@ -361,10 +337,10 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                 )}
 
                 {/* Quick Actions (Download file, Magic link) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={exportKeyText}
-                    className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-gray-200 hover:text-white transition-all flex items-center justify-center gap-2"
+                    className="p-2.5 sm:p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-gray-200 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5 text-purple-400" />
                     <span>{language === 'vi' ? 'Tải file khóa (.txt)' : 'Download Key File (.txt)'}</span>
@@ -372,7 +348,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
 
                   <button
                     onClick={handleCopyLink}
-                    className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-gray-200 hover:text-white transition-all flex items-center justify-center gap-2"
+                    className="p-2.5 sm:p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-gray-200 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5 text-brand-teal" />
                     <span>{copiedLink ? (language === 'vi' ? 'Đã chép link!' : 'Link copied!') : (language === 'vi' ? 'Chép link khôi phục' : 'Copy Recovery Link')}</span>
@@ -380,7 +356,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                 </div>
 
                 {/* Restore Old Key Section */}
-                <div className="pt-3 border-t border-white/10 space-y-2.5">
+                <div className="pt-2.5 border-t border-white/10 space-y-2">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-gray-300 uppercase tracking-wider">
                     <RotateCcw className="w-3.5 h-3.5 text-purple-400" />
                     <span>{language === 'vi' ? 'Đổi máy hoặc khôi phục mã cũ' : 'Switch Device or Restore Old Key'}</span>
@@ -397,7 +373,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                     <button
                       type="submit"
                       disabled={!restoreInput.trim()}
-                      className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all disabled:opacity-40"
+                      className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer"
                     >
                       {language === 'vi' ? 'Khôi phục' : 'Restore'}
                     </button>
@@ -418,11 +394,11 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
 
             {/* TAB 2: CUSTOM ACCOUNT (USERNAME & PASSWORD) */}
             {activeTab === 'account' && (
-              <div className="space-y-4 animate-in fade-in duration-200">
+              <div className="space-y-3.5 animate-in fade-in duration-200">
                 {accountInfo ? (
                   /* ALREADY LINKED VIEW */
                   <div className="space-y-4">
-                    <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-purple-950/40 border border-emerald-500/40 space-y-3">
+                    <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-purple-950/40 border border-emerald-500/40 space-y-2.5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
                           <UserCheck className="w-5 h-5" />
@@ -444,11 +420,11 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                       </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+                    <div className="grid grid-cols-2 gap-3 pt-1">
                       <button
                         type="button"
                         onClick={logoutAccount}
-                        className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-white/15 cursor-pointer"
+                        className="py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-white/15 cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5 text-rose-300" />
                         <span>{language === 'vi' ? 'Đăng xuất tài khoản' : 'Log out'}</span>
@@ -457,7 +433,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                       <button
                         type="button"
                         onClick={unlinkAccount}
-                        className="w-full sm:w-auto py-2.5 px-3.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-semibold text-xs transition-all flex items-center justify-center gap-1 border border-rose-500/20 cursor-pointer"
+                        className="py-2.5 px-3.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-semibold text-xs transition-all flex items-center justify-center gap-1 border border-rose-500/20 cursor-pointer"
                         title={language === 'vi' ? 'Hủy liên kết tài khoản này' : 'Unlink account'}
                       >
                         <Unlink className="w-3.5 h-3.5" />
@@ -476,7 +452,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                           setAccountSubMode('create');
                           setRegMessage(null);
                         }}
-                        className={`flex-1 py-1.5 rounded-lg font-semibold transition-all ${
+                        className={`flex-1 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                           accountSubMode === 'create'
                             ? 'bg-purple-600 text-white shadow-sm'
                             : 'text-gray-400 hover:text-white'
@@ -490,7 +466,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                           setAccountSubMode('login');
                           setLoginMessage(null);
                         }}
-                        className={`flex-1 py-1.5 rounded-lg font-semibold transition-all ${
+                        className={`flex-1 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                           accountSubMode === 'login'
                             ? 'bg-purple-600 text-white shadow-sm'
                             : 'text-gray-400 hover:text-white'
@@ -502,14 +478,14 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
 
                     {accountSubMode === 'create' ? (
                       /* FORM 1: CREATE & BIND */
-                      <form onSubmit={handleBindAccount} className="space-y-3">
+                      <form id="bind-account-form" onSubmit={handleBindAccount} className="space-y-3">
                         <p className="text-xs text-gray-300 leading-relaxed bg-[#160c30] p-3 rounded-xl border border-purple-500/20">
                           {language === 'vi'
                             ? `Đặt tên đăng nhập & mật khẩu để bảo vệ mã ${anonymousKey}.`
                             : `Set a username & password to protect key ${anonymousKey}.`}
                         </p>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                           <input
                             type="text"
                             value={regUsername}
@@ -519,43 +495,51 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                             className="w-full bg-black/50 border border-white/15 focus:border-purple-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition-all"
                           />
 
-                          <input
-                            type="password"
-                            value={regPassword}
-                            onChange={(e) => setRegPassword(e.target.value)}
-                            placeholder={language === 'vi' ? 'Mật khẩu (tối thiểu 6 ký tự)' : 'Password (min 6 characters)'}
-                            required
-                            className="w-full bg-black/50 border border-white/15 focus:border-purple-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition-all"
-                          />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <input
+                              type="password"
+                              value={regPassword}
+                              onChange={(e) => setRegPassword(e.target.value)}
+                              placeholder={language === 'vi' ? 'Mật khẩu (tối thiểu 6 ký tự)' : 'Password (min 6 characters)'}
+                              required
+                              className="w-full bg-black/50 border border-white/15 focus:border-purple-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition-all"
+                            />
 
-                          <input
-                            type="password"
-                            value={regPasswordConfirm}
-                            onChange={(e) => setRegPasswordConfirm(e.target.value)}
-                            placeholder={language === 'vi' ? 'Xác nhận lại mật khẩu' : 'Confirm password'}
-                            required
-                            className="w-full bg-black/50 border border-white/15 focus:border-purple-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition-all"
-                          />
+                            <input
+                              type="password"
+                              value={regPasswordConfirm}
+                              onChange={(e) => setRegPasswordConfirm(e.target.value)}
+                              placeholder={language === 'vi' ? 'Xác nhận lại mật khẩu' : 'Confirm password'}
+                              required
+                              className="w-full bg-black/50 border border-white/15 focus:border-purple-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition-all"
+                            />
+                          </div>
                         </div>
-
-                        <button
-                          type="submit"
-                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Lock className="w-3.5 h-3.5" />
-                          <span>{language === 'vi' ? 'Liên kết tài khoản vào Mã này' : 'Bind Account to this Key'}</span>
-                        </button>
 
                         {regMessage && (
                           <p className={`text-xs ${regMessage.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {regMessage.text}
                           </p>
                         )}
+
+                        <button
+                          type="submit"
+                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>{language === 'vi' ? 'Liên kết tài khoản vào Mã này' : 'Bind Account to this Key'}</span>
+                        </button>
                       </form>
                     ) : (
                       /* FORM 2: LOGIN TO RESTORE KEY */
-                      <form onSubmit={handleLoginAccount} className="space-y-3">
-                        <div className="space-y-2">
+                      <form id="login-account-form" onSubmit={handleLoginAccount} className="space-y-3">
+                        <p className="text-xs text-gray-300 leading-relaxed bg-[#160c30] p-3 rounded-xl border border-purple-500/20">
+                          {language === 'vi'
+                            ? 'Đăng nhập để khôi phục mã khóa và hồ sơ của bạn.'
+                            : 'Log in with your existing account to restore your secret key and test history.'}
+                        </p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           <input
                             type="text"
                             value={loginUsername}
@@ -575,19 +559,19 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                           />
                         </div>
 
-                        <button
-                          type="submit"
-                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                          <span>{language === 'vi' ? 'Đồng bộ khóa' : 'Sync Key'}</span>
-                        </button>
-
                         {loginMessage && (
                           <p className={`text-xs ${loginMessage.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {loginMessage.text}
                           </p>
                         )}
+
+                        <button
+                          type="submit"
+                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
+                          <span>{language === 'vi' ? 'Đồng bộ khóa' : 'Sync Key'}</span>
+                        </button>
                       </form>
                     )}
                   </div>
@@ -596,8 +580,8 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
             )}
 
             {/* Footer tip & Bottom Close Button */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10">
-              <span className="text-[11px] text-gray-500 text-center sm:text-left">
+            <div className="pt-2 flex items-center justify-between gap-3 border-t border-white/10">
+              <span className="text-[11px] text-gray-500 text-left">
                 {language === 'vi'
                   ? '🔒 Nhấn ESC hoặc bấm ra ngoài để đóng'
                   : '🔒 Press ESC or click outside to close'}
@@ -606,7 +590,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="w-full sm:w-auto px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-semibold transition-all text-center cursor-pointer active:scale-95"
+                className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-semibold transition-all text-center cursor-pointer active:scale-95"
               >
                 {language === 'vi' ? 'Đóng' : 'Close'}
               </button>

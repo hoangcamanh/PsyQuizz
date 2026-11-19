@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useTranslation } from '@/i18n/I18nContext';
 import { 
@@ -393,58 +394,72 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 bg-[#0d071f]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="p-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-brand-teal group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-5 h-5" />
+      <header className="sticky top-0 z-40 w-full bg-[#080314]/90 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/40">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-4">
+          {/* Left Side: Logo + Navigation Tabs (1 hàng duy nhất thẳng tắp, không cuộn ngang) */}
+          <div className="flex items-center gap-5 sm:gap-6 lg:gap-8 shrink-0">
+            <Link href="/" className="flex items-center shrink-0 transition-transform hover:scale-[1.02]" title="PsyQuizz">
+              <div className="relative h-9 sm:h-10 w-36 sm:w-40">
+                <Image
+                  src="/logo-white.png"
+                  alt="PsyQuizz Logo"
+                  fill
+                  className="object-contain object-left"
+                  priority
+                />
+              </div>
+            </Link>
+
+            {/* Navigation Tabs (Thẳng hàng với các nút bên phải, khoảng cách thoáng vừa đủ, không cuộn) */}
+            <nav className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 text-xs lg:text-[13px] font-medium shrink-0">
+              {[
+                { id: 'financial', labelVi: 'Doanh Thu', labelEn: 'Revenue' },
+                { id: 'transactions', labelVi: 'Giao Dịch', labelEn: 'Transactions' },
+                { id: 'subscribers', labelVi: 'Tài Khoản', labelEn: 'Accounts' },
+                { id: 'affiliate', labelVi: 'Affiliate', labelEn: 'Affiliate' },
+                { id: 'traffic', labelVi: 'Lưu Lượng', labelEn: 'Traffic Analytics' },
+                { id: 'settings', labelVi: 'Ngân Hàng Thụ Hưởng', labelEn: 'Bank Management' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-xl border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center ${
+                    activeTab === tab.id
+                      ? 'border-brand-teal text-brand-teal font-bold bg-brand-teal/10 shadow-sm'
+                      : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {adminLang === 'vi' ? tab.labelVi : tab.labelEn}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Right Side: Language Switcher + Admin Account Badge + Logout (Thẳng hàng tuyệt đối với Left Side) */}
+          <div className="flex items-center gap-3 sm:gap-3.5 shrink-0 ml-auto">
+            {/* Standard LanguageSwitcher Component */}
+            <div className="flex items-center">
+              <LanguageSwitcher />
             </div>
-            <div>
-              <span className="font-extrabold text-base text-white tracking-tight block">PsyQuizz Master Admin</span>
-              <span className="text-[10px] text-gray-400 font-mono">
-                {adminLang === 'vi' ? 'Hệ thống Quản trị & Đối soát VPBank' : 'VPBank Automated Control Center'}
+
+            {/* Admin Account Badge (Giữ lại @admin) */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-purple-500/40 bg-[#140b2b]/90 text-xs shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-brand-teal shrink-0" />
+              <span className="font-mono text-xs font-semibold text-gray-200">
+                @admin
               </span>
             </div>
-          </Link>
-        </div>
 
-        {/* Navigation Tabs in Header (Chữ bình thường, không icon, không màu mè, không thông số) */}
-        <nav className="flex items-center gap-1 sm:gap-4 overflow-x-auto text-xs sm:text-sm font-medium scrollbar-none">
-          {[
-            { id: 'financial', labelVi: 'Doanh Thu', labelEn: 'Revenue' },
-            { id: 'transactions', labelVi: 'Giao Dịch', labelEn: 'Transactions' },
-            { id: 'subscribers', labelVi: 'Tài Khoản', labelEn: 'Accounts' },
-            { id: 'affiliate', labelVi: 'Affiliate', labelEn: 'Affiliate' },
-            { id: 'traffic', labelVi: 'Phân Tích Lưu Lượng', labelEn: 'Traffic Analytics' },
-            { id: 'settings', labelVi: 'Quản lý Ngân Hàng Thụ Hưởng', labelEn: 'Bank Management' }
-          ].map((tab) => (
             <button
-              key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-2.5 py-1.5 transition-colors whitespace-nowrap cursor-pointer ${
-                activeTab === tab.id
-                  ? 'text-brand-teal font-bold border-b-2 border-brand-teal'
-                  : 'text-gray-400 hover:text-white'
-              }`}
+              onClick={handleLogout}
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-colors cursor-pointer flex items-center justify-center"
+              title={adminLang === 'vi' ? 'Đăng xuất' : 'Log out'}
             >
-              {adminLang === 'vi' ? tab.labelVi : tab.labelEn}
+              <LogOut className="w-4 h-4" />
             </button>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          {/* Standard LanguageSwitcher Component */}
-          <LanguageSwitcher />
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-colors cursor-pointer"
-            title={adminLang === 'vi' ? 'Đăng xuất' : 'Log out'}
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          </div>
         </div>
       </header>
 
@@ -653,7 +668,9 @@ export default function AdminDashboardPage() {
                   {/* Editable Outflow 2: Cloud Hosting & Domain */}
                   <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between gap-4">
                     <div className="flex-1">
-                      <span className="font-bold text-white block">Hạ Tầng Cloud & Domain (Vercel)</span>
+                      <span className="font-bold text-white block">
+                        {adminLang === 'vi' ? 'Hạ Tầng Cloud & Domain (Vercel)' : 'Cloud Hosting & Domain (Vercel)'}
+                      </span>
                       <span className="text-gray-400 text-[11px]">
                         {adminLang === 'vi' ? 'Băng thông & Serverless (tự điền)' : 'Server & bandwidth (manual input)'}
                       </span>
@@ -724,21 +741,31 @@ export default function AdminDashboardPage() {
                   type="text"
                   value={searchTxn}
                   onChange={(e) => setSearchTxn(e.target.value)}
-                  placeholder="Tìm theo mã giao dịch, số tiền, nội dung CK, khóa PQ-..."
+                  placeholder={
+                    adminLang === 'vi'
+                      ? 'Tìm theo mã giao dịch, số tiền, nội dung CK, khóa PQ-...'
+                      : 'Search by transaction ID, amount, memo, PQ- key...'
+                  }
                   className="w-full bg-transparent text-xs text-white placeholder-gray-500 focus:outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-gray-400">Trạng thái:</span>
+                <span className="text-gray-400">{adminLang === 'vi' ? 'Trạng thái:' : 'Status:'}</span>
                 <select
                   value={filterTxnStatus}
                   onChange={(e) => setFilterTxnStatus(e.target.value as any)}
                   className="bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
                 >
-                  <option value="all">Tất cả ({transactions.length})</option>
-                  <option value="matched">Khớp tự động</option>
-                  <option value="manual_review">Cần đối soát tay</option>
+                  <option value="all">
+                    {adminLang === 'vi' ? `Tất cả (${transactions.length})` : `All (${transactions.length})`}
+                  </option>
+                  <option value="matched">
+                    {adminLang === 'vi' ? 'Khớp tự động' : 'Auto Matched'}
+                  </option>
+                  <option value="manual_review">
+                    {adminLang === 'vi' ? 'Cần đối soát tay' : 'Manual Review'}
+                  </option>
                 </select>
               </div>
             </div>
@@ -749,15 +776,15 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-white/5 border-b border-white/10 text-gray-400 font-mono">
                     <tr>
-                      <th className="py-3.5 px-4">MÃ ĐƠN / REF</th>
-                      <th className="py-3.5 px-4">NGÂN HÀNG</th>
-                      <th className="py-3.5 px-4">SỐ TIỀN</th>
-                      <th className="py-3.5 px-4">NỘI DUNG CHUYỂN KHOẢN</th>
-                      <th className="py-3.5 px-4">KHÓA ẨN DANH NHẬN</th>
-                      <th className="py-3.5 px-4">GÓI</th>
-                      <th className="py-3.5 px-4">TRẠNG THÁI</th>
-                      <th className="py-3.5 px-4">THỜI GIAN</th>
-                      <th className="py-3.5 px-4 text-right">THAO TÁC</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'MÃ ĐƠN / REF' : 'ORDER ID / REF'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'NGÂN HÀNG' : 'BANK'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'SỐ TIỀN' : 'AMOUNT'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'NỘI DUNG CHUYỂN KHOẢN' : 'TRANSFER MEMO'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'KHÓA ẨN DANH NHẬN' : 'RECIPIENT ANONYMOUS KEY'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'GÓI' : 'PLAN'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'TRẠNG THÁI' : 'STATUS'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'THỜI GIAN' : 'TIMESTAMP'}</th>
+                      <th className="py-3.5 px-4 text-right">{adminLang === 'vi' ? 'THAO TÁC' : 'ACTION'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -794,22 +821,30 @@ export default function AdminDashboardPage() {
                                 {txn.anonymousKey}
                               </span>
                             ) : (
-                              <span className="text-rose-400 font-semibold">Chưa rõ mã</span>
+                              <span className="text-rose-400 font-semibold">
+                                {adminLang === 'vi' ? 'Chưa rõ mã' : 'Unknown Key'}
+                              </span>
                             )}
                           </td>
                           <td className="py-3.5 px-4">
                             <span className="capitalize font-semibold text-gray-300">
-                              {txn.plan === 'lifetime' ? 'Trọn đời' : txn.plan === 'yearly' ? '1 Năm' : '1 Tháng'}
+                              {txn.plan === 'lifetime'
+                                ? (adminLang === 'vi' ? 'Trọn đời' : 'Lifetime')
+                                : txn.plan === 'yearly'
+                                ? (adminLang === 'vi' ? '1 Năm' : '1 Year')
+                                : (adminLang === 'vi' ? '1 Tháng' : '1 Month')}
                             </span>
                           </td>
                           <td className="py-3.5 px-4">
                             {txn.status === 'matched' ? (
                               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold">
-                                <CheckCircle2 className="w-3 h-3" /> Khớp tự động
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>{adminLang === 'vi' ? 'Khớp tự động' : 'Auto Matched'}</span>
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold">
-                                <AlertCircle className="w-3 h-3" /> Cần đối soát
+                                <AlertCircle className="w-3 h-3" />
+                                <span>{adminLang === 'vi' ? 'Cần đối soát' : 'Manual Review'}</span>
                               </span>
                             )}
                           </td>
@@ -821,12 +856,17 @@ export default function AdminDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const key = prompt('Nhập mã Anonymous Key (PQ-XXXX-XXXX) để gán cho giao dịch này:', 'PQ-D4HT-CEP9');
+                                  const key = prompt(
+                                    adminLang === 'vi'
+                                      ? 'Nhập mã Anonymous Key (PQ-XXXX-XXXX) để gán cho giao dịch này:'
+                                      : 'Enter Anonymous Key (PQ-XXXX-XXXX) for this transaction:',
+                                    'PQ-D4HT-CEP9'
+                                  );
                                   if (key) handleApproveManual(txn.id, key.trim().toUpperCase());
                                 }}
                                 className="px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs"
                               >
-                                Duyệt tay
+                                {adminLang === 'vi' ? 'Duyệt tay' : 'Approve'}
                               </button>
                             )}
                           </td>
@@ -852,7 +892,11 @@ export default function AdminDashboardPage() {
                   type="text"
                   value={manualKeyInput}
                   onChange={(e) => setManualKeyInput(e.target.value)}
-                  placeholder="Kích hoạt thủ công: Nhập mã PQ-XXXX-XXXX..."
+                  placeholder={
+                    adminLang === 'vi'
+                      ? 'Kích hoạt thủ công: Nhập mã PQ-XXXX-XXXX...'
+                      : 'Manual activation: Enter PQ-XXXX-XXXX...'
+                  }
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 font-mono focus:outline-none"
                 />
               </div>
@@ -863,9 +907,9 @@ export default function AdminDashboardPage() {
                   onChange={(e) => setManualKeyPlan(e.target.value as any)}
                   className="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
                 >
-                  <option value="monthly">Gói 1 Tháng</option>
-                  <option value="yearly">Gói 1 Năm</option>
-                  <option value="lifetime">Trọn Đời</option>
+                  <option value="monthly">{adminLang === 'vi' ? 'Gói 1 Tháng' : 'Monthly Plan'}</option>
+                  <option value="yearly">{adminLang === 'vi' ? 'Gói 1 Năm' : 'Yearly Plan'}</option>
+                  <option value="lifetime">{adminLang === 'vi' ? 'Trọn Đời' : 'Lifetime'}</option>
                 </select>
 
                 <button
@@ -892,12 +936,16 @@ export default function AdminDashboardPage() {
                       localStorage.setItem(`psyquizz_plus_status_${key}`, 'true');
                     }
                     setManualKeyInput('');
-                    showToast(`Đã kích hoạt Plus gói ${manualKeyPlan} cho ${key}!`);
+                    showToast(
+                      adminLang === 'vi'
+                        ? `Đã kích hoạt Plus gói ${manualKeyPlan} cho ${key}!`
+                        : `Activated Plus ${manualKeyPlan} plan for ${key}!`
+                    );
                   }}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Kích Hoạt Ngay</span>
+                  <span>{adminLang === 'vi' ? 'Kích Hoạt Ngay' : 'Activate Now'}</span>
                 </button>
               </div>
             </div>
@@ -908,14 +956,14 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-white/5 border-b border-white/10 text-gray-400 font-mono">
                     <tr>
-                      <th className="py-3.5 px-4">KHÓA ẨN DANH (KEY)</th>
-                      <th className="py-3.5 px-4">TÀI KHOẢN LIÊN KẾT</th>
-                      <th className="py-3.5 px-4">GÓI</th>
-                      <th className="py-3.5 px-4">SỐ LƯỢT AI ĐÃ HỎI</th>
-                      <th className="py-3.5 px-4">NGÀY ĐĂNG KÝ</th>
-                      <th className="py-3.5 px-4">HẠN DÙNG</th>
-                      <th className="py-3.5 px-4">TRẠNG THÁI</th>
-                      <th className="py-3.5 px-4 text-right">THAO TÁC</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'KHÓA ẨN DANH (KEY)' : 'ANONYMOUS KEY'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'TÀI KHOẢN LIÊN KẾT' : 'LINKED USER'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'GÓI' : 'PLAN'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'SỐ LƯỢT AI ĐÃ HỎI' : 'AI QUERIES USED'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'NGÀY ĐĂNG KÝ' : 'REGISTERED DATE'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'HẠN DÙNG' : 'EXPIRATION'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'TRẠNG THÁI' : 'STATUS'}</th>
+                      <th className="py-3.5 px-4 text-right">{adminLang === 'vi' ? 'THAO TÁC' : 'ACTION'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -937,7 +985,9 @@ export default function AdminDashboardPage() {
                             {sub.username ? (
                               <span className="font-semibold text-white">@{sub.username}</span>
                             ) : (
-                              <span className="text-gray-500 italic">Chưa liên kết</span>
+                              <span className="text-gray-500 italic">
+                                {adminLang === 'vi' ? 'Chưa liên kết' : 'Not linked'}
+                              </span>
                             )}
                           </td>
                           <td className="py-3.5 px-4">
@@ -946,7 +996,7 @@ export default function AdminDashboardPage() {
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-mono font-bold text-teal-300">
-                            {sub.aiTurnsUsed} lượt
+                            {sub.aiTurnsUsed} {adminLang === 'vi' ? 'lượt' : 'queries'}
                           </td>
                           <td className="py-3.5 px-4 font-mono text-gray-400 text-[11px]">
                             {sub.registeredAt}
@@ -979,11 +1029,17 @@ export default function AdminDashboardPage() {
                                   return item;
                                 });
                                 setSubscribers(updated);
-                                showToast(`Đã thay đổi trạng thái của ${sub.anonymousKey}!`);
+                                showToast(
+                                  adminLang === 'vi'
+                                    ? `Đã thay đổi trạng thái của ${sub.anonymousKey}!`
+                                    : `Updated status for ${sub.anonymousKey}!`
+                                );
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white text-[11px]"
+                              className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white text-[11px] cursor-pointer"
                             >
-                              {sub.status === 'active' ? 'Tạm khóa' : 'Kích hoạt lại'}
+                              {sub.status === 'active'
+                                ? (adminLang === 'vi' ? 'Tạm khóa' : 'Suspend')
+                                : (adminLang === 'vi' ? 'Kích hoạt lại' : 'Reactivate')}
                             </button>
                           </td>
                         </tr>
@@ -1002,13 +1058,21 @@ export default function AdminDashboardPage() {
           <div className="space-y-6 animate-in fade-in duration-200">
             <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950/60 via-[#160a2b] to-[#0d071f] border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-white">Doanh Số Tiếp Thị Liên Kết (Affiliate Revenue)</h3>
+                <h3 className="text-base font-bold text-white">
+                  {adminLang === 'vi'
+                    ? 'Doanh Số Tiếp Thị Liên Kết (Affiliate Revenue)'
+                    : 'Affiliate Revenue Performance'}
+                </h3>
                 <p className="text-xs text-gray-400">
-                  Hệ thống ghi nhận lượt chuyển đổi từ các sản phẩm gợi ý tại Khối 6 (Trà thảo mộc, Đồng hồ ADHD, Nến thơm, Sách tâm lý).
+                  {adminLang === 'vi'
+                    ? 'Hệ thống ghi nhận lượt chuyển đổi từ các sản phẩm gợi ý tại Khối 6 (Trà thảo mộc, Đồng hồ ADHD, Nến thơm, Sách tâm lý).'
+                    : 'Conversion tracking for recommended physical products from Block 6 (Herbal tea, ADHD timer, scented candles, psychology books).'}
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-xs text-gray-400 block font-mono">Tổng hoa hồng ước tính:</span>
+                <span className="text-xs text-gray-400 block font-mono">
+                  {adminLang === 'vi' ? 'Tổng hoa hồng ước tính:' : 'Estimated Total Commission:'}
+                </span>
                 <span className="text-2xl font-extrabold text-brand-teal font-mono">
                   {financialSummary.totalAffiliateCommission.toLocaleString()} đ
                 </span>
@@ -1021,13 +1085,13 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-white/5 border-b border-white/10 text-gray-400 font-mono">
                     <tr>
-                      <th className="py-3.5 px-4">TÊN SẢN PHẨM TIẾP THỊ</th>
-                      <th className="py-3.5 px-4">DANH MỤC</th>
-                      <th className="py-3.5 px-4">SÀN THƯƠNG MẠI</th>
-                      <th className="py-3.5 px-4 text-center">LƯỢT CLICKS</th>
-                      <th className="py-3.5 px-4 text-center">ĐƠN HÀNG ƯỚC TÍNH</th>
-                      <th className="py-3.5 px-4 text-right">TỔNG GMV</th>
-                      <th className="py-3.5 px-4 text-right">HOA HỒNG NHẬN (8-10%)</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'TÊN SẢN PHẨM TIẾP THỊ' : 'AFFILIATE PRODUCT'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'DANH MỤC' : 'CATEGORY'}</th>
+                      <th className="py-3.5 px-4">{adminLang === 'vi' ? 'SÀN THƯƠNG MẠI' : 'PLATFORM'}</th>
+                      <th className="py-3.5 px-4 text-center">{adminLang === 'vi' ? 'LƯỢT CLICKS' : 'CLICKS'}</th>
+                      <th className="py-3.5 px-4 text-center">{adminLang === 'vi' ? 'ĐƠN HÀNG ƯỚC TÍNH' : 'EST. ORDERS'}</th>
+                      <th className="py-3.5 px-4 text-right">{adminLang === 'vi' ? 'TỔNG GMV' : 'TOTAL GMV'}</th>
+                      <th className="py-3.5 px-4 text-right">{adminLang === 'vi' ? 'HOA HỒNG NHẬN (8-10%)' : 'COMMISSION (8-10%)'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -1136,7 +1200,9 @@ export default function AdminDashboardPage() {
                         {adminLang === 'vi' ? '3. Hoàn Thành Bài Test' : '3. Tests Completed'}
                       </span>
                       <span className="text-xl font-extrabold text-teal-300">{totalTests.toLocaleString()}</span>
-                      <span className="text-[10px] text-teal-400 block">4 bài chuẩn hóa</span>
+                      <span className="text-[10px] text-teal-400 block">
+                        {adminLang === 'vi' ? '4 bài chuẩn hóa' : '4 Standardized Tests'}
+                      </span>
                     </div>
 
                     <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
@@ -1146,7 +1212,9 @@ export default function AdminDashboardPage() {
                       <span className="text-xl font-extrabold text-amber-300">
                         {liveData.totalAiQuestionsAsked.toLocaleString()}
                       </span>
-                      <span className="text-[10px] text-amber-400 block">lượt tương tác</span>
+                      <span className="text-[10px] text-amber-400 block">
+                        {adminLang === 'vi' ? 'lượt tương tác' : 'interactions'}
+                      </span>
                     </div>
 
                     <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
@@ -1183,8 +1251,14 @@ export default function AdminDashboardPage() {
                     <div className="space-y-3 text-xs pt-1">
                       <div>
                         <div className="flex justify-between font-semibold pb-1">
-                          <span>1. Thang đo DASS-21 (Trầm cảm, Lo âu, Căng thẳng)</span>
-                          <span className="font-mono text-purple-300">{liveDass} lượt ({pDass}%)</span>
+                          <span>
+                            {adminLang === 'vi'
+                              ? '1. Thang đo DASS-21 (Trầm cảm, Lo âu, Căng thẳng)'
+                              : '1. DASS-21 Scale (Depression, Anxiety, Stress)'}
+                          </span>
+                          <span className="font-mono text-purple-300">
+                            {liveDass} {adminLang === 'vi' ? 'lượt' : 'takes'} ({pDass}%)
+                          </span>
                         </div>
                         <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                           <div className="h-full bg-purple-500 rounded-full" style={{ width: `${pDass}%` }} />
@@ -1193,8 +1267,14 @@ export default function AdminDashboardPage() {
 
                       <div>
                         <div className="flex justify-between font-semibold pb-1">
-                          <span>2. Sàng lọc ADHD Người Lớn (ASRS v1.1)</span>
-                          <span className="font-mono text-cyan-300">{liveAdhd} lượt ({pAdhd}%)</span>
+                          <span>
+                            {adminLang === 'vi'
+                              ? '2. Sàng lọc ADHD Người Lớn (ASRS v1.1)'
+                              : '2. Adult ADHD Screener (ASRS v1.1)'}
+                          </span>
+                          <span className="font-mono text-cyan-300">
+                            {liveAdhd} {adminLang === 'vi' ? 'lượt' : 'takes'} ({pAdhd}%)
+                          </span>
                         </div>
                         <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                           <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${pAdhd}%` }} />
@@ -1203,8 +1283,14 @@ export default function AdminDashboardPage() {
 
                       <div>
                         <div className="flex justify-between font-semibold pb-1">
-                          <span>3. Khí chất Sinh học Eysenck (EPI-57)</span>
-                          <span className="font-mono text-amber-300">{liveEysenck} lượt ({pEysenck}%)</span>
+                          <span>
+                            {adminLang === 'vi'
+                              ? '3. Khí chất Sinh học Eysenck (EPI-57)'
+                              : '3. Eysenck Biological Temperament (EPI-57)'}
+                          </span>
+                          <span className="font-mono text-amber-300">
+                            {liveEysenck} {adminLang === 'vi' ? 'lượt' : 'takes'} ({pEysenck}%)
+                          </span>
                         </div>
                         <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                           <div className="h-full bg-amber-500 rounded-full" style={{ width: `${pEysenck}%` }} />
@@ -1213,8 +1299,14 @@ export default function AdminDashboardPage() {
 
                       <div>
                         <div className="flex justify-between font-semibold pb-1">
-                          <span>4. Năm Yếu Tố Nhân Cách Big Five (BFI-44)</span>
-                          <span className="font-mono text-teal-300">{liveBfi} lượt ({pBfi}%)</span>
+                          <span>
+                            {adminLang === 'vi'
+                              ? '4. Năm Yếu Tố Nhân Cách Big Five (BFI-44)'
+                              : '4. Big Five Personality Traits (BFI-44)'}
+                          </span>
+                          <span className="font-mono text-teal-300">
+                            {liveBfi} {adminLang === 'vi' ? 'lượt' : 'takes'} ({pBfi}%)
+                          </span>
                         </div>
                         <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                           <div className="h-full bg-teal-500 rounded-full" style={{ width: `${pBfi}%` }} />
@@ -1281,203 +1373,232 @@ export default function AdminDashboardPage() {
         {/* TAB 6: GATEWAY SETTINGS & BANK CONFIG */}
         {/* ============================================================== */}
         {activeTab === 'settings' && (
-          <div className="space-y-6 max-w-3xl animate-in fade-in duration-200">
-            <div className="p-6 rounded-3xl bg-[#0e0722] border border-white/10 space-y-5">
+          <div className="space-y-6 w-full animate-in fade-in duration-200">
+            {/* Header Title & Subtitle */}
+            <div className="p-6 rounded-3xl bg-[#0e0722] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2.5">
                   <Building2 className="w-5 h-5 text-teal-300" />
                   <span>
                     {adminLang === 'vi'
-                      ? 'Quản lý Ngân Hàng Thụ Hưởng'
+                      ? 'Cài Đặt Ngân Hàng Thụ Hưởng'
                       : 'Receiving Bank Management'}
                   </span>
                 </h3>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 mt-1">
                   {adminLang === 'vi'
                     ? 'Tài khoản thụ hưởng nhận tiền khi khách hàng nâng cấp gói PsyQuizz Plus qua VietQR Napas247.'
-                    : 'Recipient account for automated transfers when users upgrade to PsyQuizz Plus.'}
+                    : 'Recipient account for automated transfers when users upgrade to PsyQuizz Plus via VietQR Napas247.'}
                 </p>
               </div>
+            </div>
 
-              {/* Large Real QR Display Preview */}
-              <div className="p-5 rounded-2xl bg-black/50 border border-purple-500/40 flex flex-col sm:flex-row items-center gap-6">
-                <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-2xl bg-white p-2.5 shrink-0 border-2 border-purple-400 shadow-2xl overflow-hidden flex items-center justify-center">
+            {/* Balanced Grid: 2 Equal / Proportionate Columns */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              {/* Left Column: QR Code & Bank Identification Card */}
+              <div className="lg:col-span-5 rounded-3xl bg-[#0e0722] border border-white/10 p-6 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-full flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-300 font-mono">
+                    {adminLang === 'vi' ? 'Mã QR VPBank' : 'VPBank QR Code'}
+                  </span>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>
+                      {adminLang === 'vi'
+                        ? 'Mã QR Đã Kích Hoạt Sẵn Sàng Nhận Tiền'
+                        : 'QR Code Activated & Ready for Payments'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* QR Image */}
+                <div className="w-64 h-64 sm:w-72 sm:h-72 rounded-2xl bg-white p-3 border-2 border-purple-400/80 shadow-2xl shadow-purple-500/20 overflow-hidden flex items-center justify-center transition-transform hover:scale-102">
                   <img src="/qr-vpbank-crop.jpg" alt="VPBank QR Code" className="w-full h-full object-contain" />
                 </div>
-                <div className="space-y-2 text-xs text-gray-300">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold font-mono">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Mã QR Đã Kích Hoạt Sẵn Sàng Nhận Tiền</span>
-                  </div>
-                  <p className="text-base font-bold text-white">
+
+                {/* Beneficiary Header Text */}
+                <div className="space-y-1.5 w-full">
+                  <p className="text-base sm:text-lg font-mono font-extrabold text-white tracking-wide">
                     VPBank • 39112082003 • LE HOANG ANH
                   </p>
-                  <p className="text-xs text-gray-400 leading-relaxed">
+                  <p className="text-xs text-gray-400 leading-relaxed max-w-sm mx-auto">
                     {adminLang === 'vi'
-                      ? 'Khách hàng quét mã này trên ứng dụng ngân hàng bất kỳ sẽ tự động nhận diện đúng số tài khoản và tên chủ thụ hưởng LE HOANG ANH.'
+                      ? 'Khách hàng quét mã này trên ứng dụng ngân hàng bất kỳ sẽ tự động nhận diện đúng số tài khoản, tên chủ thụ hưởng LE HOANG ANH và cú pháp chuyển khoản.'
                       : 'Scanning this code auto-populates exact account number, beneficiary LE HOANG ANH, and transfer memo.'}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1">
-                  <label className="text-gray-300 font-semibold">
-                    {adminLang === 'vi' ? 'Ngân Hàng Thụ Hưởng' : 'Receiving Bank'}
-                  </label>
-                  <select
-                    value={bankConfig.bankCode}
-                    onChange={(e) => setBankConfig({ ...bankConfig, bankCode: e.target.value })}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none"
-                  >
-                    <option value="VPBank">VPBank (Ngân hàng TMCP Việt Nam Thịnh Vượng)</option>
-                    <option value="MB">MBBank (Ngân hàng Quân Đội)</option>
-                    <option value="VCB">Vietcombank (Ngoại thương)</option>
-                    <option value="TCB">Techcombank (Kỹ thương)</option>
-                  </select>
-                </div>
+              {/* Right Column: Bank Details & Pricing Configuration */}
+              <div className="lg:col-span-7 rounded-3xl bg-[#0e0722] border border-white/10 p-6 flex flex-col justify-between space-y-6">
+                {/* Bank Account Fields */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-gray-300 uppercase tracking-wider font-mono border-b border-white/10 pb-2">
+                    {adminLang === 'vi' ? 'Thông Tin Tài Khoản Thụ Hưởng' : 'Receiving Bank Details'}
+                  </h4>
 
-                <div className="space-y-1">
-                  <label className="text-gray-300 font-semibold">
-                    {adminLang === 'vi' ? 'Số Tài Khoản Nhận Tiền' : 'Account Number'}
-                  </label>
-                  <input
-                    type="text"
-                    value={bankConfig.accountNumber}
-                    onChange={(e) => setBankConfig({ ...bankConfig, accountNumber: e.target.value })}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
-                  />
-                </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="space-y-1.5">
+                      <label className="text-gray-300 font-semibold block">
+                        {adminLang === 'vi' ? 'Ngân Hàng Thụ Hưởng' : 'Receiving Bank'}
+                      </label>
+                      <select
+                        value={bankConfig.bankCode}
+                        onChange={(e) => setBankConfig({ ...bankConfig, bankCode: e.target.value })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                      >
+                        <option value="VPBank">VPBank (Ngân hàng TMCP Việt Nam Thịnh Vượng)</option>
+                        <option value="MB">MBBank (Ngân hàng Quân Đội)</option>
+                        <option value="VCB">Vietcombank (Ngoại thương)</option>
+                        <option value="TCB">Techcombank (Kỹ thương)</option>
+                      </select>
+                    </div>
 
-                <div className="space-y-1">
-                  <label className="text-gray-300 font-semibold">
-                    {adminLang === 'vi' ? 'Tên Chủ Tài Khoản (Không dấu)' : 'Account Holder (Uppercase)'}
-                  </label>
-                  <input
-                    type="text"
-                    value={bankConfig.accountHolder}
-                    onChange={(e) => setBankConfig({ ...bankConfig, accountHolder: e.target.value.toUpperCase() })}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
-                  />
-                </div>
+                    <div className="space-y-1.5">
+                      <label className="text-gray-300 font-semibold block">
+                        {adminLang === 'vi' ? 'Số Tài Khoản Nhận Tiền' : 'Account Number'}
+                      </label>
+                      <input
+                        type="text"
+                        value={bankConfig.accountNumber}
+                        onChange={(e) => setBankConfig({ ...bankConfig, accountNumber: e.target.value })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-white font-mono focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
 
-                <div className="space-y-1">
-                  <label className="text-gray-300 font-semibold">
-                    Webhook Destination URL (Vercel Endpoint)
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value="https://<your-vercel-domain>/api/webhook/payment"
-                    className="w-full bg-black/60 border border-purple-500/30 rounded-xl px-3 py-2 text-teal-300 font-mono text-[11px]"
-                  />
-                </div>
-              </div>
+                    <div className="space-y-1.5">
+                      <label className="text-gray-300 font-semibold block">
+                        {adminLang === 'vi' ? 'Tên Chủ Tài Khoản (Không dấu)' : 'Account Holder (Uppercase)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={bankConfig.accountHolder}
+                        onChange={(e) => setBankConfig({ ...bankConfig, accountHolder: e.target.value.toUpperCase() })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-white font-mono focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
 
-              <div className="pt-2 border-t border-white/10 space-y-3">
-                <h4 className="text-xs font-bold text-gray-300 uppercase tracking-wider">
-                  {adminLang === 'vi' ? 'Cấu Hình Giá Bán Gói Premium' : 'Premium Pricing Configuration'}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div className="space-y-1">
-                    <label className="text-gray-400">
-                      {adminLang === 'vi' ? 'Gói Tháng (VNĐ)' : 'Monthly Plan'}
-                    </label>
-                    <input
-                      type="number"
-                      value={bankConfig.monthlyPrice}
-                      onChange={(e) => setBankConfig({ ...bankConfig, monthlyPrice: Number(e.target.value) })}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-gray-400">
-                      {adminLang === 'vi' ? 'Gói 1 Năm (VNĐ)' : 'Yearly Plan'}
-                    </label>
-                    <input
-                      type="number"
-                      value={bankConfig.yearlyPrice}
-                      onChange={(e) => setBankConfig({ ...bankConfig, yearlyPrice: Number(e.target.value) })}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-gray-400">
-                      {adminLang === 'vi' ? 'Gói Trọn Đời (VNĐ)' : 'Lifetime Plan'}
-                    </label>
-                    <input
-                      type="number"
-                      value={bankConfig.lifetimePrice}
-                      onChange={(e) => setBankConfig({ ...bankConfig, lifetimePrice: Number(e.target.value) })}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white font-mono"
-                    />
+                    <div className="space-y-1.5">
+                      <label className="text-gray-300 font-semibold block">
+                        Webhook Destination URL (Vercel Endpoint)
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value="https://<your-vercel-domain>/api/webhook/payment"
+                        className="w-full bg-black/60 border border-purple-500/30 rounded-xl px-3 py-2.5 text-teal-300 font-mono text-[11px]"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="pt-2 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const current = getPricingConfig();
-                    const origYearly = bankConfig.monthlyPrice * 12;
-                    const discount = Math.max(0, Math.round(((origYearly - bankConfig.yearlyPrice) / origYearly) * 100));
-                    savePricingConfig({
-                      monthly: {
-                        ...current.monthly,
-                        price: bankConfig.monthlyPrice,
-                        originalPrice: bankConfig.monthlyPrice
-                      },
-                      yearly: {
-                        ...current.yearly,
-                        price: bankConfig.yearlyPrice,
-                        originalPrice: origYearly,
-                        discountPercent: discount
-                      },
-                      lifetime: {
-                        ...current.lifetime,
-                        price: bankConfig.lifetimePrice
-                      }
-                    });
-                    showToast(adminLang === 'vi' ? 'Đã lưu cấu hình tài khoản ngân hàng và cập nhật giá bán toàn hệ thống!' : 'Bank settings and system pricing saved successfully!');
-                  }}
-                  className="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-black font-bold text-xs shadow-lg transition-all cursor-pointer"
-                >
-                  {adminLang === 'vi' ? 'Lưu Cấu Hình' : 'Save Configuration'}
-                </button>
-              </div>
+                {/* Pricing Configuration */}
+                <div className="space-y-4 pt-4 border-t border-white/10">
+                  <h4 className="text-xs font-bold text-gray-300 uppercase tracking-wider font-mono">
+                    {adminLang === 'vi' ? 'Cấu Hình Giá Bán Gói Premium' : 'Premium Pricing Configuration'}
+                  </h4>
 
-              {/* Reset to Clean Slate */}
-              <div className="pt-4 border-t border-rose-500/20 space-y-2">
-                <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider">
-                  {adminLang === 'vi' ? 'Khởi Tạo Lại Dữ Liệu (Reset To Clean Slate)' : 'Wipe & Reset System Data'}
-                </h4>
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  {adminLang === 'vi'
-                    ? 'Xóa sạch toàn bộ giao dịch, tài khoản giả lập và lượt tương tác telemetry, đưa hệ thống về trạng thái mới toanh 100%.'
-                    : 'Wipe all mock transactions, test subscriptions, and telemetry metrics to start 100% fresh.'}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const clean = resetAllSystemTelemetry();
-                    setLiveData(clean);
-                    setTransactions([]);
-                    setSubscribers([]);
-                    setAffiliateProducts(INITIAL_AFFILIATE_PRODUCTS);
-                    setAiTokensCost(0);
-                    setHostingCost(0);
-                    if (typeof window !== 'undefined') {
-                      localStorage.removeItem('psyquizz_admin_outflow_ai');
-                      localStorage.removeItem('psyquizz_admin_outflow_hosting');
-                    }
-                    showToast(adminLang === 'vi' ? 'Đã xóa toàn bộ dữ liệu giả lập và đặt lại hệ thống về mới toanh 100%!' : 'System completely reset to clean state (0 everywhere)!');
-                  }}
-                  className="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 font-bold text-xs transition-all cursor-pointer"
-                >
-                  {adminLang === 'vi' ? 'Xóa Toàn Bộ Data Giả Lập & Reset Về Mới Toanh' : 'Reset Everything to Clean Slate'}
-                </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div className="space-y-1.5">
+                      <label className="text-gray-400 block">
+                        {adminLang === 'vi' ? 'Gói Tháng (VNĐ)' : 'Monthly Plan'}
+                      </label>
+                      <input
+                        type="number"
+                        value={bankConfig.monthlyPrice}
+                        onChange={(e) => setBankConfig({ ...bankConfig, monthlyPrice: Number(e.target.value) })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-white font-mono focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-gray-400 block">
+                        {adminLang === 'vi' ? 'Gói 1 Năm (VNĐ)' : 'Yearly Plan'}
+                      </label>
+                      <input
+                        type="number"
+                        value={bankConfig.yearlyPrice}
+                        onChange={(e) => setBankConfig({ ...bankConfig, yearlyPrice: Number(e.target.value) })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-white font-mono focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-gray-400 block">
+                        {adminLang === 'vi' ? 'Gói Trọn Đời (VNĐ)' : 'Lifetime Plan'}
+                      </label>
+                      <input
+                        type="number"
+                        value={bankConfig.lifetimePrice}
+                        onChange={(e) => setBankConfig({ ...bankConfig, lifetimePrice: Number(e.target.value) })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-white font-mono focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const current = getPricingConfig();
+                        const origYearly = bankConfig.monthlyPrice * 12;
+                        const discount = Math.max(0, Math.round(((origYearly - bankConfig.yearlyPrice) / origYearly) * 100));
+                        savePricingConfig({
+                          monthly: {
+                            ...current.monthly,
+                            price: bankConfig.monthlyPrice,
+                            originalPrice: bankConfig.monthlyPrice
+                          },
+                          yearly: {
+                            ...current.yearly,
+                            price: bankConfig.yearlyPrice,
+                            originalPrice: origYearly,
+                            discountPercent: discount
+                          },
+                          lifetime: {
+                            ...current.lifetime,
+                            price: bankConfig.lifetimePrice
+                          }
+                        });
+                        showToast(adminLang === 'vi' ? 'Đã lưu cấu hình tài khoản ngân hàng và cập nhật giá bán toàn hệ thống!' : 'Bank settings and system pricing saved successfully!');
+                      }}
+                      className="px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-black font-bold text-xs shadow-lg transition-all cursor-pointer"
+                    >
+                      {adminLang === 'vi' ? 'Lưu Cấu Hình' : 'Save Configuration'}
+                    </button>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            {/* Full-width Danger / Reset Card */}
+            <div className="p-6 rounded-3xl bg-[#0e0722] border border-rose-500/20 space-y-3">
+              <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider font-mono">
+                {adminLang === 'vi' ? 'Khởi Tạo Lại Dữ Liệu (Reset To Clean Slate)' : 'Wipe & Reset System Data'}
+              </h4>
+              <p className="text-xs text-gray-400 leading-relaxed max-w-3xl">
+                {adminLang === 'vi'
+                  ? 'Xóa sạch toàn bộ giao dịch, tài khoản giả lập và lượt tương tác telemetry, đưa hệ thống về trạng thái mới toanh 100%.'
+                  : 'Wipe all mock transactions, test subscriptions, and telemetry metrics to start 100% fresh.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const clean = resetAllSystemTelemetry();
+                  setLiveData(clean);
+                  setTransactions([]);
+                  setSubscribers([]);
+                  setAffiliateProducts(INITIAL_AFFILIATE_PRODUCTS);
+                  setAiTokensCost(0);
+                  setHostingCost(0);
+                  if (typeof window !== 'undefined') {
+                    localStorage.removeItem('psyquizz_admin_outflow_ai');
+                    localStorage.removeItem('psyquizz_admin_outflow_hosting');
+                  }
+                  showToast(adminLang === 'vi' ? 'Đã xóa toàn bộ dữ liệu giả lập và đặt lại hệ thống về mới toanh 100%!' : 'System completely reset to clean state (0 everywhere)!');
+                }}
+                className="px-5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 font-bold text-xs transition-all cursor-pointer"
+              >
+                {adminLang === 'vi' ? 'Xóa Toàn Bộ Data Giả Lập & Reset Về Mới Toanh' : 'Reset Everything to Clean Slate'}
+              </button>
             </div>
           </div>
         )}
@@ -1501,7 +1622,9 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-teal-300" />
-                <h3 className="text-base font-bold text-white">Mô Phỏng Chuyển Khoản Ngân Hàng</h3>
+                <h3 className="text-base font-bold text-white">
+                  {adminLang === 'vi' ? 'Mô Phỏng Chuyển Khoản Ngân Hàng' : 'Simulate Bank Transfer'}
+                </h3>
               </div>
               <button
                 type="button"
@@ -1513,12 +1636,16 @@ export default function AdminDashboardPage() {
             </div>
 
             <p className="text-xs text-gray-300">
-              Công cụ dành cho Admin kiểm tra tính năng Webhook: Khi một khách chuyển khoản qua VietQR, hệ thống sẽ tự động bóc tách Anonymous Key và kích hoạt Plus ngay tức thì.
+              {adminLang === 'vi'
+                ? 'Công cụ dành cho Admin kiểm tra tính năng Webhook: Khi một khách chuyển khoản qua VietQR, hệ thống sẽ tự động bóc tách Anonymous Key và kích hoạt Plus ngay tức thì.'
+                : 'Admin testing tool for Webhook reconciliation: When a user pays via VietQR, system parses Anonymous Key and activates Plus immediately.'}
             </p>
 
             <div className="space-y-3 text-xs">
               <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">Khóa Ẩn Danh Cần Mua (Anonymous Key)</label>
+                <label className="text-gray-300 font-semibold">
+                  {adminLang === 'vi' ? 'Khóa Ẩn Danh Cần Mua (Anonymous Key)' : 'Target Anonymous Key'}
+                </label>
                 <input
                   type="text"
                   value={simKey}
@@ -1528,20 +1655,24 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">Số tiền chuyển khoản</label>
+                <label className="text-gray-300 font-semibold">
+                  {adminLang === 'vi' ? 'Số tiền chuyển khoản' : 'Transfer Amount'}
+                </label>
                 <select
                   value={simAmount}
                   onChange={(e) => setSimAmount(Number(e.target.value))}
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white font-mono"
                 >
-                  <option value={99000}>99,000 đ (Gói 1 Tháng)</option>
-                  <option value={299000}>299,000 đ (Gói 1 Năm)</option>
-                  <option value={699000}>699,000 đ (Gói Trọn Đời Lifetime)</option>
+                  <option value={99000}>99,000 đ ({adminLang === 'vi' ? 'Gói 1 Tháng' : 'Monthly Plan'})</option>
+                  <option value={299000}>299,000 đ ({adminLang === 'vi' ? 'Gói 1 Năm' : 'Yearly Plan'})</option>
+                  <option value={699000}>699,000 đ ({adminLang === 'vi' ? 'Gói Trọn Đời Lifetime' : 'Lifetime Plan'})</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">App Ngân hàng chuyển</label>
+                <label className="text-gray-300 font-semibold">
+                  {adminLang === 'vi' ? 'App Ngân hàng chuyển' : 'Sending Bank App'}
+                </label>
                 <select
                   value={simGateway}
                   onChange={(e) => setSimGateway(e.target.value as any)}
@@ -1554,7 +1685,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-[11px] text-purple-200">
-                <strong>Nội dung chuyển khoản mô phỏng:</strong>{' '}
+                <strong>{adminLang === 'vi' ? 'Nội dung chuyển khoản mô phỏng:' : 'Simulated Transfer Memo:'}</strong>{' '}
                 <span className="font-mono text-white">{simKey.trim().toUpperCase()} NANG CAP PREMIUM</span>
               </div>
             </div>
@@ -1563,16 +1694,16 @@ export default function AdminDashboardPage() {
               <button
                 type="button"
                 onClick={() => setShowSimulateModal(false)}
-                className="px-4 py-2 rounded-xl bg-white/10 text-gray-300 hover:text-white text-xs"
+                className="px-4 py-2 rounded-xl bg-white/10 text-gray-300 hover:text-white text-xs cursor-pointer"
               >
-                Hủy
+                {adminLang === 'vi' ? 'Hủy' : 'Cancel'}
               </button>
               <button
                 type="button"
                 onClick={handleSimulatePayment}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold text-xs shadow-md"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold text-xs shadow-md cursor-pointer"
               >
-                Bắn Webhook Khớp Tiền Ngay
+                {adminLang === 'vi' ? 'Bắn Webhook Khớp Tiền Ngay' : 'Trigger Webhook & Match'}
               </button>
             </div>
           </div>

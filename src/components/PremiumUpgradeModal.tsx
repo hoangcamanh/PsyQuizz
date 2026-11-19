@@ -27,7 +27,6 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
 
   const [pricingConfig, setPricingConfig] = useState<SystemPricingConfig>(() => getPricingConfig());
   const [upgradePlan, setUpgradePlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [qrType, setQrType] = useState<'vietqr' | 'vpbank'>('vietqr');
   const [copiedPayField, setCopiedPayField] = useState<string | null>(null);
   const [paySuccessMsg, setPaySuccessMsg] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -103,10 +102,6 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
 
         {/* Header */}
         <div className="space-y-1.5 text-center sm:text-left pr-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300">
-            <Crown className="w-4 h-4 text-amber-400" />
-            <span>PsyQuizz Plus • 100% Ẩn danh</span>
-          </div>
           <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
             {isVi ? 'Nâng cấp Gói PsyQuizz Plus' : 'Upgrade to PsyQuizz Plus'}
           </h3>
@@ -122,7 +117,7 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
           <button
             type="button"
             onClick={() => setUpgradePlan('monthly')}
-            className={`p-3.5 rounded-2xl border text-left transition-all ${
+            className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
               upgradePlan === 'monthly'
                 ? 'bg-purple-600/30 border-purple-400 ring-2 ring-purple-500/50'
                 : 'bg-black/30 border-white/10 hover:border-white/20'
@@ -144,7 +139,7 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
           <button
             type="button"
             onClick={() => setUpgradePlan('yearly')}
-            className={`p-3.5 rounded-2xl border text-left transition-all relative ${
+            className={`p-3.5 rounded-2xl border text-left transition-all relative cursor-pointer ${
               upgradePlan === 'yearly'
                 ? 'bg-purple-600/30 border-purple-400 ring-2 ring-purple-500/50'
                 : 'bg-black/30 border-white/10 hover:border-white/20'
@@ -170,28 +165,6 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
           </button>
         </div>
 
-        {/* QR Type Switcher (VietQR động vs QR VPBank gốc) */}
-        <div className="flex items-center justify-between p-1 bg-black/40 rounded-xl border border-white/10 text-xs">
-          <button
-            type="button"
-            onClick={() => setQrType('vietqr')}
-            className={`flex-1 py-1.5 px-2 rounded-lg font-bold transition-all text-center ${
-              qrType === 'vietqr' ? 'bg-purple-600 text-white shadow' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            {isVi ? 'Mã VietQR Tự Điền Tiền' : 'Auto-fill VietQR'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setQrType('vpbank')}
-            className={`flex-1 py-1.5 px-2 rounded-lg font-bold transition-all text-center ${
-              qrType === 'vpbank' ? 'bg-purple-600 text-white shadow' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            {isVi ? 'Mã QR VPBank Gốc' : 'Original VPBank QR'}
-          </button>
-        </div>
-
         {/* Real VPBank QR Code & Bank Transfer Details */}
         <div className="p-4 sm:p-5 rounded-2xl bg-black/50 border border-purple-500/30 space-y-4">
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -199,20 +172,11 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
             <div className="relative group shrink-0">
               <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-2xl bg-white p-2.5 shadow-2xl flex items-center justify-center overflow-hidden border-2 border-purple-400/70">
                 <img 
-                  src={
-                    qrType === 'vietqr'
-                      ? `https://img.vietqr.io/image/970432-39112082003-compact2.png?amount=${planAmount}&addInfo=${encodeURIComponent(transferContent)}&accountName=LE%20HOANG%20ANH`
-                      : `/qr-vpbank-crop.jpg`
-                  }
+                  src={`https://img.vietqr.io/image/970432-39112082003-compact2.png?amount=${planAmount}&addInfo=${encodeURIComponent(transferContent)}&accountName=LE%20HOANG%20ANH`}
                   alt="VPBank QR Code"
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="text-[11px] text-center text-gray-300 block mt-2 font-mono">
-                {qrType === 'vietqr'
-                  ? (isVi ? '⚡ Tự động điền số tiền & nội dung' : '⚡ Auto-fills amount & memo')
-                  : (isVi ? 'Mã QR tài khoản VPBank' : 'Official VPBank Account QR')}
-              </span>
             </div>
 
             {/* Account Details */}
@@ -232,7 +196,7 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
                 <button
                   type="button"
                   onClick={() => copyToClipboard('39112082003', 'account')}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-gray-200 transition-colors"
+                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-gray-200 transition-colors cursor-pointer"
                   title="Copy"
                 >
                   {copiedPayField === 'account' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -256,7 +220,7 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
                 <button
                   type="button"
                   onClick={() => copyToClipboard(transferContent, 'content')}
-                  className="p-1.5 rounded-lg bg-purple-500/30 hover:bg-purple-500/50 text-white transition-colors"
+                  className="p-1.5 rounded-lg bg-purple-500/30 hover:bg-purple-500/50 text-white transition-colors cursor-pointer"
                   title="Copy"
                 >
                   {copiedPayField === 'content' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -285,8 +249,8 @@ export default function PremiumUpgradeModal({ isOpen, onClose }: PremiumUpgradeM
         <div className="space-y-2 pt-1">
           <p className="text-xs text-center text-gray-400 leading-relaxed">
             {isVi
-              ? '⚡ Quét mã bằng ứng dụng ngân hàng bất kỳ (VPBank NEO, MB, VCB, Momo...). Hệ thống đối soát tự động kích hoạt quyền lợi Plus ngay khi tiền vào tài khoản.'
-              : '⚡ Scan with any mobile banking app. Plus perks activate automatically once the payment is received.'}
+              ? 'Quét mã bằng ứng dụng ngân hàng bất kỳ (VPBank NEO, MB, VCB, Momo...). Hệ thống đối soát tự động kích hoạt quyền lợi Plus ngay khi tiền vào tài khoản.'
+              : 'Scan with any mobile banking app. Plus perks activate automatically once the payment is received.'}
           </p>
         </div>
       </div>
