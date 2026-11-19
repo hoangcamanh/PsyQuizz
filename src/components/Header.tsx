@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Crown } from 'lucide-react';
 import { useTranslation } from '@/i18n/I18nContext';
+import { useAnonymous } from '@/context/AnonymousContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import AnonymousKeyBadge from './AnonymousKeyBadge';
+import PremiumUpgradeModal from './PremiumUpgradeModal';
 
 interface HeaderProps {
   onOpenAuth?: (mode: 'login' | 'signup') => void;
@@ -18,7 +20,9 @@ interface HeaderProps {
 export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { t } = useTranslation();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const { t, locale } = useTranslation();
+  const { isPlus } = useAnonymous();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -63,11 +67,30 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
           </div>
         </Link>
 
-        {/* Right Navigation Links: Anonymous Key, Language Switcher, About Us & Take a Test */}
-        <nav className="hidden md:flex items-center gap-4 lg:gap-6">
+        {/* Right Navigation Links: Anonymous Key, Get Premium, Language Switcher, About Us & Take a Test */}
+        <nav className="hidden md:flex items-center gap-3 lg:gap-5">
           {/* Anonymous Key Badge */}
           <div className="shrink-0 flex items-center">
             <AnonymousKeyBadge />
+          </div>
+
+          {/* Get Premium Button */}
+          <div className="shrink-0 flex items-center">
+            {isPlus ? (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold shadow-sm">
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span>PLUS VIP</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 hover:from-amber-500/30 hover:to-purple-600/40 border border-amber-500/40 hover:border-amber-400 text-amber-300 hover:text-amber-200 text-xs font-bold shadow-[0_0_15px_rgba(245,158,11,0.2)] transition-all active:scale-95 cursor-pointer"
+              >
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span>{locale === 'vi' ? 'Nâng Cấp Premium' : 'Get Premium'}</span>
+              </button>
+            )}
           </div>
 
           {/* Flag Switcher placed to the LEFT of About Us */}
@@ -119,6 +142,20 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
             <AnonymousKeyBadge isMobile />
             <LanguageSwitcher isMobile />
           </div>
+
+          {!isPlus && (
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setShowUpgradeModal(true);
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-center gap-2"
+            >
+              <Crown className="w-4 h-4 text-amber-400" />
+              <span>{locale === 'vi' ? 'Nâng Cấp Premium' : 'Get Premium'}</span>
+            </button>
+          )}
           
           <Link
             href="#about"
@@ -138,6 +175,12 @@ export default function Header({ onOpenTest, onLogoClick, logoHref = '/' }: Head
           </button>
         </div>
       )}
+
+      {/* Reusable Premium Modal */}
+      <PremiumUpgradeModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => setShowUpgradeModal(false)} 
+      />
     </header>
   );
 }

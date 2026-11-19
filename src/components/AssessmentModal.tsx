@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { AssessmentData, getLocalizedAssessments } from '@/config/assessments';
 import { getAssessmentById } from '@/data/assessments';
+import SafeNextStepRouting from '@/components/SafeNextStepRouting';
 import { useTranslation } from '@/i18n/I18nContext';
 import { 
   ArrowLeft, 
@@ -570,22 +571,13 @@ export default function AssessmentModal({
                 </div>
               )}
 
-              {/* Self-Care Guidance */}
-              {results.actionGuide && (
-                <div className="p-4 sm:p-5 rounded-xl bg-[#130926] border border-purple-900/40 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-pink-400" />
-                    <h4 className="text-xs sm:text-sm font-bold text-white">
-                      {results.actionGuide.levelTitle}
-                    </h4>
-                  </div>
-                  <ul className="space-y-2 text-xs text-gray-300 list-disc list-inside leading-relaxed">
-                    {results.actionGuide.recommendations.map((rec, i) => (
-                      <li key={i}>{rec}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* Safe Next-Step Routing (Khối 6: Điều hướng an toàn theo tầng rủi ro) */}
+              <SafeNextStepRouting
+                scores={results.scores}
+                actionGuide={results.actionGuide}
+                assessmentTitle={results.title}
+                assessmentId={assessment?.id}
+              />
 
             </div>
 

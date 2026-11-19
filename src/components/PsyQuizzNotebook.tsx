@@ -26,6 +26,8 @@ import { AssessmentDefinition } from '@/data/assessments/types';
 import { KNOWLEDGE_BASE, queryAssessmentKnowledge } from '@/data/assessments/knowledgeBase';
 import { useTranslation } from '@/i18n/I18nContext';
 import { useAnonymous } from '@/context/AnonymousContext';
+import { trackLiveEvent } from '@/lib/realtimeAnalytics';
+import PremiumUpgradeModal from './PremiumUpgradeModal';
 
 interface NotebookMessage {
   id: string;
@@ -199,11 +201,75 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
     useAiQuestion,
     activatePlus
   } = useAnonymous();
+  const isVi = locale === 'vi';
   const isQuotaExhausted = !isPlus && remainingAiQuestions <= 0;
+
+  // Upgrade Modal Payment State
+  const [upgradePlan, setUpgradePlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [copiedPayField, setCopiedPayField] = useState<string | null>(null);
+  const [isVerifyingPay, setIsVerifyingPay] = useState<boolean>(false);
+  const [paySuccessMsg, setPaySuccessMsg] = useState<string | null>(null);
+
+  const planAmount = upgradePlan === 'monthly' ? 99000 : 299000;
+  const transferContent = `PQ ${anonymousKey.replace('PQ-', '')}`;
+
+  // Poll for webhook completion while upgrade modal is open
+  useEffect(() => {
+    if (!showUpgradeModal || isPlus) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/webhook/payment?key=${encodeURIComponent(anonymousKey)}`);
+        const data = await res.json();
+        if (data?.paid) {
+          activatePlus();
+          trackLiveEvent('payment_success', {
+            anonymousKey,
+            amount: planAmount,
+            plan: upgradePlan,
+            gateway: 'VPBank',
+            description: `${transferContent} AUTO WEBHOOK`
+          });
+          setPaySuccessMsg(isVi ? 'Thanh toán thành công! Chào mừng bạn đến với PsyQuizz Plus!' : 'Payment received! Welcome to PsyQuizz Plus!');
+          setTimeout(() => {
+            setShowUpgradeModal(false);
+            setPaySuccessMsg(null);
+          }, 2500);
+        }
+      } catch {
+        // network polling silence
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [showUpgradeModal, isPlus, anonymousKey, planAmount, upgradePlan, transferContent, isVi, activatePlus]);
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedPayField(field);
+    setTimeout(() => setCopiedPayField(null), 2000);
+  };
+
+  const handleManualConfirmPayment = () => {
+    setIsVerifyingPay(true);
+    setTimeout(() => {
+      activatePlus();
+      trackLiveEvent('payment_success', {
+        anonymousKey,
+        amount: planAmount,
+        plan: upgradePlan,
+        gateway: 'VPBank',
+        description: `${transferContent} XAC NHAN CHUYEN KHOAN`
+      });
+      setIsVerifyingPay(false);
+      setPaySuccessMsg(isVi ? 'Đã xác nhận thanh toán! Quyền lợi Plus đã được kích hoạt.' : 'Payment confirmed! Plus benefits activated.');
+      setTimeout(() => {
+        setShowUpgradeModal(false);
+        setPaySuccessMsg(null);
+      }, 2000);
+    }, 1200);
+  };
   
   // Knowledge base reference
   const kb = KNOWLEDGE_BASE[assessment.id] || KNOWLEDGE_BASE['adhd'];
-  const isVi = locale === 'vi';
 
   // Chat State
   const initialWelcomeText = isVi
@@ -754,105 +820,11 @@ export function PsyQuizzNotebook({ assessment, resultsSummary }: PsyQuizzNoteboo
         )}
       </div>
 
-      {/* ================= MODAL: PSYQUIZZ PLUS UPGRADE (ANONYMOUS FREEMIUM) ================= */}
-      {showUpgradeModal && mounted && createPortal(
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
-        >
-          <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#180e33] to-[#0c0618] border border-purple-500/40 p-6 sm:p-8 text-white shadow-2xl space-y-6">
-            {/* Close Button */}
-            <button
-              onClick={() => setShowUpgradeModal(false)}
-              className="absolute top-5 right-5 p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Header */}
-            <div className="space-y-2 text-center sm:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300">
-                <Crown className="w-4 h-4 text-amber-400" />
-                <span>PsyQuizz Plus • 100% Ẩn danh</span>
-              </div>
-              <h3 className="text-2xl font-extrabold text-white tracking-tight">
-                {isVi ? 'Nâng cấp Gói PsyQuizz Plus' : 'Upgrade to PsyQuizz Plus'}
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                {isVi
-                  ? 'Gắn quyền lợi trực tiếp vào Anonymous Key của bạn. Không cần Email, SĐT hay Mật khẩu.'
-                  : 'Bound directly to your Anonymous Key. Zero personal data required.'}
-              </p>
-            </div>
-
-            {/* Pricing Card */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-purple-500/30 flex items-center justify-between">
-              <div>
-                <span className="text-xs text-gray-400 block">{isVi ? 'Gói Hội viên Toàn diện' : 'Comprehensive Access'}</span>
-                <span className="text-2xl font-black text-white">59.000 <span className="text-sm font-normal text-purple-300">VNĐ/tháng</span></span>
-              </div>
-              <div className="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-400/40 text-[11px] font-mono text-purple-200">
-                Key: <strong className="text-white">{anonymousKey}</strong>
-              </div>
-            </div>
-
-            {/* Feature List */}
-            <ul className="space-y-3 text-xs sm:text-sm text-gray-200">
-              <li className="flex items-start gap-2.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span>
-                  <strong className="text-white">{isVi ? 'Hỏi đáp AI không giới hạn:' : 'Unlimited RAG AI Queries:'}</strong>{' '}
-                  {isVi ? 'Tra cứu tâm lý học thực chứng 24/7 với dữ liệu đã kiểm duyệt.' : 'Grounded in peer-reviewed psychology literature 24/7.'}
-                </span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span>
-                  <strong className="text-white">{isVi ? 'Báo cáo Phân tích Chéo Đa Thang Đo:' : 'Cross-Scale Analysis Report:'}</strong>{' '}
-                  {isVi ? 'Đối chiếu đồng thời DASS-21, Big Five, Eysenck và ADHD.' : 'Synthesizes DASS-21, Big Five, Eysenck, and ADHD profiles.'}
-                </span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span>
-                  <strong className="text-white">{isVi ? 'Lộ trình Hành động An toàn:' : 'Safe Next-Step Routing:'}</strong>{' '}
-                  {isVi ? 'Chiến lược thích nghi cá nhân hóa và phân tầng rủi ro chuyên sâu.' : 'Personalized self-care routines and clinical triage.'}
-                </span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                <span>
-                  <strong className="text-white">{isVi ? 'Bảo lưu Bằng Khóa Ẩn Danh:' : 'Preserved by Anonymous Key:'}</strong>{' '}
-                  {isVi ? 'Lưu khóa hoặc khôi phục bất cứ lúc nào qua liên kết riêng tư.' : 'Recover anytime using your private recovery link.'}
-                </span>
-              </li>
-            </ul>
-
-            {/* VietQR Sandbox Checkout Simulation */}
-            <div className="space-y-2 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  activatePlus();
-                  setShowUpgradeModal(false);
-                }}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-purple-600 hover:from-emerald-400 hover:to-purple-500 text-white font-bold text-sm shadow-xl shadow-teal-500/20 transition-all flex items-center justify-center gap-2 active:scale-95"
-              >
-                <QrColorIcon />
-                <span>{isVi ? 'Mở khóa Plus ngay (Mô phỏng VietQR)' : 'Unlock Plus Now (VietQR Demo)'}</span>
-              </button>
-              <p className="text-[11px] text-center text-gray-400">
-                {isVi
-                  ? '⚡ Hệ thống VietQR tự động kích hoạt quyền lợi trong 3–5 giây.'
-                  : '⚡ VietQR automated gateway activates access within 3–5 seconds.'}
-              </p>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+      {/* ================= MODAL: PSYQUIZZ PLUS UPGRADE ================= */}
+      <PremiumUpgradeModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => setShowUpgradeModal(false)} 
+      />
     </div>
   );
 }

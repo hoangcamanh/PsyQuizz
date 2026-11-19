@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { trackLiveEvent } from '@/lib/realtimeAnalytics';
 
 interface AccountRecord {
   username: string;
@@ -15,13 +16,16 @@ interface AnonymousContextType {
   remainingAiQuestions: number;
   maxFreeAiQuestions: number;
   accountInfo: { username: string } | null;
+  isAdminUser: boolean;
   useAiQuestion: () => boolean;
   restoreKey: (key: string) => boolean;
   activatePlus: () => void;
   exportKeyText: () => void;
   resetQuotaForTesting: () => void;
   bindAccount: (username: string, password: string) => { success: boolean; message: string };
-  loginWithAccount: (username: string, password: string) => { success: boolean; message: string };
+  loginWithAccount: (username: string, password: string) => { success: boolean; message: string; isAdmin?: boolean };
+  logoutAdmin: () => void;
+  logoutAccount: () => void;
   unlinkAccount: () => void;
 }
 
@@ -51,11 +55,17 @@ export function AnonymousProvider({ children }: { children: React.ReactNode }) {
   const [isPlus, setIsPlus] = useState<boolean>(false);
   const [aiQuestionsUsed, setAiQuestionsUsed] = useState<number>(0);
   const [accountInfo, setAccountInfo] = useState<{ username: string } | null>(null);
+  const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   // Initialize or restore Anonymous Key on load
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Check admin session
+    if (sessionStorage.getItem('psyquizz_admin_session') === 'authenticated') {
+      setIsAdminUser(true);
+    }
 
     // 1. Check if URL has ?key=PQ-... for quick recovery (Magic Link)
     const urlParams = new URLSearchParams(window.location.search);
@@ -99,6 +109,7 @@ export function AnonymousProvider({ children }: { children: React.ReactNode }) {
 
   // Use 1 AI question turn
   const useAiQuestion = (): boolean => {
+    trackLiveEvent('ai_question');
     if (isPlus) return true; // Unlimited for Plus
 
     if (aiQuestionsUsed >= MAX_FREE_AI_QUESTIONS) {
@@ -182,8 +193,8 @@ export function AnonymousProvider({ children }: { children: React.ReactNode }) {
     return { success: true, message: `Đã liên kết tài khoản @${cleanUser} vào mã ${anonymousKey} thành công!` };
   };
 
-  // Login with username and password to restore the linked key
-  const loginWithAccount = (username: string, password: string): { success: boolean; message: string } => {
+  // Login with username and password to restore the linked key (or admin login)
+  const loginWithAccount = (username: string, password: string): { success: boolean; message: string; isAdmin?: boolean } => {
     const cleanUser = username.trim().toLowerCase();
     if (!cleanUser || !password) {
       return { success: false, message: 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.' };
@@ -191,6 +202,17 @@ export function AnonymousProvider({ children }: { children: React.ReactNode }) {
 
     if (typeof window === 'undefined') {
       return { success: false, message: 'Lỗi môi trường duyệt web.' };
+    }
+
+    // Special check for ADMIN account
+    if (cleanUser === 'admin' && (password === 'admin123' || password === 'psyadmin2026' || password === 'psyquizz')) {
+      sessionStorage.setItem('psyquizz_admin_session', 'authenticated');
+      setIsAdminUser(true);
+      return {
+        success: true,
+        message: 'Đăng nhập Quản trị viên thành công! Đang chuyển đến Admin Dashboard...',
+        isAdmin: true
+      };
     }
 
     const registryRaw = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
@@ -206,6 +228,26 @@ export function AnonymousProvider({ children }: { children: React.ReactNode }) {
     setAccountInfo({ username: account.username });
 
     return { success: true, message: `Đăng nhập thành công! Đã đồng bộ mã ${account.key}.` };
+  };
+
+  const logoutAdmin = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('psyquizz_admin_session');
+      setIsAdminUser(false);
+    }
+  };
+
+  const logoutAccount = () => {
+    setAccountInfo(null);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('psyquizz_admin_session');
+      setIsAdminUser(false);
+      const newKey = generateAnonymousKey();
+      localStorage.setItem(STORAGE_KEY, newKey);
+      setAnonymousKey(newKey);
+      setIsPlus(false);
+      setAiQuestionsUsed(0);
+    }
   };
 
   // Unlink account
@@ -282,6 +324,7 @@ KEEP THIS KEY SAFE. This key is your cryptographic identity on PsyQuizz.
         remainingAiQuestions,
         maxFreeAiQuestions: MAX_FREE_AI_QUESTIONS,
         accountInfo,
+        isAdminUser,
         useAiQuestion,
         restoreKey,
         activatePlus,
@@ -289,6 +332,8 @@ KEEP THIS KEY SAFE. This key is your cryptographic identity on PsyQuizz.
         resetQuotaForTesting,
         bindAccount,
         loginWithAccount,
+        logoutAdmin,
+        logoutAccount,
         unlinkAccount
       }}
     >

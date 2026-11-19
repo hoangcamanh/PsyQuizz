@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { 
   ShieldCheck, 
@@ -18,22 +19,28 @@ import {
   Lock,
   ArrowRight,
   Shield,
-  Unlink
+  Unlink,
+  LayoutDashboard,
+  LogOut
 } from 'lucide-react';
 import { useAnonymous } from '@/context/AnonymousContext';
 import { useTranslation } from '@/i18n/I18nContext';
 
 export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boolean }) {
+  const router = useRouter();
   const { 
     anonymousKey, 
     isPlus, 
     remainingAiQuestions, 
     maxFreeAiQuestions, 
     accountInfo,
+    isAdminUser,
     restoreKey, 
     exportKeyText,
     bindAccount,
     loginWithAccount,
+    logoutAdmin,
+    logoutAccount,
     unlinkAccount
   } = useAnonymous();
   const { locale } = useTranslation();
@@ -142,6 +149,13 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
     });
 
     if (res.success) {
+      if (res.isAdmin) {
+        setTimeout(() => {
+          setIsOpen(false);
+          router.push('/admin');
+        }, 600);
+        return;
+      }
       setLoginUsername('');
       setLoginPassword('');
       setTimeout(() => setLoginMessage(null), 3500);
@@ -216,12 +230,53 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                   {language === 'vi' ? 'Bảo Mật & Định Danh Cá Nhân' : 'Identity & Privacy Access'}
                 </h3>
                 <p className="text-xs text-gray-400">
-                  {language === 'vi' ? 'Linh hoạt giữa Khóa Ẩn Danh và Tài Khoản Tự Chọn' : 'Dual-Auth: Anonymous Key or Custom Account'}
+                  {language === 'vi' ? 'Khóa Ẩn Danh và Tài khoản' : 'Anonymous Key & Account'}
                 </p>
               </div>
             </div>
 
-            {/* 2-Option Tabs: Khóa Ẩn Danh vs Tài Khoản Cá Nhân */}
+            {/* Admin Active Banner */}
+            {isAdminUser && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900/60 to-indigo-900/60 border border-purple-400/50 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-purple-500/20 text-brand-teal shrink-0">
+                    <LayoutDashboard className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">
+                      {language === 'vi' ? 'Quản trị viên PsyQuizz Admin' : 'PsyQuizz Master Admin'}
+                    </p>
+                    <p className="text-[11px] text-purple-300">
+                      {language === 'vi' ? 'Đang kích hoạt quyền Quản trị hệ thống' : 'Logged in with Master Admin role'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOpen(false);
+                      router.push('/admin');
+                    }}
+                    className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-black font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow"
+                  >
+                    <span>{language === 'vi' ? 'Vào Dashboard' : 'Open Admin'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={logoutAdmin}
+                    className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white text-xs font-semibold transition-all flex items-center gap-1 border border-white/10"
+                    title={language === 'vi' ? 'Đăng xuất Admin' : 'Admin Logout'}
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>{language === 'vi' ? 'Thoát' : 'Exit'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 2-Option Tabs: Khóa Ẩn Danh vs Tài Khoản */}
             <div className="grid grid-cols-2 p-1 rounded-2xl bg-black/50 border border-white/10">
               <button
                 type="button"
@@ -249,7 +304,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                 <span>
                   {accountInfo 
                     ? `@${accountInfo.username}` 
-                    : (language === 'vi' ? 'Tạo Tài Khoản' : 'Custom Account')}
+                    : (language === 'vi' ? 'Tài khoản' : 'Account')}
                 </span>
                 {accountInfo && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
               </button>
@@ -389,12 +444,21 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/40 border border-white/10 text-xs text-gray-400">
-                      <span>{language === 'vi' ? 'Muốn quay về trạng thái ẩn danh thuần túy?' : 'Return to pure anonymous state?'}</span>
+                    <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={logoutAccount}
+                        className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-white/15 cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-rose-300" />
+                        <span>{language === 'vi' ? 'Đăng xuất tài khoản' : 'Log out'}</span>
+                      </button>
+
                       <button
                         type="button"
                         onClick={unlinkAccount}
-                        className="text-rose-400 hover:text-rose-300 font-semibold underline flex items-center gap-1"
+                        className="w-full sm:w-auto py-2.5 px-3.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-semibold text-xs transition-all flex items-center justify-center gap-1 border border-rose-500/20 cursor-pointer"
+                        title={language === 'vi' ? 'Hủy liên kết tài khoản này' : 'Unlink account'}
                       >
                         <Unlink className="w-3.5 h-3.5" />
                         <span>{language === 'vi' ? 'Hủy liên kết' : 'Unlink'}</span>
@@ -441,8 +505,8 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                       <form onSubmit={handleBindAccount} className="space-y-3">
                         <p className="text-xs text-gray-300 leading-relaxed bg-[#160c30] p-3 rounded-xl border border-purple-500/20">
                           {language === 'vi'
-                            ? `Đặt tên đăng nhập & mật khẩu để gắn với mã ${anonymousKey}. Không bắt buộc khai báo Email hay SĐT.`
-                            : `Set a username & password to protect key ${anonymousKey}. No Email or Phone required.`}
+                            ? `Đặt tên đăng nhập & mật khẩu để bảo vệ mã ${anonymousKey}.`
+                            : `Set a username & password to protect key ${anonymousKey}.`}
                         </p>
 
                         <div className="space-y-2">
@@ -476,7 +540,7 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
 
                         <button
                           type="submit"
-                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Lock className="w-3.5 h-3.5" />
                           <span>{language === 'vi' ? 'Liên kết tài khoản vào Mã này' : 'Bind Account to this Key'}</span>
@@ -491,12 +555,6 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
                     ) : (
                       /* FORM 2: LOGIN TO RESTORE KEY */
                       <form onSubmit={handleLoginAccount} className="space-y-3">
-                        <p className="text-xs text-gray-300 leading-relaxed bg-[#160c30] p-3 rounded-xl border border-purple-500/20">
-                          {language === 'vi'
-                            ? 'Đăng nhập bằng tài khoản bạn đã tạo trước đây để kéo mã phiên và toàn bộ dữ liệu về thiết bị này.'
-                            : 'Sign in with your previously bound account to restore its anonymous key and benefits to this device.'}
-                        </p>
-
                         <div className="space-y-2">
                           <input
                             type="text"
@@ -519,10 +577,10 @@ export default function AnonymousKeyBadge({ isMobile = false }: { isMobile?: boo
 
                         <button
                           type="submit"
-                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <UserCheck className="w-3.5 h-3.5" />
-                          <span>{language === 'vi' ? 'Đăng nhập & Đồng bộ mã' : 'Sign in & Sync Key'}</span>
+                          <span>{language === 'vi' ? 'Đồng bộ khóa' : 'Sync Key'}</span>
                         </button>
 
                         {loginMessage && (

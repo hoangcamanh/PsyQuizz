@@ -242,7 +242,8 @@ export const DASS21_ASSESSMENT: AssessmentDefinition = {
         levelTitle: 'Supportive Well-Being Guidance',
         levelBadge: overallBadge,
         levelColor: overallColor,
-        recommendations
+        recommendations,
+        riskTier: maxWeight >= 4 ? 'red' : maxWeight === 3 ? 'yellow' : 'green'
       }
     };
   }

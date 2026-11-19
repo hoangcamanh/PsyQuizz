@@ -46,6 +46,7 @@ export interface AssessmentDefinition {
       levelColor: string;
       recommendations: string[];
       emergencyNote?: string;
+      riskTier?: 'green' | 'yellow' | 'red';
     };
   };
 }

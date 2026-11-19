@@ -363,7 +363,8 @@ export function createDass21Definition(locale: Locale): AssessmentDefinition {
           levelTitle: isVi ? 'Định hướng Chăm sóc Sức khỏe Cảm xúc' : 'Supportive Well-Being Guidance',
           levelBadge: overallBadge,
           levelColor: overallColor,
-          recommendations
+          recommendations,
+          riskTier: maxWeight >= 4 ? 'red' : maxWeight === 3 ? 'yellow' : 'green'
         }
       };
     }

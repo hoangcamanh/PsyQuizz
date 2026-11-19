@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
@@ -16,7 +16,9 @@ import {
 } from 'lucide-react';
 import { getAssessmentById } from '@/data/assessments';
 import { PsyQuizzNotebook } from '@/components/PsyQuizzNotebook';
+import SafeNextStepRouting from '@/components/SafeNextStepRouting';
 import { useTranslation } from '@/i18n/I18nContext';
+import { trackLiveEvent } from '@/lib/realtimeAnalytics';
 
 export default function AssessmentRunnerPage() {
   const params = useParams();
@@ -42,6 +44,16 @@ export default function AssessmentRunnerPage() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isCompleted, answers]);
+
+  useEffect(() => {
+    trackLiveEvent('pageview');
+  }, []);
+
+  useEffect(() => {
+    if (isCompleted && assessment?.id) {
+      trackLiveEvent('test_complete', { testId: assessment.id });
+    }
+  }, [isCompleted, assessment?.id]);
 
   const handleAttemptExit = () => {
     if (!isCompleted && Object.keys(answers).length > 0) {
@@ -447,22 +459,13 @@ export default function AssessmentRunnerPage() {
                 );
               })()}
 
-              {/* Action Guidance Card */}
-              {results.actionGuide && (
-                <div className="p-7 sm:p-8 rounded-3xl bg-[#140b26]/90 border border-purple-900/40 space-y-3">
-                  <div className="flex items-center gap-2.5">
-                    <Heart className="w-5 h-5 text-pink-400 shrink-0" />
-                    <h3 className="text-base font-bold text-white tracking-wide">
-                      {results.actionGuide.levelTitle}
-                    </h3>
-                  </div>
-                  <ul className="space-y-2 text-xs sm:text-sm text-gray-300 list-disc list-inside leading-relaxed pt-1">
-                    {results.actionGuide.recommendations.map((rec, i) => (
-                      <li key={i}>{rec}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* Safe Next-Step Routing (Khối 6: Điều hướng an toàn theo tầng rủi ro) */}
+              <SafeNextStepRouting
+                scores={results.scores}
+                actionGuide={results.actionGuide}
+                assessmentTitle={results.title}
+                assessmentId={assessmentId}
+              />
 
               {/* PsyQuizz In-App Research Notebook & Academic Companion */}
               <PsyQuizzNotebook 
